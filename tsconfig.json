@@ -1,0 +1,9 @@
+{
+ "exclude": ["node_modules"],
+ "compilerOptions": {
+  "rootDir": "./src",
+  "outDir": "./build",
+  "esModuleInterop": true,
+  "lib": ["es2015", "dom"]
+ }
+}
