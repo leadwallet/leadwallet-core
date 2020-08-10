@@ -28,9 +28,14 @@ Example:
 > **Implementing classes/Added files**
 >
 > peer.ts 
+>
 > sockets.ts
 
 ##### Coding Conventions
 
 * Prefer camel case when naming variables (e.g myVariable).
 * Delegate complex functionalities (e.g hashing) to helper functions or utilities present in classes found in the utils folder.
+
+##### Branch naming conventions
+
+* Branches should be named this way: leadwallet-core-DEVELOPER_NAME (e.g leadwallet-core-kingsley) 
