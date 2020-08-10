@@ -35,7 +35,7 @@ Example:
 
 * Prefer camel case when naming variables (e.g myVariable).
 * Delegate complex functionalities (e.g hashing) to helper functions or utilities present in classes found in the utils folder.
-* Class names hould begin with uppercase as shown below
+* Class names should begin with uppercase as shown below
 
 ```ts
 export class SomeClass {
