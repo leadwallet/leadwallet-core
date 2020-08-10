@@ -35,7 +35,22 @@ Example:
 
 * Prefer camel case when naming variables (e.g myVariable).
 * Delegate complex functionalities (e.g hashing) to helper functions or utilities present in classes found in the utils folder.
+* Class names hould begin with uppercase as shown below
+
+```ts
+export class SomeClass {
+ name: string;
+ 
+ constructor(name: string) {
+  this.name = name;
+ }
+
+ getName(): string {
+  return this.name;
+ }
+}
+```
 
 ##### Branch naming conventions
 
-* Branches should be named this way: leadwallet-core-DEVELOPER_NAME (e.g leadwallet-core-kingsley) 
+* Branches should be named this way: leadwallet-core-DEVELOPER_NAME (e.g leadwallet-core-kingsley)
