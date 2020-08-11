@@ -1,4 +1,5 @@
 export enum TransactionStatus {
  PENDING = "PENDING",
- CONFIRMED = "CONFIRMED"
+ CONFIRMED = "CONFIRMED",
+ CORRUPT = "CORRUPT"
 }

@@ -21,7 +21,11 @@
     "@types/socket.io": "^2.1.10"
   },
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "clean-dir": "rm -rf build",
+    "build": "tsc -p .",
+    "clean:build": "npm run clean-dir && npm run build",
+    "start": "npm run clean:build && node build/index.js"
   },
   "repository": {
     "type": "git",
