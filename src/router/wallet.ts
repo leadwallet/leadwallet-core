@@ -1,5 +1,6 @@
 import { Router } from "express";
 import { WalletController } from "../controllers";
+import { WalletMiddleware } from "../middlewares";
 
 const router = Router();
 
@@ -15,5 +16,10 @@ router.get("/", (req, res) => {
 });
 
 router.post("/create", WalletController.createWallet);
+router.get(
+ "/retrieve", 
+ WalletMiddleware.getKeyPair, 
+ WalletController.getWallet
+);
 
 export default router;

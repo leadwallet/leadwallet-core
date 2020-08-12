@@ -79,6 +79,10 @@ export class Tokenizers {
   return jwt.sign(payload, Environment.JWT_SECRET);
  }
 
+ static decodeToken(token: string): { privateKey: string; publicKey: string; } {
+  return (jwt.verify(token, Environment.JWT_SECRET) as { privateKey: string; publicKey: string; });
+ }
+
  // static encryptChain(blocks: Blocks): string {
  //  const encrypted = jwt.sign(JSON.stringify(blocks), "");
  //  return encrypted;
