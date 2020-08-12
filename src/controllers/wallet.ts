@@ -90,15 +90,52 @@ export class WalletController {
   }
  }
 
- static async sendToken(req: express.Request & { wallet: Wallet; }, res: express.Response): Promise<any> {
+ static async sendToken(req: express.Request & { wallet: Wallet; privateKey: string; }, res: express.Response): Promise<any> {
   try {
+   // Token's recipient
    const recipient = req.params.recipient;
+
+   // Sender's wallet
+   const senderWallet = req.wallet;
+
+   // Null wallet interface. Would serve as updated recipient's wallet
    let wallet: Wallet = null;
+
+   // All wallets in the database. Recipient's wallet would be singled out and updated
    const allWallets = await DBWallet.getAllWallets();
+
+   // Loop through all wallets and find recipient's wallet.
    for (const w of allWallets)
     if (w.publicKey === recipient)
      wallet = w;
-   wallet.balance = wallet.balance + parseInt(req.body.balance);
-  } catch (error) {}
+   
+   // Update recipient's wallet balance by adding to it
+   wallet.balance = wallet.balance + parseInt(req.body.amount);
+
+   // Update sender's wallet balance by deducting from it 
+   senderWallet.balance = senderWallet.balance - parseInt(req.body.amount);
+
+   // Update both wallets
+   const updatedSenderWallet = await DBWallet.updateWallet(req.privateKey, senderWallet);
+   const updatedRecipientWallet = await DBWallet.updateWallet(wallet.privateKey, wallet);
+
+   // API response
+   const response = {
+    senderWallet: Tokenizers.encryptWallet(updatedSenderWallet),
+    recipientWallet: Tokenizers.encryptWallet(updatedRecipientWallet),
+    message: "Token has been sent."
+   };
+
+   //Send response
+   res.status(200).json({
+    statusCode: 200,
+    response
+   });
+  } catch (error) {
+   res.status(500).json({
+    statusCode: 500,
+    response: error.message
+   });
+  }
  }
 }
