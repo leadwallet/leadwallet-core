@@ -1,0 +1,12 @@
+{
+ "btc": {
+  "usd": {
+   "rate": 500,
+   "name": "United States Dollar"
+  },
+  "gbp": {
+   "rate": 200,
+   "name": "Great Britain Pound"
+  }
+ }
+}

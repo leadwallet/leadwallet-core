@@ -1,7 +1,10 @@
 import express from "express";
+import config from "./config";
 
-const app: express.Application = express();
+let app: express.Application = express();
 const port = process.env.PORT || 7890
+
+app = config(app);
 
 app.listen(port, () => console.log(`Server listening on port ${port}`));
 

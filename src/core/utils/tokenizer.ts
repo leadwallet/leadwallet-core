@@ -1,8 +1,9 @@
 import crypto from "crypto";
 import hasher from "crypto-js";
 import jwt from "jsonwebtoken";
-import { Transaction, Block, Wallet } from "../interfaces";
-import { TransactionStatus } from "../enums";
+import { Wallet } from "../interfaces";
+import { Environment } from "../../env";
+// import { TransactionStatus } from "../enums";
 
 export class Tokenizers {
  static hash(input: string): string {
@@ -28,22 +29,22 @@ export class Tokenizers {
   }
  }
 
- static signTransaction(tx: Transaction, privateKey: string): Transaction {
-  const txStringified = JSON.stringify({
-   recipient: tx.recipient,
-   sender: tx.sender,
-   amount: tx.amount,
-   id: tx.id
-  });
-  const signed = crypto.sign("SHA256", Buffer.from(txStringified), privateKey);
-  tx.signature = signed.toString();
-  return tx;
- }
+ // static signTransaction(tx: Transaction, privateKey: string): Transaction {
+ //  const txStringified = JSON.stringify({
+ //   recipient: tx.recipient,
+ //   sender: tx.sender,
+ //   amount: tx.amount,
+ //   id: tx.id
+ //  });
+ //  const signed = crypto.sign("SHA256", Buffer.from(txStringified), privateKey);
+ //  tx.signature = signed.toString();
+ //  return tx;
+ // }
 
- static verifyTransaction(tx: Transaction, publicKey: string): Transaction {
-  tx.status = TransactionStatus.CONFIRMED;
-  return tx;
- }
+ // static verifyTransaction(tx: Transaction, publicKey: string): Transaction {
+ //  tx.status = TransactionStatus.CONFIRMED;
+ //  return tx;
+ // }
 
  static encryptWallet(wallet: Wallet): string {
   const walletStringified = JSON.stringify(wallet);
@@ -67,20 +68,34 @@ export class Tokenizers {
  }
 
  static encryptPrivateKey(privateKey: string, publicKey: string): string {
-  const encrypted = crypto.publicEncrypt({
-   key: publicKey,
-   padding: crypto.constants.RSA_PKCS1_OAEP_PADDING,
-   oaepHash: "sha256"
-  }, Buffer.from(privateKey));
-  return encrypted.toString("base64");
+  return jwt.sign(privateKey, publicKey);
  }
 
- static decryptPrivateKey(encryptedKey: string, privateKey: string): string {
-  const decrypted = crypto.privateDecrypt({
-   key: privateKey,
-   padding: crypto.constants.RSA_PKCS1_OAEP_PADDING,
-   oaepHash: "sha256"
-  }, Buffer.from(encryptedKey, "base64"));
-  return decrypted.toString();
+ static decryptPrivateKey(encryptedKey: string): string {
+  return (jwt.decode(encryptedKey) as string);
  }
+
+ static generateToken(payload: { privateKey: string; publicKey: string; }): string {
+  return jwt.sign(payload, Environment.JWT_SECRET);
+ }
+
+ // static encryptChain(blocks: Blocks): string {
+ //  const encrypted = jwt.sign(JSON.stringify(blocks), "");
+ //  return encrypted;
+ // }
+
+ // static decryptChain(token: string): Blocks {
+ //  const decrypted: any = jwt.verify(token, "");
+ //  return JSON.parse(decrypted);
+ // }
+
+ // static encryptBlock(block: Block): string {
+ //  const encrypted = jwt.sign(block, "");
+ //  return encrypted;
+ // }
+
+ // static decryptBlock(token: string): Block {
+ //  const decrypted: any = jwt.verify(token, "");
+ //  return decrypted;
+ // }
 }
