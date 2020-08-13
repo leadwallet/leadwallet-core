@@ -73,4 +73,43 @@ export class WalletMiddleware {
    });
   }
  }
+
+ static async recoverWallet(
+  req: express.Request & { wallet: Wallet },
+  res: express.Response,
+  next: express.NextFunction
+ ): Promise<any> {
+  try {
+   // Phrase to use in recovery
+   let phrase: string = "";
+
+   // The incoming recovery phrase
+   const recoveryPhrase: string[] = req.body.recoveryPhrase;
+
+   // Loop through and append to actual phrase
+   for (const p of recoveryPhrase)
+    phrase += p + " ";
+
+   // Generate key pair
+   const keyPair = Tokenizers.generateKeyPairs(phrase);
+
+   // Get wallet using private key
+   const wallet: Wallet = await DBWallet.getWallet(keyPair.privateKey);
+
+   // Respond with a 404 if wallet is not found
+   if (!wallet)
+    throw new CustomError(404, "Wallet not found");
+
+   // Modify the request
+   req.wallet = wallet;
+
+   // Delegate control to the next controller function
+   next();
+  } catch (error) {
+   res.status(error.code || 500).json({
+    statusCode: error.code || 500,
+    response: error.message
+   });
+  }
+ }
 }

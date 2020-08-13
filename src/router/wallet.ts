@@ -21,5 +21,15 @@ router.get(
  WalletMiddleware.getKeyPair, 
  WalletController.getWallet
 );
+router.get(
+ "/import",
+ WalletMiddleware.recoverWallet,
+ WalletController.importWallet
+);
+router.post(
+ "/send_token/:recipient",
+ WalletMiddleware.getKeyPair,
+ WalletController.sendToken
+);
 
 export default router;
