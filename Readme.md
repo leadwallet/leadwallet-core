@@ -1,7 +1,7 @@
 LEADWALLET CORE API :rocket:
 ===========================
 
-This is the repository for the Lead Wallet implementation of the blockchain protocol.
+This is the repository for the Lead Wallet core wallet implementation.
 
 | Technology | Use Case                |
 |------------|-------------------------|
