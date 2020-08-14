@@ -1,6 +1,6 @@
-import crypto from "crypto";
 import hasher from "crypto-js";
 import jwt from "jsonwebtoken";
+import { v4 as uuid } from "uuid";
 import { Wallet } from "../interfaces";
 import { Environment } from "../../env";
 // import { TransactionStatus } from "../enums";
@@ -10,23 +10,11 @@ export class Tokenizers {
   return hasher.SHA256(input).toString();
  }
 
- static generateKeyPairs(recoveryPhrase: string): { publicKey: string; privateKey: string } {
-  const keyPair = crypto.generateKeyPairSync("rsa", {
-   modulusLength: 2048,
-   publicKeyEncoding: {
-    type: "pkcs1",
-    format: "der"
-   },
-   privateKeyEncoding: {
-    type: "pkcs8",
-    format: "der",
-    passphrase: recoveryPhrase
-   }
+ static async generateKeyPairs(recoveryPhrase: string): Promise<{ publicKey: string; privateKey: string }> {
+  return Promise.resolve({
+   publicKey: Tokenizers.hash(uuid()),
+   privateKey: Tokenizers.hash(recoveryPhrase)
   });
-  return {
-   publicKey: keyPair.publicKey.toString("base64"),
-   privateKey: keyPair.privateKey.toString("base64")
-  }
  }
 
  // static signTransaction(tx: Transaction, privateKey: string): Transaction {
@@ -47,24 +35,11 @@ export class Tokenizers {
  // }
 
  static encryptWallet(wallet: Wallet): string {
-  const walletStringified = JSON.stringify(wallet);
-  const encrypted = crypto.publicEncrypt({
-   key: wallet.publicKey,
-   padding: crypto.constants.RSA_PKCS1_OAEP_PADDING,
-   oaepHash: "sha256"
-  }, Buffer.from(walletStringified));
-  return encrypted.toString("base64");
+  return jwt.sign(wallet, wallet.privateKey);
  }
 
  static decryptWallet(encryptedWallet: string, privateKey: string): Wallet {
-  const decrypted = crypto.privateDecrypt({
-   key: privateKey,
-   padding: crypto.constants.RSA_PKCS1_OAEP_PADDING,
-   oaepHash: "sha256"
-  }, Buffer.from(encryptedWallet, "base64"));
-  return JSON.parse(
-   decrypted.toString()
-  );
+  return (jwt.verify(encryptedWallet, privateKey) as Wallet);
  }
 
  static encryptPrivateKey(privateKey: string, publicKey: string): string {

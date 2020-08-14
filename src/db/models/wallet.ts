@@ -34,7 +34,7 @@ export class WalletModel {
   let encryptedWallet = null;
   encryptedWallets.forEach((encWallet: mongoose.Document & { encryptedPrivateKey: string, encryptedWallet: string }) => {
    if (Tokenizers.decryptPrivateKey(encWallet.encryptedPrivateKey) === privateKey)
-    encryptedWallet = encWallet;
+    encryptedWallet = encWallet.encryptedWallet;
   });
   const decryptedWallet: Wallet = Tokenizers.decryptWallet(encryptedWallet, privateKey);
   return Promise.resolve(decryptedWallet);

@@ -5,28 +5,33 @@
   "main": "index.js",
   "dependencies": {
     "crypto-js": "^4.0.0",
+    "dotenv": "^8.2.0",
     "express": "^4.17.1",
     "jsonwebtoken": "^8.5.1",
     "mongoose": "^5.9.28",
     "morgan": "^1.10.0",
     "request": "^2.88.2",
     "request-promise": "^4.2.6",
-    "typescript": "^3.9.7"
+    "typescript": "^3.9.7",
+    "uuid": "^8.3.0"
   },
   "devDependencies": {
     "@types/crypto-js": "^3.1.47",
+    "@types/dotenv": "^8.2.0",
     "@types/express": "^4.17.7",
     "@types/jsonwebtoken": "^8.5.0",
     "@types/mongoose": "^5.7.36",
     "@types/morgan": "^1.9.1",
-    "@types/request-promise": "^4.1.46"
+    "@types/request-promise": "^4.1.46",
+    "@types/uuid": "^8.3.0"
   },
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
     "clean-dir": "rm -rf build",
     "build": "tsc -p .",
     "clean:build": "npm run clean-dir && npm run build",
-    "start": "npm run clean:build && node build/index.js"
+    "dev": "export NODE_ENV=development && npm run clean:build && node build/index.js",
+    "prod": "npm run clean:build && node build/index.js"
   },
   "repository": {
     "type": "git",

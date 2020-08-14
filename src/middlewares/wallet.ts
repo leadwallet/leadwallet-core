@@ -27,6 +27,8 @@ export class WalletMiddleware {
    if (token.trim().length === 0)
     throw new CustomError(400, "Token not found in header.");
 
+   // console.log(token);
+
    // Key pair from token
    const pair = Tokenizers.decodeToken(token);
 
@@ -41,6 +43,7 @@ export class WalletMiddleware {
    // Pass control to the next controller
    next();
   } catch (error) {
+   // console.log(error);
    res.status(error.code || 500).json({
     statusCode: error.code || 500,
     response: error.message
@@ -91,7 +94,7 @@ export class WalletMiddleware {
     phrase += p + " ";
 
    // Generate key pair
-   const keyPair = Tokenizers.generateKeyPairs(phrase);
+   const keyPair = await Tokenizers.generateKeyPairs(phrase);
 
    // Get wallet using private key
    const wallet: Wallet = await DBWallet.getWallet(keyPair.privateKey);

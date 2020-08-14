@@ -21,7 +21,7 @@ router.get(
  WalletMiddleware.getKeyPair, 
  WalletController.getWallet
 );
-router.get(
+router.post(
  "/import",
  WalletMiddleware.recoverWallet,
  WalletController.importWallet
@@ -29,6 +29,7 @@ router.get(
 router.post(
  "/send_token/:recipient",
  WalletMiddleware.getKeyPair,
+ WalletMiddleware.getWalletFromRequest,
  WalletController.sendToken
 );
 

@@ -2,6 +2,7 @@ import express from "express";
 import db from "../db";
 import { Wallet } from "../core/interfaces";
 import { Tokenizers } from "../core/utils";
+import { CustomError } from "../custom";
 
 const { DBWallet } = db;
 
@@ -19,7 +20,7 @@ export class WalletController {
     phrase += p + " ";
    
     // Generate keypair
-   const keyPair = Tokenizers.generateKeyPairs(phrase);
+   const keyPair = await Tokenizers.generateKeyPairs(phrase);
    
    // Instantiate wallet
    const wallet: Wallet = {
@@ -108,6 +109,10 @@ export class WalletController {
    for (const w of allWallets)
     if (w.publicKey === recipient)
      wallet = w;
+    
+   // Throw an error with code 400 if sender's wallet balance is less than token to be sent
+   if (senderWallet.balance < parseInt(req.body.amount))
+    throw new CustomError(400, "Not enough token");
    
    // Update recipient's wallet balance by adding to it
    wallet.balance = wallet.balance + parseInt(req.body.amount);
