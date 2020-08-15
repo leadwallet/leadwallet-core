@@ -38,7 +38,7 @@
     "build": "tsc -p .",
     "clean:build": "npm run clean-dir && npm run build",
     "dev": "export NODE_ENV=development && npm run clean:build && node build/index.js",
-    "prod": "export NODE_ENV=production && bnpm run clean:build && node build/index.js"
+    "prod": "export NODE_ENV=production && npm run clean:build && node build/index.js"
   },
   "repository": {
     "type": "git",
