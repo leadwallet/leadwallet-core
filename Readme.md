@@ -54,3 +54,17 @@ export class SomeClass {
 ##### Branch naming conventions
 
 * Branches should be named this way: leadwallet-core-DEVELOPER_NAME (e.g leadwallet-core-kingsley)
+
+API Documentation :rocket:
+===========================
+
+> **API Prefix:** /api/v1
+
+| Path         | Method | Request Parameters        |
+|--------------|--------|---------------------------|
+|/wallet/create| POST   | body:                     |  
+|              |        | | parameter    | type   | |
+|              |        | |--------------|--------| |
+|              |        | |recoveryPhrase|string[]| |
+|              |        |                           |
+|              |        |                           |

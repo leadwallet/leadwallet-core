@@ -37,6 +37,7 @@ export class WalletController {
 
    // Generate BTC address
    const btcAddressCreationResponse = await BTC.createAddress();
+   console.log(btcAddressCreationResponse.payload);
 
    // Throw error if btc response code is within 4XX or 5XX range
    if (btcAddressCreationResponse.statusCode >= 400)
@@ -44,12 +45,13 @@ export class WalletController {
 
    // Get BTC address details
    const btcAddressDetailsResponse = await BTC.getAddressDetails(btcAddressCreationResponse.payload.address);
+   console.log(btcAddressDetailsResponse.payload);
    
    // Instantiate wallet
    const wallet: Wallet = {
     privateKey: keyPair.privateKey,
     publicKey: keyPair.publicKey,
-    balance: parseInt(btcAddressDetailsResponse.payload.balace),
+    balance: parseInt(btcAddressDetailsResponse.payload.balance),
     hash: Tokenizers.hash(keyPair.publicKey + keyPair.privateKey),
     btcAddress: btcAddressCreationResponse.payload.address
    };
@@ -118,7 +120,7 @@ export class WalletController {
  static async sendToken(req: express.Request & { wallet: Wallet; privateKey: string; }, res: express.Response): Promise<any> {
   try {
    // Token's recipient
-   const recipient = req.params.recipient;
+   const recipient = req.body.recipient;
 
    // Sender's wallet
    const senderWallet = req.wallet;
@@ -137,6 +139,21 @@ export class WalletController {
    // Throw an error with code 400 if sender's wallet balance is less than token to be sent
    if (senderWallet.balance < parseInt(req.body.amount))
     throw new CustomError(400, "Not enough token");
+   
+   // Send BTC
+   const btcSentResponse = await BTC.sendToken(
+    [{ address: senderWallet.btcAddress, value: parseInt(req.body.amount) }],
+    [{ address: recipient, value: parseInt(req.body.amount) }],
+    { address: senderWallet.btcAddress, value: 0.000141 },
+    JSON.stringify({
+     initialBalance: senderWallet.balance,
+     newBalance: senderWallet.balance - parseInt(req.body.amount)
+    })
+   );
+
+   // Throw error for 4XX or 5XX status code ranges
+   if (btcSentResponse.statusCode >= 400)
+    throw new CustomError(btcSentResponse.statusCode, errorCodes[btcSentResponse.statusCode]);
    
    // Update recipient's wallet balance by adding to it
    wallet.balance = wallet.balance + parseInt(req.body.amount);
