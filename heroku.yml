@@ -1,7 +1,6 @@
 setup:
  config:
   CRYPTO_API: https://api.cryptoapis.info
-  NODE_ENV: production
 build:
  docker:
   web: Dockerfile
