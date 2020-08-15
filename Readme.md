@@ -55,8 +55,7 @@ export class SomeClass {
 
 * Branches should be named this way: leadwallet-core-DEVELOPER_NAME (e.g leadwallet-core-kingsley)
 
-API Documentation :rocket:
-===========================
+### API Documentation :rocket:
 
 > **API Prefix:** /api/v1
 
