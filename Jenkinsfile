@@ -24,8 +24,10 @@ pipeline {
    }
   }
   stage("Push To Heroku") {
-   sh("git push $GIT_USERNAME:$GIT_PASSWORD@git.heroku.com/leadwallet-core.git HEAD:master")
-   echo "Pushed To Heroku."
+   steps {
+    sh("git push $GIT_USERNAME:$GIT_PASSWORD@git.heroku.com/leadwallet-core.git HEAD:master")
+    echo "Pushed To Heroku."
+   }
   }
  }
 }
