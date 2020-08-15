@@ -3,8 +3,21 @@ import db from "../db";
 import { Wallet } from "../core/interfaces";
 import { Tokenizers } from "../core/utils";
 import { CustomError } from "../custom";
+import { BTC } from "../core/handlers";
 
 const { DBWallet } = db;
+const errorCodes = {
+ 400: "BAD REQUEST",
+ 401: "UNAUTHORIZED",
+ 402: "PAYMENT REQUIRED",
+ 403: "FORBIDDEN",
+ 404: "NOT FOUND",
+ 408: "REQUEST TIMEOUT",
+ 500: "INTERNAL SERVER ERROR",
+ 502: "BAD GATEWAY",
+ 503: "SERVICE UNAVAILABLE",
+ 504: "GATEWAY TIMEOUT"
+}
 
 export class WalletController {
  static async createWallet(req: express.Request, res: express.Response): Promise<any> {
@@ -21,13 +34,24 @@ export class WalletController {
    
     // Generate keypair
    const keyPair = await Tokenizers.generateKeyPairs(phrase);
+
+   // Generate BTC address
+   const btcAddressCreationResponse = await BTC.createAddress();
+
+   // Throw error if btc response code is within 4XX or 5XX range
+   if (btcAddressCreationResponse.statusCode >= 400)
+    throw new CustomError(btcAddressCreationResponse.statusCode, errorCodes[btcAddressCreationResponse.statusCode]);
+
+   // Get BTC address details
+   const btcAddressDetailsResponse = await BTC.getAddressDetails(btcAddressCreationResponse.payload.address);
    
    // Instantiate wallet
    const wallet: Wallet = {
     privateKey: keyPair.privateKey,
     publicKey: keyPair.publicKey,
-    balance: 0.00,
-    hash: Tokenizers.hash(keyPair.publicKey + keyPair.privateKey)
+    balance: parseInt(btcAddressDetailsResponse.payload.balace),
+    hash: Tokenizers.hash(keyPair.publicKey + keyPair.privateKey),
+    btcAddress: btcAddressCreationResponse.payload.address
    };
 
    // Save wallet to db and get as object
@@ -48,8 +72,8 @@ export class WalletController {
     response
    });
   } catch (error) {
-   res.status(500).json({
-    statusCode: 500,
+   res.status(error.code || 500).json({
+    statusCode: error.code || 500,
     response: error.message
    });
   }

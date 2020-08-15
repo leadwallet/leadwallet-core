@@ -1,0 +1,8 @@
+build:
+ web:
+  docker: Dockerfile
+ config:
+  NODE_ENV: production
+setup:
+ config:
+  CRYPTO_API: https://api.cryptoapis.info

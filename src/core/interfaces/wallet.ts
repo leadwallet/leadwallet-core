@@ -3,5 +3,7 @@ export interface Wallet {
  privateKey: string;
  hash: string;
  balance: number;
+ btcAddress?: string;
+ ethAddress?: string;
 }
 
