@@ -1,6 +1,6 @@
 build:
- web:
-  docker: Dockerfile
+ docker:
+  web: Dockerfile
  config:
   NODE_ENV: production
 setup:
