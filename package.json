@@ -33,12 +33,13 @@
     "supertest": "^4.0.2"
   },
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1",
+    "test": "mocha ./build/tests/*.test.js -R spec --timeout 30000 --exit",
     "clean-dir": "rm -rf build",
     "build": "tsc -p .",
     "clean:build": "npm run clean-dir && npm run build",
     "dev": "export NODE_ENV=development && npm run clean:build && node build/index.js",
-    "prod": "export NODE_ENV=production && npm run clean:build && node build/index.js"
+    "prod": "export NODE_ENV=production && npm run clean:build && node build/index.js",
+    "clean:build:test": "export NODE_ENV=test && npm run clean:build && npm run test"
   },
   "repository": {
     "type": "git",

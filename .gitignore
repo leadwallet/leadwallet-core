@@ -3,3 +3,6 @@ node_modules
 
 # Generated JavaScript
 build
+
+# Test output
+.nyc_output

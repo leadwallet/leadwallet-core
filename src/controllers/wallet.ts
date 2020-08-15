@@ -37,7 +37,7 @@ export class WalletController {
 
    // Generate BTC address
    const btcAddressCreationResponse = await BTC.createAddress();
-   console.log(btcAddressCreationResponse.payload);
+   // console.log(btcAddressCreationResponse.payload);
 
    // Throw error if btc response code is within 4XX or 5XX range
    if (btcAddressCreationResponse.statusCode >= 400)
@@ -45,7 +45,7 @@ export class WalletController {
 
    // Get BTC address details
    const btcAddressDetailsResponse = await BTC.getAddressDetails(btcAddressCreationResponse.payload.address);
-   console.log(btcAddressDetailsResponse.payload);
+   // console.log(btcAddressDetailsResponse.payload);
    
    // Instantiate wallet
    const wallet: Wallet = {
