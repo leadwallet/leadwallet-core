@@ -4,6 +4,7 @@ pipeline {
   GIT_USERNAME = credentials("git-username")
   GIT_PASSWORD = credentials("git-password")
   CRYPTO_API_KEY = credentials("crypto-api-key")
+  LEADWALLET_GIT_USERNAME = credentials("leadwallet-git-user")
  }
  stages {
   stage("Install Dependencies") {
@@ -25,7 +26,7 @@ pipeline {
   }
   stage("Push To Heroku") {
    steps {
-    sh("git push $GIT_USERNAME:$GIT_PASSWORD@git.heroku.com/leadwallet-core.git HEAD:master")
+    sh("git push ssh://$LEADWALLET_GIT_USERNAME@git.heroku.com/leadwallet-core.git HEAD:master")
     echo "Pushed To Heroku."
    }
   }
