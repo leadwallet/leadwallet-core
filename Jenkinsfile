@@ -4,7 +4,7 @@ pipeline {
   GIT_USERNAME = credentials("git-username")
   GIT_PASSWORD = credentials("git-password")
   CRYPTO_API_KEY = credentials("crypto-api-key")
-  LEADWALLET_GIT_USERNAME = credentials("leadwallet-git-user")
+  // LEADWALLET_GIT_USERNAME = credentials("leadwallet-git-user")
  }
  stages {
   stage("Install Dependencies") {
@@ -24,9 +24,18 @@ pipeline {
     echo "Tests completed."
    }
   }
-  stage("Push To Heroku") {
+  stage("Create Build Detail Files & SCM Tag") {
    steps {
-    sh("git push ssh://$LEADWALLET_GIT_USERNAME@heroku.com:leadwallet-core.git HEAD:master")
+    sh('echo "Build Number: $BUILD_NUMBER \n Status: passed \n Branch: $BRANCH_NAME \n Job: $JOB_NAME \n Node: $NODE_NAME \n Workspace: $WORKSPACE"' 
+    + '> build-$BRANCH_NAME-$BUILD_NUMBER.txt')
+    sh "cp build-${BRANCH_NAME}-${BUILD_NUMBER}.txt /jenkins/build-$BRANCH_NAME-$BUILD_NUMBER.txt"
+    sh 'git tag -a leadwallet-core-$BRANCH_NAME-$BUILD_NUMBER "Jenkins Pipeline Build."'
+    sh 'git add . && git commit -m "Jenkins pipeline build succeeded"'
+   }
+  }
+  stage("Push To GitHub") {
+   steps {
+    sh("git push https://$GIT_USERNAME:$GIT_PASSWORD@github.com/leadwallet/leadwallet-core HEAD:leadwallet-core-jenkins-pipelines")
     echo "Pushed To Heroku."
    }
   }
