@@ -28,7 +28,7 @@ pipeline {
    steps {
     sh('echo -e "Build Number: $BUILD_NUMBER \nStatus: passed \nJob: $JOB_NAME \nNode: $NODE_NAME \nWorkspace: $WORKSPACE" > build-${JOB_NAME}-${BUILD_NUMBER}.txt')
     sh "sudo mv build-${JOB_NAME}-${BUILD_NUMBER}.txt /jenkins"
-    sh 'git tag -a leadwallet-core-$BUILD_ID-$NODE_NAME "Jenkins Pipeline Build."'
+    sh 'git tag -a leadwallet-core-$BUILD_ID-$NODE_NAME -m "Jenkins Pipeline Build."'
     sh 'git add . && git commit -m "Jenkins pipeline build succeeded"'
    }
   }
