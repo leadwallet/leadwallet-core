@@ -40,7 +40,7 @@ pipeline {
   }
   stage("Push To GitHub") {
    steps {
-    sh("git push https://$GIT_USERNAME:$GIT_PASSWORD@github.com/leadwallet/leadwallet-core HEAD:leadwallet-core-jenkins-pipelines")
+    sh("git push https://$GIT_USERNAME:$GIT_PASSWORD@github.com/leadwallet/leadwallet-core HEAD:refs/heads/leadwallet-core-jenkins-pipelines")
     echo "Pushed To Github."
    }
   }
