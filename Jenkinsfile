@@ -26,7 +26,7 @@ pipeline {
   }
   stage("Push To Heroku") {
    steps {
-    sh("git push ssh://$LEADWALLET_GIT_USERNAME@git.heroku.com/leadwallet-core.git HEAD:master")
+    sh("git push ssh://$LEADWALLET_GIT_USERNAME@heroku.com:leadwallet-core.git HEAD:master")
     echo "Pushed To Heroku."
    }
   }
