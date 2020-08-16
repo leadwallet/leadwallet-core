@@ -40,8 +40,14 @@ pipeline {
   }
   stage("Push To GitHub") {
    steps {
-    sh("git push https://$GIT_USERNAME:$GIT_PASSWORD@github.com/leadwallet/leadwallet-core HEAD:refs/heads/leadwallet-core-jenkins-pipelines")
+    sh("git push --force https://$GIT_USERNAME:$GIT_PASSWORD@github.com/leadwallet/leadwallet-core HEAD:refs/heads/leadwallet-core-jenkins-pipelines")
     echo "Pushed To Github."
+   }
+  }
+  stage("Push Tags") {
+   steps {
+    sh("git push https://$GIT_USERNAME:$GIT_PASSWORD@github.com/leadwallet/leadwallet-core leadwallet-core-$BUILD_ID-$NODE_NAME")
+    echo "Pushed Tag"
    }
   }
  }
