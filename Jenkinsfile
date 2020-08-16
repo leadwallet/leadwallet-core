@@ -24,6 +24,12 @@ pipeline {
     echo "Tests completed."
    }
   }
+  stage("Configure Git Name And Email") {
+   steps {
+    sh 'git config --global user.name "Kingsley Victor"'
+    sh 'git config --global user.email "javaprodigy56@gmail.com"'
+   }
+  }
   stage("Create Build Detail Files & SCM Tag") {
    steps {
     sh('echo -e "Build Number: $BUILD_NUMBER \nStatus: passed \nJob: $JOB_NAME \nNode: $NODE_NAME \nWorkspace: $WORKSPACE" > build-${JOB_NAME}-${BUILD_NUMBER}.txt')
