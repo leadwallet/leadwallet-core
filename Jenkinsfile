@@ -26,10 +26,9 @@ pipeline {
   }
   stage("Create Build Detail Files & SCM Tag") {
    steps {
-    sh('echo "Build Number: $BUILD_NUMBER \n Status: passed \n Branch: $BRANCH_NAME \n Job: $JOB_NAME \n Node: $NODE_NAME \n Workspace: $WORKSPACE"' 
-    + '> build-$BRANCH_NAME-$BUILD_NUMBER.txt')
-    sh "cp build-${BRANCH_NAME}-${BUILD_NUMBER}.txt /jenkins/build-$BRANCH_NAME-$BUILD_NUMBER.txt"
-    sh 'git tag -a leadwallet-core-$BRANCH_NAME-$BUILD_NUMBER "Jenkins Pipeline Build."'
+    sh('echo "Build Number: $BUILD_NUMBER \n Status: passed \n Job: $JOB_NAME \n Node: $NODE_NAME \n Workspace: $WORKSPACE" > build-$JOB_NAME-$BUILD_NUMBER.txt')
+    sh "cp build-${JOB_NAME}-${BUILD_NUMBER}.txt /jenkins/build-$JOB_NAME-$BUILD_NUMBER.txt"
+    sh 'git tag -a leadwallet-core-$BUILD_ID-$NODE_NAME "Jenkins Pipeline Build."'
     sh 'git add . && git commit -m "Jenkins pipeline build succeeded"'
    }
   }
