@@ -6,3 +6,6 @@ build
 
 # Test output
 .nyc_output
+
+# Environment variables
+.env
