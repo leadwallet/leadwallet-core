@@ -33,7 +33,7 @@ pipeline {
   stage("Create Build Detail Files & SCM Tag") {
    steps {
     sh('echo -e "Build Number: $BUILD_NUMBER \nStatus: passed \nJob: $JOB_NAME \nNode: $NODE_NAME \nWorkspace: $WORKSPACE" > build-${JOB_NAME}-${BUILD_NUMBER}.txt')
-    sh "sudo mv build-${JOB_NAME}-${BUILD_NUMBER}.txt ./jenkins/build-${JOB_NAME}-${BUILD_NUMBER}.txt"
+    sh "sudo mkdir -p jenkins && sudo mv build-${JOB_NAME}-${BUILD_NUMBER}.txt ./jenkins/build-${JOB_NAME}-${BUILD_NUMBER}.txt"
     sh 'git tag -a leadwallet-core-$BUILD_ID-$NODE_NAME -m "Jenkins Pipeline Build."'
     sh 'git add . && git commit -m "Jenkins pipeline build succeeded"'
    }
