@@ -35,4 +35,16 @@ export class ETH {
    payload: response.body.payload
   });
  }
+
+ static async sendToken(
+  body: { fromAddress: string; toAddress: string; gasPrice: number; gasLimit: number; value: number; password: string; nonce?: number; }
+ ): Promise<{ statusCode: number; payload: any; }> {
+  const response = await rp.post(ETHROOT + "/txs/new", {
+   ...options, body
+  });
+  return Promise.resolve({
+   statusCode: response.statusCode,
+   payload: response.body.payload
+  });
+ }
 }

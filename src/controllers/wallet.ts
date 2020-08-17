@@ -133,57 +133,80 @@ export class WalletController {
 
  static async sendToken(req: express.Request & { wallet: Wallet; privateKey: string; }, res: express.Response): Promise<any> {
   try {
-   // Token's recipient
-   const recipient = req.body.recipient;
+   // Wallet type. BTC (Bitcoin), ETH (Ethereum) e.t.c.
+   const { type } = req.body;
 
    // Sender's wallet
    const senderWallet = req.wallet;
 
-   // Null wallet interface. Would serve as updated recipient's wallet
-   let wallet: Wallet = null;
+   // Empty array of wallets. Would serve as updated recipients' wallets
+   let wallets: Array<Wallet> = [];
+
+   // Empty array of encrypted recipients' wallets
+   const encRecipientWallets: Array<string> = [];
 
    // All wallets in the database. Recipient's wallet would be singled out and updated
    const allWallets = await DBWallet.getAllWallets();
 
-   // Loop through all wallets and find recipient's wallet.
-   for (const w of allWallets)
-    if (w.publicKey === recipient)
-     wallet = w;
-    
-   // Throw an error with code 400 if sender's wallet balance is less than token to be sent
-   if (senderWallet.balance < parseInt(req.body.amount))
-    throw new CustomError(400, "Not enough token");
-   
-   // Send BTC
-   const btcSentResponse = await BTC.sendToken(
-    req.body.inputs,
-    req.body.outputs,
-    { address: senderWallet.btc.address, value: 0.000141 },
-    JSON.stringify({
-     initialBalance: senderWallet.balance,
-     newBalance: senderWallet.balance - parseInt(req.body.amount)
-    })
-   );
+   // Total balance to be sent
+   let balance: number = 0;
 
-   // Throw error for 4XX or 5XX status code ranges
-   if (btcSentResponse.statusCode >= 400)
-    throw new CustomError(btcSentResponse.statusCode, errorCodes[btcSentResponse.statusCode]);
-   
-   // Update recipient's wallet balance by adding to it
-   wallet.balance = wallet.balance + parseInt(req.body.amount);
+   if (type === "btc") {
+
+    // Increment balance for every input
+    for (const i of req.body.inputs)
+     balance = balance + i.value
+  
+    // Throw error if sender's balance is less than balance to be sent
+    if (senderWallet.balance < balance)
+     throw new CustomError(400, "Wallet balance is not sufficient.");
+
+    // Check for matching btc address
+    for (const o of req.body.outputs)
+     for (const w of allWallets)
+      if (o.address === w.btc.address)
+       wallets = [...wallets, w];
+    
+    // Send BTC
+    const btcSentResponse = await BTC.sendToken(
+     req.body.inputs,
+     req.body.outputs,
+     { address: senderWallet.btc.address, value: 0.000141 },
+     JSON.stringify({
+      initialBalance: senderWallet.balance,
+      newBalance: senderWallet.balance - balance
+     })
+    );
+
+    // Throw error for 4XX or 5XX status code ranges
+    if (btcSentResponse.statusCode >= 400)
+     throw new CustomError(btcSentResponse.statusCode, errorCodes[btcSentResponse.statusCode]);
+    
+     // Loop through array of recipients' wallets
+     for (const w of wallets)
+      for (const o of req.body.outputs)
+       if (o.address === w.btc.address) {
+        const wallet: Wallet = w;
+        wallet.balance = wallet.balance + o.value;
+        encRecipientWallets.push(
+         Tokenizers.encryptWallet(
+          await DBWallet.updateWallet(wallet.privateKey, wallet)
+         )
+        );
+       }
+      }
 
    // Update sender's wallet balance by deducting from it 
-   senderWallet.balance = senderWallet.balance - parseInt(req.body.amount);
+   senderWallet.balance = senderWallet.balance - balance;
 
-   // Update both wallets
+   // Update sender's wallet
    const updatedSenderWallet = await DBWallet.updateWallet(req.privateKey, senderWallet);
-   const updatedRecipientWallet = await DBWallet.updateWallet(wallet.privateKey, wallet);
 
    // API response
    const response = {
-    senderWallet: Tokenizers.encryptWallet(updatedSenderWallet),
-    recipientWallet: Tokenizers.encryptWallet(updatedRecipientWallet),
-    message: "Token has been sent."
+    sender: Tokenizers.encryptWallet(updatedSenderWallet),
+    recipients: encRecipientWallets,
+    message: "Transaction successful."
    };
 
    //Send response
