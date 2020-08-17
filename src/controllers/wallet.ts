@@ -3,7 +3,7 @@ import db from "../db";
 import { Wallet } from "../core/interfaces";
 import { Tokenizers } from "../core/utils";
 import { CustomError } from "../custom";
-import { BTC } from "../core/handlers";
+import { BTC, ETH } from "../core/handlers";
 
 const { DBWallet } = db;
 const errorCodes = {
@@ -39,21 +39,35 @@ export class WalletController {
    const btcAddressCreationResponse = await BTC.createAddress();
    // console.log(btcAddressCreationResponse.payload);
 
+   // Generate ETH address
+   const ethAddressCreationResponse = await ETH.createAddress(phrase, keyPair.publicKey);
+
    // Throw error if btc response code is within 4XX or 5XX range
    if (btcAddressCreationResponse.statusCode >= 400)
     throw new CustomError(btcAddressCreationResponse.statusCode, errorCodes[btcAddressCreationResponse.statusCode]);
 
+   // Throw error if eth response code is within 4XX or 5XX range
+   if (ethAddressCreationResponse.statusCode >= 400)
+    throw new CustomError(ethAddressCreationResponse.statusCode, errorCodes[ethAddressCreationResponse.statusCode]);
+   
    // Get BTC address details
    const btcAddressDetailsResponse = await BTC.getAddressDetails(btcAddressCreationResponse.payload.address);
    // console.log(btcAddressDetailsResponse.payload);
+
+   // Get ETH address details
+   const ethAddressDetailsResponse = await ETH.getAddressDetails(ethAddressCreationResponse.payload.address);
    
    // Instantiate wallet
    const wallet: Wallet = {
     privateKey: keyPair.privateKey,
     publicKey: keyPair.publicKey,
-    balance: parseInt(btcAddressDetailsResponse.payload.balance),
+    balance: parseInt(btcAddressDetailsResponse.payload.balance) + parseInt(ethAddressDetailsResponse.payload.balance),
     hash: Tokenizers.hash(keyPair.publicKey + keyPair.privateKey),
-    btcAddress: btcAddressCreationResponse.payload.address
+    ethAddress: ethAddressCreationResponse.payload.address,
+    btc: {
+     address: btcAddressCreationResponse.payload.address,
+     wif: btcAddressCreationResponse.payload.wif
+    }
    };
 
    // Save wallet to db and get as object
@@ -142,9 +156,9 @@ export class WalletController {
    
    // Send BTC
    const btcSentResponse = await BTC.sendToken(
-    [{ address: senderWallet.btcAddress, value: parseInt(req.body.amount) }],
-    [{ address: recipient, value: parseInt(req.body.amount) }],
-    { address: senderWallet.btcAddress, value: 0.000141 },
+    req.body.inputs,
+    req.body.outputs,
+    { address: senderWallet.btc.address, value: 0.000141 },
     JSON.stringify({
      initialBalance: senderWallet.balance,
      newBalance: senderWallet.balance - parseInt(req.body.amount)
