@@ -63,10 +63,14 @@ export class WalletController {
     publicKey: keyPair.publicKey,
     balance: parseInt(btcAddressDetailsResponse.payload.balance) + parseInt(ethAddressDetailsResponse.payload.balance),
     hash: Tokenizers.hash(keyPair.publicKey + keyPair.privateKey),
-    ethAddress: ethAddressCreationResponse.payload.address,
     btc: {
      address: btcAddressCreationResponse.payload.address,
-     wif: btcAddressCreationResponse.payload.wif
+     wif: btcAddressCreationResponse.payload.wif,
+     balance: parseInt(btcAddressDetailsResponse.payload.balance)
+    },
+    eth: {
+     address: ethAddressCreationResponse.payload.address,
+     balance: parseInt(ethAddressDetailsResponse.payload.balance)
     }
    };
 
@@ -161,6 +165,10 @@ export class WalletController {
     if (senderWallet.balance < balance)
      throw new CustomError(400, "Wallet balance is not sufficient.");
 
+    // Throw error if sender's btc balance is less than balance to be sent
+    if (senderWallet.btc.balance < balance)
+     throw new CustomError(400, "Insufficient BTC balance");
+
     // Check for matching btc address
     for (const o of req.body.outputs)
      for (const w of allWallets)
@@ -188,12 +196,62 @@ export class WalletController {
        if (o.address === w.btc.address) {
         const wallet: Wallet = w;
         wallet.balance = wallet.balance + o.value;
+        wallet.btc.balance = wallet.btc.balance + o.value;
         encRecipientWallets.push(
          Tokenizers.encryptWallet(
           await DBWallet.updateWallet(wallet.privateKey, wallet)
          )
         );
        }
+       // Update sender's btc balance
+       senderWallet.btc.balance = senderWallet.btc.balance - balance;
+      } else if (type === "eth") {
+       // Increment balance
+       balance = balance + req.body.value;
+
+       // Throw error if balance is more than sender's wallet balance
+       if (senderWallet.balance < balance)
+        throw new CustomError(400, "Wallet balance is not sufficient.");
+
+       // Throw error if sender's ethereum balance is less than balance to be sent
+       if (senderWallet.eth.balance < balance)
+        throw new CustomError(400, "Insufficient ETH balance.");
+
+       // Find matching wallet
+       for (const w of allWallets)
+        if (w.eth.address === req.body.toAddress)
+         wallets = [...wallets, w];
+
+       // Send ETH
+       const ethSentResponse = await ETH.sendToken({
+        fromAddress: req.wallet.eth.address,
+        toAddress: req.body.toAddress,
+        gasPrice: 21000000000,
+        gasLimit: 21000,
+        value: req.body.value,
+        password: req.body.passphrase,
+        nonce: 0
+       });
+
+       // Throw error for 4XX or 5XX status code ranges
+       if (ethSentResponse.statusCode >= 400)
+        throw new CustomError(ethSentResponse.statusCode, errorCodes[ethSentResponse.statusCode]);
+       
+       // Loop through array
+       for (const w of wallets)
+        if (w.eth.address === req.body.toAddress) {
+         const wallet: Wallet = w;
+         wallet.balance = wallet.balance + req.body.value;
+         wallet.eth.balance = wallet.eth.balance + req.body.value;
+         encRecipientWallets.push(
+          Tokenizers.encryptWallet(
+           await DBWallet.updateWallet(wallet.privateKey, wallet)
+          )
+         );
+        }
+       
+       // Update sender's wallet eth balance
+       senderWallet.eth.balance = senderWallet.eth.balance - balance;
       }
 
    // Update sender's wallet balance by deducting from it 

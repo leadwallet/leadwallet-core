@@ -15,13 +15,7 @@ const ETHROOT = Environment.CRYPTO_API + ethPath;
 
 export class ETH {
  static async createAddress(phrase: string, id: string): Promise<{ statusCode: number; payload: any; }> {
-  const response = await rp.post(ETHROOT + "/account", {
-   ...options,
-   body: {
-    password: phrase,
-    id
-   }
-  });
+  const response = await rp.post(ETHROOT + "/address", { ...options });
   return Promise.resolve({
    statusCode: response.statusCode,
    payload: response.body.payload

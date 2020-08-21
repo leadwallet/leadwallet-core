@@ -6,7 +6,11 @@ export interface Wallet {
  btc?: {
   address: string;
   wif: string;
+  balance: number;
  };
- ethAddress?: string;
+ eth?: {
+  address: string;
+  balance: number;
+ };
 }
 
