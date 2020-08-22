@@ -162,9 +162,16 @@ export class WalletController {
  static async importWallet(req: express.Request & { wallet: Wallet; }, res: express.Response): Promise<void> {
   try {
    const { wallet } = req;
+   const token = Tokenizers.generateToken({
+    privateKey: wallet.privateKey,
+    publicKey: wallet.publicKey
+   });
    res.status(200).json({
     statusCode: 200,
-    response: wallet
+    response: {
+     wallet,
+     token
+    }
    });
   } catch (error) {
    res.status(500).json({
