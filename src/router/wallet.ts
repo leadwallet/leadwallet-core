@@ -32,5 +32,11 @@ router.post(
  WalletMiddleware.getWalletFromRequest,
  WalletController.sendToken
 );
+router.get(
+ "/update",
+ WalletMiddleware.getKeyPair,
+ WalletMiddleware.getWalletFromRequest,
+ WalletController.updateWallet
+);
 
 export default router;

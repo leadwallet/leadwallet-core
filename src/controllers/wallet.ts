@@ -120,6 +120,45 @@ export class WalletController {
   }
  }
 
+ static async updateWallet(req: express.Request & { wallet: Wallet; }, res: express.Response): Promise<void> {
+  try {
+   // Get user's wallet
+   const wallet = req.wallet;
+
+   // Get BTC address details
+   const btcDetailsResponse = await BTC.getAddressDetails(wallet.btc.address);
+
+   // Throw error for 4XX and 5XX status code ranges
+   if (btcDetailsResponse.statusCode >= 400)
+    throw new CustomError(btcDetailsResponse.statusCode, errorCodes[btcDetailsResponse.statusCode]);
+
+   // Get ETH address details
+   const ethDetailsResponse = await ETH.getAddressDetails(wallet.eth.address);
+
+   // Throw error for 4XX and 5XX status code ranges
+   if (ethDetailsResponse.statusCode >= 400)
+    throw new CustomError(ethDetailsResponse.statusCode, errorCodes[ethDetailsResponse.statusCode]);
+
+   // Update wallet
+   wallet.balance = parseInt(btcDetailsResponse.payload.balance) + parseInt(ethDetailsResponse.payload.balance);
+   wallet.btc.balance = parseInt(btcDetailsResponse.payload.balance);
+   wallet.eth.balance = parseInt(ethDetailsResponse.payload.balance);
+
+   // Update wallet in db
+   const newWallet = await DBWallet.updateWallet(wallet.privateKey, wallet);
+
+   res.status(200).json({
+    statusCode: 200,
+    response: newWallet
+   });
+  } catch (error) {
+   res.status(error.code || 500).json({
+    statusCode: error.code || 500,
+    response: error.message
+   });
+  }
+ }
+
  static async importWallet(req: express.Request & { wallet: Wallet; }, res: express.Response): Promise<void> {
   try {
    const { wallet } = req;
