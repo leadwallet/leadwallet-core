@@ -35,7 +35,9 @@ export class Tokenizers {
  // }
 
  static encryptWallet(wallet: Wallet): string {
-  return jwt.sign(wallet, wallet.privateKey);
+  return jwt.sign(wallet, wallet.privateKey, {
+   noTimestamp: true
+  });
  }
 
  static decryptWallet(encryptedWallet: string, privateKey: string): Wallet {

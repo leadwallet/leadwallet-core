@@ -14,7 +14,7 @@ const ethPath = "/v1/bc/eth/mainnet";
 const ETHROOT = Environment.CRYPTO_API + ethPath;
 
 export class ETH {
- static async createAddress(phrase: string, id: string): Promise<{ statusCode: number; payload: any; }> {
+ static async createAddress(): Promise<{ statusCode: number; payload: any; }> {
   const response = await rp.post(ETHROOT + "/address", { ...options });
   return Promise.resolve({
    statusCode: response.statusCode,

@@ -3,7 +3,7 @@ import db from "../db";
 import { Wallet } from "../core/interfaces";
 import { Tokenizers } from "../core/utils";
 import { CustomError } from "../custom";
-import { BTC, ETH } from "../core/handlers";
+import { BTC, ETH, DOGE } from "../core/handlers";
 
 const { DBWallet } = db;
 const errorCodes = {
@@ -17,7 +17,7 @@ const errorCodes = {
  502: "BAD GATEWAY",
  503: "SERVICE UNAVAILABLE",
  504: "GATEWAY TIMEOUT"
-}
+};
 
 export class WalletController {
  static async createWallet(req: express.Request, res: express.Response): Promise<any> {
@@ -40,7 +40,10 @@ export class WalletController {
    // console.log(btcAddressCreationResponse.payload);
 
    // Generate ETH address
-   const ethAddressCreationResponse = await ETH.createAddress(phrase, keyPair.publicKey);
+   const ethAddressCreationResponse = await ETH.createAddress();
+
+   // Generate DOGE address
+   const dogeAddressCreationResponse = await DOGE.createAddress(); 
 
    // Throw error if btc response code is within 4XX or 5XX range
    if (btcAddressCreationResponse.statusCode >= 400)
@@ -49,6 +52,10 @@ export class WalletController {
    // Throw error if eth response code is within 4XX or 5XX range
    if (ethAddressCreationResponse.statusCode >= 400)
     throw new CustomError(ethAddressCreationResponse.statusCode, errorCodes[ethAddressCreationResponse.statusCode]);
+
+   // Throw error if doge response code is within 4XX or 5XX range
+   if (dogeAddressCreationResponse.statusCode >= 400)
+    throw new CustomError(dogeAddressCreationResponse.statusCode, errorCodes[dogeAddressCreationResponse.statusCode]);
    
    // Get BTC address details
    const btcAddressDetailsResponse = await BTC.getAddressDetails(btcAddressCreationResponse.payload.address);
@@ -56,12 +63,15 @@ export class WalletController {
 
    // Get ETH address details
    const ethAddressDetailsResponse = await ETH.getAddressDetails(ethAddressCreationResponse.payload.address);
+
+   // Get DOGE address details
+   const dogeAddressDetailsResponse = await DOGE.getAddressDetails(dogeAddressCreationResponse.payload.address);
    
    // Instantiate wallet
    const wallet: Wallet = {
     privateKey: keyPair.privateKey,
     publicKey: keyPair.publicKey,
-    balance: parseInt(btcAddressDetailsResponse.payload.balance) + parseInt(ethAddressDetailsResponse.payload.balance),
+    balance: parseInt(btcAddressDetailsResponse.payload.balance) + parseInt(ethAddressDetailsResponse.payload.balance) + parseInt(dogeAddressDetailsResponse.payload.balance),
     hash: Tokenizers.hash(keyPair.publicKey + keyPair.privateKey),
     btc: {
      address: btcAddressCreationResponse.payload.address,
@@ -71,6 +81,11 @@ export class WalletController {
     eth: {
      address: ethAddressCreationResponse.payload.address,
      balance: parseInt(ethAddressDetailsResponse.payload.balance)
+    },
+    doge: {
+     address: dogeAddressCreationResponse.payload.address,
+     wif: dogeAddressCreationResponse.payload.wif,
+     balance: parseInt(dogeAddressDetailsResponse.payload.balance)
     }
    };
 
@@ -139,10 +154,18 @@ export class WalletController {
    if (ethDetailsResponse.statusCode >= 400)
     throw new CustomError(ethDetailsResponse.statusCode, errorCodes[ethDetailsResponse.statusCode]);
 
+   // Get DOGE address details
+   const dogeDetailsResponse = await DOGE.getAddressDetails(wallet.doge.address);
+
+   // Throw error for 4XX and 5XX status code ranges
+   if (dogeDetailsResponse.statusCode >= 400)
+    throw new CustomError(dogeDetailsResponse.statusCode, errorCodes[dogeDetailsResponse.statusCode]);
+
    // Update wallet
-   wallet.balance = parseInt(btcDetailsResponse.payload.balance) + parseInt(ethDetailsResponse.payload.balance);
+   wallet.balance = parseInt(btcDetailsResponse.payload.balance) + parseInt(ethDetailsResponse.payload.balance) + parseInt(dogeDetailsResponse.payload.balance);
    wallet.btc.balance = parseInt(btcDetailsResponse.payload.balance);
    wallet.eth.balance = parseInt(ethDetailsResponse.payload.balance);
+   wallet.doge.balance = parseInt(dogeDetailsResponse.payload.balance);
 
    // Update wallet in db
    const newWallet = await DBWallet.updateWallet(wallet.privateKey, wallet);
@@ -298,6 +321,35 @@ export class WalletController {
        
        // Update sender's wallet eth balance
        senderWallet.eth.balance = senderWallet.eth.balance - balance;
+      } else if (type === "doge") {
+       // Increment balance
+       for (const i of req.body.inputs)
+        balance = balance + i.value;
+
+       // Throw error if sender's wallet balance is less than specified balance
+       if (senderWallet.balance < balance)
+        throw new CustomError(400, "Wallet balance is not sufficient");
+
+       // Throw error if doge balance is less than the specified balance
+       if (senderWallet.doge.balance < balance)
+        throw new CustomError(400, "Insufficient DOGE balance.");
+
+       // Find matching wallet
+       for (const o of req.body.outputs)
+        for (const w of allWallets)
+         if (w.doge.address === o.address)
+          wallets = [...wallets, w];
+
+        // Send DOGE
+        const dogeSentResponse = await DOGE.sendToken(
+         req.body.inputs,
+         req.body.outputs,
+         req.body.fee
+        );
+
+        // Throw error if status code is within 4XX and 5XX ranges
+        if (dogeSentResponse.statusCode >= 400)
+         throw new CustomError(dogeSentResponse.statusCode, errorCodes[dogeSentResponse.statusCode]);
       }
 
    // Update sender's wallet balance by deducting from it 

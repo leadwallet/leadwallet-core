@@ -12,5 +12,10 @@ export interface Wallet {
   address: string;
   balance: number;
  };
+ doge?: {
+  address: string;
+  wif: string;
+  balance: number;
+ }
 }
 
