@@ -350,6 +350,23 @@ export class WalletController {
         // Throw error if status code is within 4XX and 5XX ranges
         if (dogeSentResponse.statusCode >= 400)
          throw new CustomError(dogeSentResponse.statusCode, errorCodes[dogeSentResponse.statusCode]);
+
+        // Loop through recipients' wallets
+        for (const w of wallets)
+         for (const o of req.body.outputs)
+          if (o.address === w.doge.address) {
+           const wallet: Wallet = w;
+           wallet.balance = wallet.balance + o.value;
+           wallet.doge.balance = wallet.doge.balance + o.value;
+           encRecipientWallets.push(
+            Tokenizers.encryptWallet(
+             await DBWallet.updateWallet(wallet.privateKey, wallet)
+            )
+           );
+          }
+        
+        // Update sender's wallet doge balance
+        senderWallet.doge.balance = senderWallet.doge.balance - balance;
       }
 
    // Update sender's wallet balance by deducting from it 
