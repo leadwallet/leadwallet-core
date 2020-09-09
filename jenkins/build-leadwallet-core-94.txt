@@ -1,0 +1,5 @@
+-e Build Number: 94 
+Status: passed 
+Job: leadwallet-core 
+Node: master 
+Workspace: /var/lib/jenkins/workspace/leadwallet-core
