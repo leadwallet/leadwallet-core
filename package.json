@@ -4,6 +4,7 @@
   "description": "",
   "main": "index.js",
   "dependencies": {
+    "cross-env": "^7.0.2",
     "crypto-js": "^4.0.0",
     "dotenv": "^8.2.0",
     "express": "^4.17.1",
@@ -12,6 +13,7 @@
     "morgan": "^1.10.0",
     "request": "^2.88.2",
     "request-promise": "^4.2.6",
+    "rimraf": "^3.0.2",
     "typescript": "^3.9.7",
     "uuid": "^8.3.0"
   },
@@ -34,12 +36,12 @@
   },
   "scripts": {
     "test": "mocha ./build/tests/*.test.js -R spec --timeout 30000 --exit",
-    "clean-dir": "rm -rf build",
+    "clean-dir": "rimraf build",
     "build": "tsc -p .",
     "clean:build": "npm run clean-dir && npm run build",
-    "dev": "export NODE_ENV=development && npm run clean:build && node build/index.js",
-    "prod": "export NODE_ENV=production && npm run clean:build && node build/index.js",
-    "clean:build:test": "export NODE_ENV=test && npm run clean:build && npm run test"
+    "dev": "npm run clean:build && cross-env NODE_ENV=development node build/index.js",
+    "prod": "npm run clean:build && cross-env NODE_ENV=production node build/index.js",
+    "clean:build:test": "npm run clean:build && cross-env NODE_ENV=test npm run test"
   },
   "repository": {
     "type": "git",

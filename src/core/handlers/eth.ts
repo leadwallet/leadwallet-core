@@ -2,6 +2,7 @@ import rp from "request-promise";
 import { Environment } from "../../env";
 
 const options = {
+ simple: false,
  json: true,
  resolveWithFullResponse: true,
  headers: {

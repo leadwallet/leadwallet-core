@@ -39,19 +39,20 @@ export class WalletController {
    const btcAddressCreationResponse = await BTC.createAddress();
    // console.log(btcAddressCreationResponse.payload);
 
-   // Generate ETH address
-   const ethAddressCreationResponse = await ETH.createAddress();
-
-   // Generate DOGE address
-   const dogeAddressCreationResponse = await DOGE.createAddress(); 
-
    // Throw error if btc response code is within 4XX or 5XX range
+
    if (btcAddressCreationResponse.statusCode >= 400)
     throw new CustomError(btcAddressCreationResponse.statusCode, errorCodes[btcAddressCreationResponse.statusCode]);
+
+   // Generate ETH address
+   const ethAddressCreationResponse = await ETH.createAddress();
 
    // Throw error if eth response code is within 4XX or 5XX range
    if (ethAddressCreationResponse.statusCode >= 400)
     throw new CustomError(ethAddressCreationResponse.statusCode, errorCodes[ethAddressCreationResponse.statusCode]);
+
+   // Generate DOGE address
+   const dogeAddressCreationResponse = await DOGE.createAddress(); 
 
    // Throw error if doge response code is within 4XX or 5XX range
    if (dogeAddressCreationResponse.statusCode >= 400)
