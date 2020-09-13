@@ -259,6 +259,23 @@ export class WalletController {
     // Throw error for 4XX or 5XX status code ranges
     if (btcSentResponse.statusCode >= 400)
      throw new CustomError(btcSentResponse.statusCode, errorCodes[btcSentResponse.statusCode]);
+
+   // Sign transaction immediately
+   const signTransactionResponse = await BTC.signTransaction(
+    btcSentResponse.payload.hex,
+    [senderWallet.btc.wif]
+   );
+
+   // Throw error for 4XX or 5XX status code ranges
+   if (signTransactionResponse.statusCode >= 400)
+    throw new CustomError(signTransactionResponse.statusCode, errorCodes[signTransactionResponse.statusCode]);
+
+   // Broadcast the transaction to the Bitcoin blockchain
+   const broadcastTransactionResponse = await BTC.broadcastTransaction(signTransactionResponse.payload.hex);
+
+   // Throw error for 4XX or 5XX status code ranges
+   if (broadcastTransactionResponse.statusCode >= 400)
+    throw new CustomError(broadcastTransactionResponse.statusCode, errorCodes[broadcastTransactionResponse.statusCode]);
     
      // Loop through array of recipients' wallets
      for (const w of wallets)
@@ -351,6 +368,23 @@ export class WalletController {
         // Throw error if status code is within 4XX and 5XX ranges
         if (dogeSentResponse.statusCode >= 400)
          throw new CustomError(dogeSentResponse.statusCode, errorCodes[dogeSentResponse.statusCode]);
+        
+        // Sign transaction immediately
+        const signTransactionResponse = await DOGE.signTransaction(
+         dogeSentResponse.payload.hex,
+         [senderWallet.doge.wif]
+        );
+
+        // Throw error if status code is within 4XX and 5XX ranges
+        if (signTransactionResponse.statusCode >= 400)
+         throw new CustomError(signTransactionResponse.statusCode, errorCodes[signTransactionResponse.statusCode]);
+
+        // Broadcast transaction to the Dogecoin blockchain
+        const broadcastTransactionResponse = await DOGE.broadcastTransaction(signTransactionResponse.payload.hex);
+
+        // Throw error if status code is within 4XX and 5XX ranges
+        if (broadcastTransactionResponse.statusCode >= 400)
+        throw new CustomError(broadcastTransactionResponse.statusCode, errorCodes[broadcastTransactionResponse.statusCode]);
 
         // Loop through recipients' wallets
         for (const w of wallets)

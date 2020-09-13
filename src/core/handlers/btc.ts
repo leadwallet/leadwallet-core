@@ -48,4 +48,29 @@ export class BTC {
    payload: response.body.payload
   });
  }
+
+ static async signTransaction(
+  hex: string, 
+  wifs: Array<string>
+ ): Promise<{ payload: any; statusCode: number }> {
+  const response = await rp.post(BTCROOT + "/txs/sign", {
+   ...options,
+   body: { hex, wifs }
+  });
+  return Promise.resolve({
+   statusCode: response.statusCode,
+   payload: response.body.payload
+  });
+ }
+
+ static async broadcastTransaction(hex: string): Promise<{ payload: any; statusCode: number }> {
+  const response = await rp.post(BTCROOT + "/txs/send", {
+   ...options,
+   body: { hex }
+  });
+  return Promise.resolve({
+   statusCode: response.statusCode,
+   payload: response.body.payload
+  });
+ }
 }
