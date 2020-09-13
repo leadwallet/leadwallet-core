@@ -42,4 +42,6 @@ export class ETH {
    payload: response.body.payload
   });
  }
+
+ static async broadcastTransaction() {}
 }
