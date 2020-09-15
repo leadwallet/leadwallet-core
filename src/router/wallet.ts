@@ -27,7 +27,7 @@ router.post(
  WalletController.importWallet
 );
 router.post(
- "/send_token/:recipient",
+ "/send_token",
  WalletMiddleware.getKeyPair,
  WalletMiddleware.getWalletFromRequest,
  WalletController.sendToken

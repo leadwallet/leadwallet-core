@@ -83,30 +83,30 @@ export class WalletController {
     privateKey: keyPair.privateKey,
     publicKey: keyPair.publicKey,
     balance: (
-     parseInt(btcAddressDetailsResponse.payload.balance) + 
-     parseInt(ethAddressDetailsResponse.payload.balance) + 
-     parseInt(dogeAddressDetailsResponse.payload.balance) +
-     parseInt(ltcAddressDetailsResponse.payload.balance)
+     parseFloat(btcAddressDetailsResponse.payload.balance) + 
+     parseFloat(ethAddressDetailsResponse.payload.balance) + 
+     parseFloat(dogeAddressDetailsResponse.payload.balance) +
+     parseFloat(ltcAddressDetailsResponse.payload.balance)
     ),
     hash: Tokenizers.hash(keyPair.publicKey + keyPair.privateKey),
     btc: {
      address: btcAddressCreationResponse.payload.address,
      wif: btcAddressCreationResponse.payload.wif,
-     balance: parseInt(btcAddressDetailsResponse.payload.balance)
+     balance: parseFloat(btcAddressDetailsResponse.payload.balance)
     },
     eth: {
      address: ethAddressCreationResponse.payload.address,
-     balance: parseInt(ethAddressDetailsResponse.payload.balance)
+     balance: parseFloat(ethAddressDetailsResponse.payload.balance)
     },
     doge: {
      address: dogeAddressCreationResponse.payload.address,
      wif: dogeAddressCreationResponse.payload.wif,
-     balance: parseInt(dogeAddressDetailsResponse.payload.balance)
+     balance: parseFloat(dogeAddressDetailsResponse.payload.balance)
     },
     ltc: {
      address: ltcAddressCreationResponse.payload.address,
      wif: ltcAddressCreationResponse.payload.wif,
-     balance: parseInt(ltcAddressDetailsResponse.payload.balance)
+     balance: parseFloat(ltcAddressDetailsResponse.payload.balance)
     }
    };
 
@@ -191,15 +191,15 @@ export class WalletController {
 
    // Update wallet
    wallet.balance = (
-    parseInt(btcDetailsResponse.payload.balance) + 
-    parseInt(ethDetailsResponse.payload.balance) + 
-    parseInt(dogeDetailsResponse.payload.balance) +
-    parseInt(ltcDetailsResponse.payload.balance)
+    parseFloat(btcDetailsResponse.payload.balance) + 
+    parseFloat(ethDetailsResponse.payload.balance) + 
+    parseFloat(dogeDetailsResponse.payload.balance) +
+    parseFloat(ltcDetailsResponse.payload.balance)
    );
-   wallet.btc.balance = parseInt(btcDetailsResponse.payload.balance);
-   wallet.eth.balance = parseInt(ethDetailsResponse.payload.balance);
-   wallet.doge.balance = parseInt(dogeDetailsResponse.payload.balance);
-   wallet.ltc.balance = parseInt(ltcDetailsResponse.payload.balance);
+   wallet.btc.balance = parseFloat(btcDetailsResponse.payload.balance);
+   wallet.eth.balance = parseFloat(ethDetailsResponse.payload.balance);
+   wallet.doge.balance = parseFloat(dogeDetailsResponse.payload.balance);
+   wallet.ltc.balance = parseFloat(ltcDetailsResponse.payload.balance);
 
    // Update wallet in db
    const newWallet = await DBWallet.updateWallet(wallet.privateKey, wallet);
@@ -282,7 +282,7 @@ export class WalletController {
     const btcSentResponse = await BTC.sendToken(
      req.body.inputs,
      req.body.outputs,
-     { address: senderWallet.btc.address, value: 0.000141 },
+     { address: senderWallet.btc.address, value: 0.00000001 },
      JSON.stringify({
       initialBalance: senderWallet.balance,
       newBalance: senderWallet.balance - balance
