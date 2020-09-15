@@ -11,7 +11,13 @@ const options = {
  }
 };
 
-const dogePath = "/v1/bc/doge/mainnet";
+const COIN_NETWORK = {
+ development: "testnet",
+ production: "mainnet",
+ test: "testnet"
+};
+
+const dogePath = "/v1/bc/doge/" + COIN_NETWORK[process.env.NODE_ENV];
 const DOGEROOT = Environment.CRYPTO_API + dogePath;
 
 export class DOGE {

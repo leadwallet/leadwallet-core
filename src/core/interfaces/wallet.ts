@@ -16,6 +16,11 @@ export interface Wallet {
   address: string;
   wif: string;
   balance: number;
+ };
+ ltc?: {
+  address: string;
+  wif: string;
+  balance: number;
  }
 }
 

@@ -11,7 +11,13 @@ const options = {
  }
 };
 
-const ltcPath = "/v1/bc/ltc/mainnet"
+const COIN_NETWORK = {
+ development: "testnet",
+ production: "mainnet",
+ test: "testnet"
+};
+
+const ltcPath = "/v1/bc/ltc/" + COIN_NETWORK[process.env.NODE_ENV];
 const LTCROOT = Environment.CRYPTO_API + ltcPath;
 
 export class LTC {

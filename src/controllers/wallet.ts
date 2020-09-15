@@ -3,7 +3,7 @@ import db from "../db";
 import { Wallet } from "../core/interfaces";
 import { Tokenizers } from "../core/utils";
 import { CustomError } from "../custom";
-import { BTC, ETH, DOGE } from "../core/handlers";
+import { BTC, ETH, DOGE, LTC } from "../core/handlers";
 
 const { DBWallet } = db;
 const errorCodes = {
@@ -57,6 +57,13 @@ export class WalletController {
    // Throw error if doge response code is within 4XX or 5XX range
    if (dogeAddressCreationResponse.statusCode >= 400)
     throw new CustomError(dogeAddressCreationResponse.statusCode, errorCodes[dogeAddressCreationResponse.statusCode]);
+
+   // Generate LTC address
+   const ltcAddressCreationResponse = await LTC.createAddress();
+
+   // Throw error if ltc response code is within 4XX or 5XX range
+   if (ltcAddressCreationResponse.statusCode >= 400)
+    throw new CustomError(ltcAddressCreationResponse.statusCode, errorCodes[ltcAddressCreationResponse.statusCode]);
    
    // Get BTC address details
    const btcAddressDetailsResponse = await BTC.getAddressDetails(btcAddressCreationResponse.payload.address);
@@ -67,12 +74,20 @@ export class WalletController {
 
    // Get DOGE address details
    const dogeAddressDetailsResponse = await DOGE.getAddressDetails(dogeAddressCreationResponse.payload.address);
+
+   // Get LTC address details
+   const ltcAddressDetailsResponse = await LTC.getAddressDetails(ltcAddressCreationResponse.payload.address);
    
    // Instantiate wallet
    const wallet: Wallet = {
     privateKey: keyPair.privateKey,
     publicKey: keyPair.publicKey,
-    balance: parseInt(btcAddressDetailsResponse.payload.balance) + parseInt(ethAddressDetailsResponse.payload.balance) + parseInt(dogeAddressDetailsResponse.payload.balance),
+    balance: (
+     parseInt(btcAddressDetailsResponse.payload.balance) + 
+     parseInt(ethAddressDetailsResponse.payload.balance) + 
+     parseInt(dogeAddressDetailsResponse.payload.balance) +
+     parseInt(ltcAddressDetailsResponse.payload.balance)
+    ),
     hash: Tokenizers.hash(keyPair.publicKey + keyPair.privateKey),
     btc: {
      address: btcAddressCreationResponse.payload.address,
@@ -87,6 +102,11 @@ export class WalletController {
      address: dogeAddressCreationResponse.payload.address,
      wif: dogeAddressCreationResponse.payload.wif,
      balance: parseInt(dogeAddressDetailsResponse.payload.balance)
+    },
+    ltc: {
+     address: ltcAddressCreationResponse.payload.address,
+     wif: ltcAddressCreationResponse.payload.wif,
+     balance: parseInt(ltcAddressDetailsResponse.payload.balance)
     }
    };
 
@@ -162,11 +182,24 @@ export class WalletController {
    if (dogeDetailsResponse.statusCode >= 400)
     throw new CustomError(dogeDetailsResponse.statusCode, errorCodes[dogeDetailsResponse.statusCode]);
 
+   // Get LTC address details
+   const ltcDetailsResponse = await LTC.getAddressDetails(wallet.ltc.address);
+
+   // Throw error for 4XX and 5XX status code ranges
+   if (ltcDetailsResponse.statusCode >= 400)
+    throw new CustomError(ltcDetailsResponse.statusCode, errorCodes[ltcDetailsResponse.statusCode]);
+
    // Update wallet
-   wallet.balance = parseInt(btcDetailsResponse.payload.balance) + parseInt(ethDetailsResponse.payload.balance) + parseInt(dogeDetailsResponse.payload.balance);
+   wallet.balance = (
+    parseInt(btcDetailsResponse.payload.balance) + 
+    parseInt(ethDetailsResponse.payload.balance) + 
+    parseInt(dogeDetailsResponse.payload.balance) +
+    parseInt(ltcDetailsResponse.payload.balance)
+   );
    wallet.btc.balance = parseInt(btcDetailsResponse.payload.balance);
    wallet.eth.balance = parseInt(ethDetailsResponse.payload.balance);
    wallet.doge.balance = parseInt(dogeDetailsResponse.payload.balance);
+   wallet.ltc.balance = parseInt(ltcDetailsResponse.payload.balance);
 
    // Update wallet in db
    const newWallet = await DBWallet.updateWallet(wallet.privateKey, wallet);
@@ -402,6 +435,66 @@ export class WalletController {
         
         // Update sender's wallet doge balance
         senderWallet.doge.balance = senderWallet.doge.balance - balance;
+      } else if (type === "ltc") {
+       // Increment balance
+       for (const i of req.body.inputs)
+        balance = balance + i.value;
+
+       // Throw error if sender's balance is less than  specified balance
+       if (senderWallet.balance < balance)
+        throw new CustomError(400, "Wallet balance not sufficient.");
+
+       // Throw error if sender's ltc balance is less than specified balance
+       if (senderWallet.ltc.balance < balance)
+        throw new CustomError(400, "Insufficient LTC balance");
+
+       // Find matching wallet
+       for (const o of req.body.outputs)
+        for (const w of allWallets)
+         if (w.ltc.address === o.address)
+          wallets = [...wallets, w];
+       
+       // Send LTC
+       const ltcSentResponse = await LTC.sendToken(req.body.inputs, req.body.outputs, req.body.fee);
+
+       // Throw error if status code is within 4XX and 5XX
+       if (ltcSentResponse.statusCode >= 400)
+        throw new CustomError(ltcSentResponse.statusCode, errorCodes[ltcSentResponse.statusCode]);
+
+       // Sign transaction
+       const transactionSignResponse = await LTC.signTransaction(
+        ltcSentResponse.payload.hex,
+        [senderWallet.ltc.wif]
+       );
+
+       // Throw error for 4XX and 5XX status codes
+       if (transactionSignResponse.statusCode >= 400)
+        throw new CustomError(transactionSignResponse.statusCode, errorCodes[transactionSignResponse.statusCode]);
+
+       // Broadcast transaction to the Litecoin blockchain
+       const broadcastTransactionResponse = await LTC.broadcastTransaction(transactionSignResponse.payload.hex);
+
+       // Throw error if there is any
+       if (broadcastTransactionResponse.statusCode >= 400)
+        throw new CustomError(broadcastTransactionResponse.statusCode, errorCodes[broadcastTransactionResponse.statusCode]);
+
+       // Find matching wallets
+       for (const w of wallets)
+        for (const o of req.body.outputs)
+         if (o.address = w.ltc.address) {
+          const wallet: Wallet = w;
+          wallet.balance = wallet.balance + o.value;
+          wallet.ltc.balance = wallet.ltc.balance + o.value;
+          encRecipientWallets.push(
+           Tokenizers.encryptWallet(
+            await DBWallet.updateWallet(wallet.privateKey, wallet)
+           )
+          );
+         }
+
+         // Update sender wallet's LTC balance
+         senderWallet.ltc.balance = senderWallet.ltc.balance - balance;
+
       }
 
    // Update sender's wallet balance by deducting from it 

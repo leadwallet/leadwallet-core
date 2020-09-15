@@ -11,7 +11,13 @@ const options = {
  }
 };
 
-const btcPath = "/v1/bc/btc/mainnet"
+const COIN_NETWORK = {
+ development: "testnet",
+ production: "mainnet",
+ test: "testnet"
+};
+
+const btcPath = "/v1/bc/btc/" + COIN_NETWORK[process.env.NODE_ENV];
 const BTCROOT = Environment.CRYPTO_API + btcPath;
 
 export class BTC {

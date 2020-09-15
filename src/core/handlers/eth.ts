@@ -11,7 +11,13 @@ const options = {
  }
 };
 
-const ethPath = "/v1/bc/eth/mainnet";
+const COIN_NETWORK = {
+ development: "ropsten",
+ test: "rinkeby",
+ production: "mainnet"
+};
+
+const ethPath = "/v1/bc/eth/" + COIN_NETWORK[process.env.NODE_ENV];
 const ETHROOT = Environment.CRYPTO_API + ethPath;
 
 export class ETH {
