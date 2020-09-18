@@ -11,4 +11,12 @@ export class Environment {
   test: process.env.MONGO_TEST_URI,
   production: process.env.MONGO_MAIN_URI
  };
+ static TRON = {
+  development: process.env.TRON_TEST_API,
+  production: process.env.TRON_MAIN_API,
+  test: process.env.TRON_TEST_API
+ }
+ static POLKA_URL = {
+  development: "wss://rpc.polkadot.io"
+ };
 }

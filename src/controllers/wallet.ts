@@ -3,7 +3,7 @@ import db from "../db";
 import { Wallet } from "../core/interfaces";
 import { Tokenizers } from "../core/utils";
 import { CustomError } from "../custom";
-import { BTC, ETH, DOGE, LTC } from "../core/handlers";
+import { BTC, ETH, DOGE, LTC, TRON } from "../core/handlers";
 
 const { DBWallet } = db;
 const errorCodes = {
@@ -64,6 +64,16 @@ export class WalletController {
    // Throw error if ltc response code is within 4XX or 5XX range
    if (ltcAddressCreationResponse.statusCode >= 400)
     throw new CustomError(ltcAddressCreationResponse.statusCode, errorCodes[ltcAddressCreationResponse.statusCode]);
+
+   // Generate POLKA address
+   // const polkaAddressCreation = await POLKA.createAddress(phrase, Tokenizers.hash(keyPair.publicKey + keyPair.privateKey));
+
+   // Generate TRON address
+   const tronAddressCreationResponse = await TRON.generateAddress();
+
+   // Throw error if any
+   // if (tronAddressCreationResponse.statusCode >= 400)
+   //  throw new CustomError(tronAddressCreationResponse.statusCode, errorCodes[tronAddressCreationResponse.statusCode]);
    
    // Get BTC address details
    const btcAddressDetailsResponse = await BTC.getAddressDetails(btcAddressCreationResponse.payload.address);
@@ -77,6 +87,12 @@ export class WalletController {
 
    // Get LTC address details
    const ltcAddressDetailsResponse = await LTC.getAddressDetails(ltcAddressCreationResponse.payload.address);
+
+   // Get POLKA address details
+   // const polkaAddressDetails = await POLKA.getAddressDetails(polkaAddressCreation.payload.address);
+
+   // Get TRON address details
+   const tronDetailsResponse = await TRON.getAddressDetails(tronAddressCreationResponse.payload.base58);
    
    // Instantiate wallet
    const wallet: Wallet = {
@@ -86,7 +102,8 @@ export class WalletController {
      parseFloat(btcAddressDetailsResponse.payload.balance) + 
      parseFloat(ethAddressDetailsResponse.payload.balance) + 
      parseFloat(dogeAddressDetailsResponse.payload.balance) +
-     parseFloat(ltcAddressDetailsResponse.payload.balance)
+     parseFloat(ltcAddressDetailsResponse.payload.balance) +
+     tronDetailsResponse.payload.balance
     ),
     hash: Tokenizers.hash(keyPair.publicKey + keyPair.privateKey),
     btc: {
@@ -107,6 +124,10 @@ export class WalletController {
      address: ltcAddressCreationResponse.payload.address,
      wif: ltcAddressCreationResponse.payload.wif,
      balance: parseFloat(ltcAddressDetailsResponse.payload.balance)
+    },
+    tron: {
+     address: tronAddressCreationResponse.payload.base58,
+     balance: tronDetailsResponse.payload.balance
     }
    };
 
@@ -189,17 +210,22 @@ export class WalletController {
    if (ltcDetailsResponse.statusCode >= 400)
     throw new CustomError(ltcDetailsResponse.statusCode, errorCodes[ltcDetailsResponse.statusCode]);
 
+   // Get TRON address details
+   const tronDetailsResponse = await TRON.getAddressDetails(wallet.tron.address);
+
    // Update wallet
    wallet.balance = (
     parseFloat(btcDetailsResponse.payload.balance) + 
     parseFloat(ethDetailsResponse.payload.balance) + 
     parseFloat(dogeDetailsResponse.payload.balance) +
-    parseFloat(ltcDetailsResponse.payload.balance)
+    parseFloat(ltcDetailsResponse.payload.balance) + 
+    tronDetailsResponse.payload.balance
    );
    wallet.btc.balance = parseFloat(btcDetailsResponse.payload.balance);
    wallet.eth.balance = parseFloat(ethDetailsResponse.payload.balance);
    wallet.doge.balance = parseFloat(dogeDetailsResponse.payload.balance);
    wallet.ltc.balance = parseFloat(ltcDetailsResponse.payload.balance);
+   wallet.tron.balance = tronDetailsResponse.payload.balance;
 
    // Update wallet in db
    const newWallet = await DBWallet.updateWallet(wallet.privateKey, wallet);
@@ -495,6 +521,39 @@ export class WalletController {
          // Update sender wallet's LTC balance
          senderWallet.ltc.balance = senderWallet.ltc.balance - balance;
 
+      } else if (type === "tron") {
+       balance = balance + req.body.amount;
+
+       if (senderWallet.balance < balance)
+        throw new CustomError(400, "Insufficient wallet balance.");
+
+       if (senderWallet.tron.balance < balance)
+        throw new CustomError(400, "Insufficient TRON balance");
+
+       // Find matching wallet
+       for (const w of allWallets)
+        if (!!w.tron && w.tron.address === req.body.to)
+         wallets = [...wallets, w];
+
+         // console.log(senderWallet);
+
+       // Send TRON
+       const tronSentResponse = await TRON.sendToken(senderWallet.tron.address, req.body.to, balance);
+       
+       for (const w of wallets)
+        if (w.tron.address === req.body.to) {
+         const wallet: Wallet = w;
+         wallet.balance = wallet.balance + balance;
+         wallet.tron.balance = wallet.tron.balance + balance;
+         encRecipientWallets.push(
+          Tokenizers.encryptWallet(
+           await DBWallet.updateWallet(wallet.privateKey, wallet)
+          )
+         );
+        }
+
+       // Update sender's wallet tron balance
+       senderWallet.tron.balance = senderWallet.tron.balance - balance;
       }
 
    // Update sender's wallet balance by deducting from it 

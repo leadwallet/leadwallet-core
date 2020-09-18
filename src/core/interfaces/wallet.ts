@@ -21,6 +21,14 @@ export interface Wallet {
   address: string;
   wif: string;
   balance: number;
+ };
+ polka?: {
+  address: string;
+  balance: number;
+ };
+ tron?: {
+  address: string;
+  balance: number;
  }
 }
 
