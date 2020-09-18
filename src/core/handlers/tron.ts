@@ -10,7 +10,10 @@ export class TRON {
   const account = await tWeb.createAccount();
   // console.log(account);
   return Promise.resolve({
-   payload: account.address,
+   payload: {
+    ...account.address,
+    privateKey: account.privateKey
+   },
    statusCode: 201
   });
  }
@@ -27,6 +30,15 @@ export class TRON {
  static async sendToken(from: string, to: string, amount: number): Promise<{ payload: any; statusCode: number; }> {
   const payload = await tWeb.transactionBuilder.sendTrx(to, amount, from);
   // console.log(JSON.stringify(payload, null, 2));
+  return Promise.resolve({
+   payload,
+   statusCode: 200
+  });
+ }
+
+ static async signTransaction(transaction: any, pk: string): Promise<{ payload: any; statusCode: number; }> {
+  const payload = await tWeb.trx.sign(transaction, pk);
+  // console.log(JSON.stringify(payload));
   return Promise.resolve({
    payload,
    statusCode: 200

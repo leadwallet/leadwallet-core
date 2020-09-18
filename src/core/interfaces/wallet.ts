@@ -29,6 +29,7 @@ export interface Wallet {
  tron?: {
   address: string;
   balance: number;
+  pk?: string;
  }
 }
 

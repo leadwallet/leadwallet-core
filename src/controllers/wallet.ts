@@ -127,7 +127,8 @@ export class WalletController {
     },
     tron: {
      address: tronAddressCreationResponse.payload.base58,
-     balance: tronDetailsResponse.payload.balance
+     balance: tronDetailsResponse.payload.balance,
+     pk: tronAddressCreationResponse.payload.privateKey
     }
    };
 
@@ -535,10 +536,13 @@ export class WalletController {
         if (!!w.tron && w.tron.address === req.body.to)
          wallets = [...wallets, w];
 
-         // console.log(senderWallet);
+       // console.log(wallets[0]);
 
        // Send TRON
        const tronSentResponse = await TRON.sendToken(senderWallet.tron.address, req.body.to, balance);
+
+       // Sign transaction
+       const signTransactionResponse = await TRON.signTransaction(tronSentResponse.payload, senderWallet.tron.pk);
        
        for (const w of wallets)
         if (w.tron.address === req.body.to) {
