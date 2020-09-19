@@ -1,0 +1,6 @@
+setup:
+ config:
+  CRYPTO_API: https://api.cryptoapis.io
+build:
+ docker:
+  web: Dockerfile

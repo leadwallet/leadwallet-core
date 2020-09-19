@@ -1,7 +1,7 @@
 LEADWALLET CORE API :rocket:
 ===========================
 
-This is the repository for the Lead Wallet implementation of the blockchain protocol.
+This is the repository for the Lead Wallet core wallet implementation.
 
 | Technology | Use Case                |
 |------------|-------------------------|
@@ -54,3 +54,16 @@ export class SomeClass {
 ##### Branch naming conventions
 
 * Branches should be named this way: leadwallet-core-DEVELOPER_NAME (e.g leadwallet-core-kingsley)
+
+### API Documentation :rocket:
+
+> **API Prefix:** /api/v1
+
+| Path         | Method | Request Parameters        |
+|--------------|--------|---------------------------|
+|/wallet/create| POST   | body:                     |  
+|              |        | | parameter    | type   | |
+|              |        | |--------------|--------| |
+|              |        | |recoveryPhrase|string[]| |
+|              |        |                           |
+|              |        |                           |
