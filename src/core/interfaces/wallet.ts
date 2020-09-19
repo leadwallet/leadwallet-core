@@ -30,6 +30,11 @@ export interface Wallet {
   address: string;
   balance: number;
   pk?: string;
+ },
+ dash?: {
+  address: string;
+  wif: string;
+  balance: number;
  }
 }
 

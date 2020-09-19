@@ -13,24 +13,24 @@ const options = {
 
 const COIN_NETWORK = {
  development: "testnet",
- production: "mainnet",
- test: "testnet"
+ test: "testnet",
+ production: "mainnet"
 };
 
-const ltcPath = "/v1/bc/ltc/" + COIN_NETWORK[process.env.NODE_ENV];
-const LTCROOT = Environment.CRYPTO_API + ltcPath;
+const dashPath = "/v1/bc/dash/" + COIN_NETWORK[process.env.NODE_ENV];
+const DASHROOT = Environment.CRYPTO_API + dashPath;
 
-export class LTC {
- static async createAddress(): Promise<{ payload: any; statusCode: number }> {
-  const response = await rp.post(LTCROOT + "/address", { ...options });
+export class DASH {
+ static async createAddress(): Promise<{ payload: any; statusCode: number; }> {
+  const response = await rp.post(DASHROOT + "/address", { ...options });
   return Promise.resolve({
    statusCode: response.statusCode,
    payload: response.body.payload
   });
  }
 
- static async getAddressDetails(address: string): Promise<{ payload: any; statusCode: number}> {
-  const response = await rp.get(LTCROOT + "/address/" + address, { ...options });
+ static async getAddressDetails(address: string): Promise<{ payload: any; statusCode: number; }> {
+  const response = await rp.get(DASHROOT + "/address/" + address, { ...options });
   return Promise.resolve({
    statusCode: response.statusCode,
    payload: response.body.payload
@@ -41,8 +41,8 @@ export class LTC {
   inputs: { address: string; value: number; }[],
   outputs: { address: string; value: number; }[],
   fee: { value: number; }
- ): Promise<{ payload: any; statusCode: number }> {
-  const response = await rp.post(LTCROOT + "/txs/create", {
+ ): Promise<{ payload: any; statusCode: number; }> {
+  const response = await rp.post(DASHROOT + "/txs/create", {
    ...options,
    body: { inputs, outputs, fee }
   });
@@ -53,7 +53,7 @@ export class LTC {
  }
 
  static async signTransaction(hex: string, wifs: Array<string>): Promise<{ payload: any; statusCode: number; }> {
-  const response = await rp.post(LTCROOT + "/txs/sign", {
+  const response = await rp.post(DASHROOT + "/txs/sign", {
    ...options,
    body: { hex, wifs }
   });
@@ -64,7 +64,7 @@ export class LTC {
  }
 
  static async broadcastTransaction(hex: string): Promise<{ payload: any; statusCode: number; }> {
-  const response = await rp.post(LTCROOT + "/txs/send", {
+  const response = await rp.post(DASHROOT + "/txs/send", {
    ...options,
    body: { hex }
   });

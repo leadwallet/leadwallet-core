@@ -3,7 +3,7 @@ import db from "../db";
 import { Wallet } from "../core/interfaces";
 import { Tokenizers } from "../core/utils";
 import { CustomError } from "../custom";
-import { BTC, ETH, DOGE, LTC, TRON } from "../core/handlers";
+import { BTC, ETH, DOGE, LTC, TRON, DASH } from "../core/handlers";
 
 const { DBWallet } = db;
 const errorCodes = {
@@ -68,6 +68,13 @@ export class WalletController {
    // Generate POLKA address
    // const polkaAddressCreation = await POLKA.createAddress(phrase, Tokenizers.hash(keyPair.publicKey + keyPair.privateKey));
 
+   // Generate XRP address
+   const dashAddressCreationResponse = await DASH.createAddress();
+
+   // Throw error if dash response code is within 4XX or 5XX range
+   if (dashAddressCreationResponse.statusCode >= 400)
+    throw new CustomError(dashAddressCreationResponse.statusCode, errorCodes[dashAddressCreationResponse.statusCode]);
+
    // Generate TRON address
    const tronAddressCreationResponse = await TRON.generateAddress();
 
@@ -79,20 +86,38 @@ export class WalletController {
    const btcAddressDetailsResponse = await BTC.getAddressDetails(btcAddressCreationResponse.payload.address);
    // console.log(btcAddressDetailsResponse.payload);
 
+   if (btcAddressDetailsResponse.statusCode >= 400)
+    throw new CustomError(btcAddressDetailsResponse.statusCode, errorCodes[btcAddressDetailsResponse.statusCode]);
+
    // Get ETH address details
    const ethAddressDetailsResponse = await ETH.getAddressDetails(ethAddressCreationResponse.payload.address);
+
+   if (ethAddressDetailsResponse.statusCode >= 400)
+    throw new CustomError(ethAddressDetailsResponse.statusCode, errorCodes[ethAddressDetailsResponse.statusCode]);
 
    // Get DOGE address details
    const dogeAddressDetailsResponse = await DOGE.getAddressDetails(dogeAddressCreationResponse.payload.address);
 
+   if (dogeAddressDetailsResponse.statusCode >= 400)
+    throw new CustomError(dogeAddressDetailsResponse.statusCode, errorCodes[dogeAddressDetailsResponse.statusCode]);
+
    // Get LTC address details
    const ltcAddressDetailsResponse = await LTC.getAddressDetails(ltcAddressCreationResponse.payload.address);
+
+   if (ltcAddressDetailsResponse.statusCode >= 400)
+    throw new CustomError(ltcAddressDetailsResponse.statusCode, errorCodes[ltcAddressDetailsResponse.statusCode]);
 
    // Get POLKA address details
    // const polkaAddressDetails = await POLKA.getAddressDetails(polkaAddressCreation.payload.address);
 
    // Get TRON address details
    const tronDetailsResponse = await TRON.getAddressDetails(tronAddressCreationResponse.payload.base58);
+
+   // Get DASH address details
+   const dashAddressDetailsResponse = await DASH.getAddressDetails(dashAddressCreationResponse.payload.address);
+
+   if (dashAddressDetailsResponse.statusCode >= 400)
+    throw new CustomError(dashAddressDetailsResponse.statusCode, errorCodes[dashAddressDetailsResponse.statusCode]);
    
    // Instantiate wallet
    const wallet: Wallet = {
@@ -103,7 +128,8 @@ export class WalletController {
      parseFloat(ethAddressDetailsResponse.payload.balance) + 
      parseFloat(dogeAddressDetailsResponse.payload.balance) +
      parseFloat(ltcAddressDetailsResponse.payload.balance) +
-     tronDetailsResponse.payload.balance
+     tronDetailsResponse.payload.balance +
+     parseFloat(dashAddressDetailsResponse.payload.balance)
     ),
     hash: Tokenizers.hash(keyPair.publicKey + keyPair.privateKey),
     btc: {
@@ -129,6 +155,11 @@ export class WalletController {
      address: tronAddressCreationResponse.payload.base58,
      balance: tronDetailsResponse.payload.balance,
      pk: tronAddressCreationResponse.payload.privateKey
+    },
+    dash: {
+     address: dashAddressCreationResponse.payload.address,
+     wif: dashAddressCreationResponse.payload.wif,
+     balance: parseFloat(dashAddressDetailsResponse.payload.balance)
     }
    };
 
@@ -214,19 +245,28 @@ export class WalletController {
    // Get TRON address details
    const tronDetailsResponse = await TRON.getAddressDetails(wallet.tron.address);
 
+   // Get DASH address details
+   const dashDetailsResponse = await DASH.getAddressDetails(wallet.dash.address);
+
+   // Throw error if any
+   if (dashDetailsResponse.statusCode >= 400)
+    throw new CustomError(dashDetailsResponse.statusCode, errorCodes[dashDetailsResponse.statusCode]);
+
    // Update wallet
    wallet.balance = (
     parseFloat(btcDetailsResponse.payload.balance) + 
     parseFloat(ethDetailsResponse.payload.balance) + 
     parseFloat(dogeDetailsResponse.payload.balance) +
     parseFloat(ltcDetailsResponse.payload.balance) + 
-    tronDetailsResponse.payload.balance
+    tronDetailsResponse.payload.balance +
+    parseFloat(dashDetailsResponse.payload.balance)
    );
    wallet.btc.balance = parseFloat(btcDetailsResponse.payload.balance);
    wallet.eth.balance = parseFloat(ethDetailsResponse.payload.balance);
    wallet.doge.balance = parseFloat(dogeDetailsResponse.payload.balance);
    wallet.ltc.balance = parseFloat(ltcDetailsResponse.payload.balance);
    wallet.tron.balance = tronDetailsResponse.payload.balance;
+   wallet.dash.balance = parseFloat(dashDetailsResponse.payload.balance);
 
    // Update wallet in db
    const newWallet = await DBWallet.updateWallet(wallet.privateKey, wallet);
@@ -309,7 +349,7 @@ export class WalletController {
     const btcSentResponse = await BTC.sendToken(
      req.body.inputs,
      req.body.outputs,
-     { address: senderWallet.btc.address, value: 0.00000001 },
+     { address: senderWallet.btc.address, value: req.body.fee },
      JSON.stringify({
       initialBalance: senderWallet.balance,
       newBalance: senderWallet.balance - balance
@@ -558,6 +598,65 @@ export class WalletController {
 
        // Update sender's wallet tron balance
        senderWallet.tron.balance = senderWallet.tron.balance - balance;
+      } else if (type === "dash") {
+       // Increment balance
+       for (const i of req.body.inputs)
+        balance = balance + i.value;
+
+       // Throw error if sender's balance is less than  specified balance
+       if (senderWallet.balance < balance)
+        throw new CustomError(400, "Wallet balance not sufficient.");
+
+       // Throw error if sender's dash balance is less than specified balance
+       if (senderWallet.dash.balance < balance)
+        throw new CustomError(400, "Insufficient DASH balance");
+
+       // Find matching wallet
+       for (const o of req.body.outputs)
+        for (const w of allWallets)
+         if (w.dash.address === o.address)
+          wallets = [...wallets, w];
+       
+       // Send LTC
+       const dashSentResponse = await DASH.sendToken(req.body.inputs, req.body.outputs, req.body.fee);
+
+       // Throw error if status code is within 4XX and 5XX
+       if (dashSentResponse.statusCode >= 400)
+        throw new CustomError(dashSentResponse.statusCode, errorCodes[dashSentResponse.statusCode]);
+
+       // Sign transaction
+       const transactionSignResponse = await DASH.signTransaction(
+        dashSentResponse.payload.hex,
+        [senderWallet.ltc.wif]
+       );
+
+       // Throw error for 4XX and 5XX status codes
+       if (transactionSignResponse.statusCode >= 400)
+        throw new CustomError(transactionSignResponse.statusCode, errorCodes[transactionSignResponse.statusCode]);
+
+       // Broadcast transaction to the Litecoin blockchain
+       const broadcastTransactionResponse = await DASH.broadcastTransaction(transactionSignResponse.payload.hex);
+
+       // Throw error if there is any
+       if (broadcastTransactionResponse.statusCode >= 400)
+        throw new CustomError(broadcastTransactionResponse.statusCode, errorCodes[broadcastTransactionResponse.statusCode]);
+
+       // Find matching wallets
+       for (const w of wallets)
+        for (const o of req.body.outputs)
+         if (o.address = w.ltc.address) {
+          const wallet: Wallet = w;
+          wallet.balance = wallet.balance + o.value;
+          wallet.dash.balance = wallet.dash.balance + o.value;
+          encRecipientWallets.push(
+           Tokenizers.encryptWallet(
+            await DBWallet.updateWallet(wallet.privateKey, wallet)
+           )
+          );
+         }
+
+         // Update sender wallet's LTC balance
+         senderWallet.dash.balance = senderWallet.dash.balance - balance;
       }
 
    // Update sender's wallet balance by deducting from it 
@@ -579,8 +678,8 @@ export class WalletController {
     response
    });
   } catch (error) {
-   res.status(500).json({
-    statusCode: 500,
+   res.status(error.code || 500).json({
+    statusCode: error.code || 500,
     response: error.message
    });
   }
