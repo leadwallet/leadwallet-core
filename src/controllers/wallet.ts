@@ -342,7 +342,7 @@ export class WalletController {
     // Check for matching btc address
     for (const o of req.body.outputs)
      for (const w of allWallets)
-      if (o.address === w.btc.address)
+      if (!!w.btc && o.address === w.btc.address)
        wallets = [...wallets, w];
     
     // Send BTC
@@ -406,15 +406,15 @@ export class WalletController {
 
        // Find matching wallet
        for (const w of allWallets)
-        if (w.eth.address === req.body.toAddress)
+        if (!!w.eth && w.eth.address === req.body.toAddress)
          wallets = [...wallets, w];
 
        // Send ETH
        const ethSentResponse = await ETH.sendToken({
-        fromAddress: req.wallet.eth.address,
+        fromAddress: senderWallet.eth.address,
         toAddress: req.body.toAddress,
-        gasPrice: 21000000000,
-        gasLimit: 21000,
+        gasPrice: req.body.gasPrice,
+        gasLimit: req.body.gasLimit,
         value: req.body.value,
         password: req.body.passphrase,
         nonce: 0
@@ -455,7 +455,7 @@ export class WalletController {
        // Find matching wallet
        for (const o of req.body.outputs)
         for (const w of allWallets)
-         if (w.doge.address === o.address)
+         if (!!w.doge && w.doge.address === o.address)
           wallets = [...wallets, w];
 
         // Send DOGE
@@ -518,7 +518,7 @@ export class WalletController {
        // Find matching wallet
        for (const o of req.body.outputs)
         for (const w of allWallets)
-         if (w.ltc.address === o.address)
+         if (!!w.ltc && w.ltc.address === o.address)
           wallets = [...wallets, w];
        
        // Send LTC
