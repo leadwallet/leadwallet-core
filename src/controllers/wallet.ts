@@ -411,10 +411,10 @@ export class WalletController {
 
        // Send ETH
        const ethSentResponse = await ETH.sendToken({
-        fromAddress: req.wallet.eth.address,
+        fromAddress: senderWallet.eth.address,
         toAddress: req.body.toAddress,
-        gasPrice: 21000000000,
-        gasLimit: 21000,
+        gasPrice: req.body.gasPrice,
+        gasLimit: req.body.gasLimit,
         value: req.body.value,
         password: req.body.passphrase,
         nonce: 0
