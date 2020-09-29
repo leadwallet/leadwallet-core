@@ -14,7 +14,8 @@ const options = {
 const COIN_NETWORK = {
  development: "testnet",
  test: "testnet",
- production: "mainnet"
+ production: "mainnet",
+ staging: "testnet"
 };
 
 const dashPath = "/v1/bc/dash/" + COIN_NETWORK[process.env.NODE_ENV];

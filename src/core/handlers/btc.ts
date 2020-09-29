@@ -14,7 +14,8 @@ const options = {
 const COIN_NETWORK = {
  development: "testnet",
  production: "mainnet",
- test: "testnet"
+ test: "testnet",
+ staging: "testnet"
 };
 
 const btcPath = "/v1/bc/btc/" + COIN_NETWORK[process.env.NODE_ENV];

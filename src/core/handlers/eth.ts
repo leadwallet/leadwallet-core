@@ -14,7 +14,8 @@ const options = {
 const COIN_NETWORK = {
  development: "ropsten",
  test: "rinkeby",
- production: "mainnet"
+ production: "mainnet",
+ staging: "ropsten"
 };
 
 const ethPath = "/v1/bc/eth/" + COIN_NETWORK[process.env.NODE_ENV];
