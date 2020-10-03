@@ -44,6 +44,7 @@ export class ETH {
   const response = await rp.post(ETHROOT + "/txs/new", {
    ...options, body
   });
+  console.log(response);
   return Promise.resolve({
    statusCode: response.statusCode,
    payload: response.body.payload
