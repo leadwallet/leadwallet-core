@@ -21,4 +21,10 @@ export class Environment {
  static POLKA_URL = {
   development: "wss://rpc.polkadot.io"
  };
+ static NEAR = {
+  development: process.env.NEAR_TEST_API,
+  production: process.env.NEAR_MAIN_API,
+  test: process.env.NEAR_TEST_API,
+  staging: process.env.NEAR_TEST_API
+ };
 }
