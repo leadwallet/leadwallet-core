@@ -696,20 +696,18 @@ export class WalletController {
 			const {ticker , address} = req.params
 			if (CRYPTO_API_COINS.includes(ticker)) {
     const response = await TransactionService.getTransactions(ticker,address);
+
+    if (response.statusCode >= 400)
+     throw new CustomError(response.statusCode, errorCodes[response.statusCode]);
+    
     res.status(200).json({
      statusCode: 200,
-     response
+     response: response.payload
     });
 			} else if (ticker === "tron") {
-				res.status(400).json({
-					statusCode: 400,
-					response: ticker + " not supported yet"
-				});
+				throw new CustomError(400, ticker + " not supported yet");
 			} else {
-				res.status(400).json({
-					statusCode: 400,
-					response: ticker + " not supported yet"
-				});
+				throw new CustomError(400, ticker + " not supported yet");
 			}
 		} catch (error) {
 			res.status(error.code || 500).json({
