@@ -1,24 +1,8 @@
 import rp from "request-promise";
 import { Environment } from "../../env";
+import { COIN_NETWORK, options } from "./commons";
 
-const options = {
- simple: false,
- json: true,
- resolveWithFullResponse: true,
- headers: {
-  "Content-Type": "application/json",
-  "X-API-Key": Environment.CRYPTO_API_KEY
- }
-};
-
-const COIN_NETWORK = {
- development: "testnet",
- production: "mainnet",
- test: "testnet",
- staging: "testnet"
-};
-
-const ltcPath = "/v1/bc/ltc/" + COIN_NETWORK[process.env.NODE_ENV];
+const ltcPath = "/v1/bc/ltc/" + COIN_NETWORK["ltc"][process.env.NODE_ENV];
 const LTCROOT = Environment.CRYPTO_API + ltcPath;
 
 export class LTC {

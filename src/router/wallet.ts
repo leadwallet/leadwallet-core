@@ -38,5 +38,8 @@ router.get(
  WalletMiddleware.getWalletFromRequest,
  WalletController.updateWallet
 );
-
+router.get(
+	"/transactions/:ticker/:address",
+	WalletController.getTransactions
+);
 export default router;
