@@ -1,23 +1,8 @@
 import rp from "request-promise";
 import { Environment } from "../../env";
+import { COIN_NETWORK, options } from "./commons";
 
-const options = {
- simple: false,
- json: true,
- resolveWithFullResponse: true,
- headers: {
-  "Content-Type": "application/json",
-  "X-API-Key": Environment.CRYPTO_API_KEY
- }
-};
-
-const COIN_NETWORK = {
- development: "testnet",
- test: "testnet",
- production: "mainnet"
-};
-
-const dashPath = "/v1/bc/dash/" + COIN_NETWORK[process.env.NODE_ENV];
+const dashPath = "/v1/bc/dash/" + COIN_NETWORK["dash"][process.env.NODE_ENV];
 const DASHROOT = Environment.CRYPTO_API + dashPath;
 
 export class DASH {

@@ -4,6 +4,9 @@ import { Wallet } from "../core/interfaces";
 import { Tokenizers } from "../core/utils";
 import { CustomError } from "../custom";
 import { BTC, ETH, DOGE, LTC, TRON, DASH } from "../core/handlers";
+import { TransactionService } from "../core/handlers/transaction_handler";
+import { CRYPTO_API_COINS } from "../core/handlers/commons";
+import { WalletAdaptor } from "../core/utils/wallet_adaptor";
 
 const { DBWallet } = db;
 const errorCodes = {
@@ -199,7 +202,7 @@ export class WalletController {
    // Send response
    res.status(200).json({
     statusCode: 200,
-    response: wallet
+    response: WalletAdaptor.convert(wallet)
    });
   } catch (error) {
    res.status(500).json({
@@ -273,7 +276,7 @@ export class WalletController {
 
    res.status(200).json({
     statusCode: 200,
-    response: newWallet
+    response: WalletAdaptor.convert(newWallet)
    });
   } catch (error) {
    res.status(error.code || 500).json({
@@ -293,7 +296,7 @@ export class WalletController {
    res.status(200).json({
     statusCode: 200,
     response: {
-     wallet,
+     WalletAdaptor.convert(wallet),
      token
     }
    });
@@ -684,4 +687,28 @@ export class WalletController {
    });
   }
  }
+
+	static async getTransactions(req: express.Request , res: express.Response): Promise<any> {
+		try {
+			const {ticker , address} = req.params
+			if (CRYPTO_API_COINS.includes(ticker)) {
+				const response = await TransactionService.getTransactions(ticker,address)
+			} else if (ticker === "tron") {
+				res.status(400).json({
+					statusCode: 400,
+					response: ticker + " not supported yet"
+				});
+			} else {
+				res.status(400).json({
+					statusCode: 400,
+					response: ticker + " not supported yet"
+				});
+			}
+		} catch (error) {
+			res.status(error.code || 500).json({
+    statusCode: error.code || 500,
+    response: error.message
+   });
+		}
+	}
 }
