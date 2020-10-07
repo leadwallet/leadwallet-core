@@ -13,26 +13,31 @@ export const COIN_NETWORK = {
     btc : {
         development: "testnet",
         production: "mainnet",
-        test: "testnet"
+        test: "testnet",
+        staging: "testnet"
     },
     ltc : {
         development: "testnet",
         production: "mainnet",
-        test: "testnet"
+        test: "testnet",
+        staging: "testnet"
     },
     dash : {
         development: "testnet",
         production: "mainnet",
-        test: "testnet"
+        test: "testnet",
+        staging: "testnet"
     },
     doge : {
         development: "testnet",
         production: "mainnet",
-        test: "testnet"
+        test: "testnet",
+        staging: "testnet"
     },
     eth : {
         development: "ropsten",
         production: "mainnet",
-        test: "ropsten"
+        test: "ropsten",
+        staging: "ropsten"
     }
 };

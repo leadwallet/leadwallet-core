@@ -174,7 +174,7 @@ export class WalletController {
 
    // API Response
    const response = {
-    wallet: newWallet,
+    wallet: WalletAdaptor.convert(newWallet),
     token: Tokenizers.generateToken({
      privateKey: newWallet.privateKey,
      publicKey: newWallet.publicKey
@@ -695,7 +695,11 @@ export class WalletController {
 		try {
 			const {ticker , address} = req.params
 			if (CRYPTO_API_COINS.includes(ticker)) {
-				const response = await TransactionService.getTransactions(ticker,address)
+    const response = await TransactionService.getTransactions(ticker,address);
+    res.status(200).json({
+     statusCode: 200,
+     response
+    });
 			} else if (ticker === "tron") {
 				res.status(400).json({
 					statusCode: 400,
