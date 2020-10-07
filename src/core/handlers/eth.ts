@@ -6,8 +6,9 @@ const ethPath = "/v1/bc/eth/" + COIN_NETWORK["eth"][process.env.NODE_ENV];
 const ETHROOT = Environment.CRYPTO_API + ethPath;
 
 export class ETH {
- static async createAddress(): Promise<{ statusCode: number; payload: any; }> {
-  const response = await rp.post(ETHROOT + "/address", { ...options });
+ static async createAddress(body: any): Promise<{ statusCode: number; payload: any; }> {
+  const response = await rp.post(ETHROOT + "/account", { ...options, body });
+  // console.log(JSON.stringify(response));
   return Promise.resolve({
    statusCode: response.statusCode,
    payload: response.body.payload
@@ -28,6 +29,7 @@ export class ETH {
   const response = await rp.post(ETHROOT + "/txs/new", {
    ...options, body
   });
+  // console.log(JSON.stringify(response));
   return Promise.resolve({
    statusCode: response.statusCode,
    payload: response.body.payload

@@ -48,7 +48,10 @@ export class WalletController {
     throw new CustomError(btcAddressCreationResponse.statusCode, errorCodes[btcAddressCreationResponse.statusCode]);
 
    // Generate ETH address
-   const ethAddressCreationResponse = await ETH.createAddress();
+   const ethAddressCreationResponse = await ETH.createAddress({
+    password: keyPair.privateKey,
+    user_id: keyPair.publicKey
+   });
 
    // Throw error if eth response code is within 4XX or 5XX range
    if (ethAddressCreationResponse.statusCode >= 400)
@@ -71,7 +74,7 @@ export class WalletController {
    // Generate POLKA address
    // const polkaAddressCreation = await POLKA.createAddress(phrase, Tokenizers.hash(keyPair.publicKey + keyPair.privateKey));
 
-   // Generate XRP address
+   // Generate DASH address
    const dashAddressCreationResponse = await DASH.createAddress();
 
    // Throw error if dash response code is within 4XX or 5XX range
@@ -419,7 +422,7 @@ export class WalletController {
         gasPrice: req.body.gasPrice,
         gasLimit: req.body.gasLimit,
         value: req.body.value,
-        password: req.body.passphrase,
+        password: senderWallet.privateKey,
         nonce: 0
        });
 

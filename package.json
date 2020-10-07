@@ -11,6 +11,7 @@
     "jsonwebtoken": "^8.5.1",
     "mongoose": "^5.9.28",
     "morgan": "^1.10.0",
+    "near-api-js": "^0.30.0",
     "request": "^2.88.2",
     "request-promise": "^4.2.6",
     "rimraf": "^3.0.2",
@@ -42,6 +43,7 @@
     "clean:build": "npm run clean-dir && npm run build",
     "dev": "npm run clean:build && cross-env NODE_ENV=development node build/index.js",
     "prod": "npm run clean:build && cross-env NODE_ENV=production node build/index.js",
+    "stage": "npm run clean:build && cross-env NODE_ENV=staging node build/index.js",
     "clean:build:test": "npm run clean:build && cross-env NODE_ENV=test npm run test"
   },
   "repository": {
