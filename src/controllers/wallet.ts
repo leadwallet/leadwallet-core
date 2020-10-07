@@ -299,7 +299,7 @@ export class WalletController {
    res.status(200).json({
     statusCode: 200,
     response: {
-     WalletAdaptor.convert(wallet),
+     wallet: WalletAdaptor.convert(wallet),
      token
     }
    });
