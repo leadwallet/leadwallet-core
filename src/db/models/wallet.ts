@@ -29,13 +29,13 @@ export class WalletModel {
   return Promise.resolve(decryptedWallet);
  }
 
- async getWallet(privateKey: string): Promise<Wallet> {
-  const encryptedWallets = await this.model.find();
-  let encryptedWallet = null;
-  encryptedWallets.forEach((encWallet: mongoose.Document & { encryptedPrivateKey: string, encryptedWallet: string }) => {
-   if (Tokenizers.decryptPrivateKey(encWallet.encryptedPrivateKey) === privateKey)
-    encryptedWallet = encWallet.encryptedWallet;
-  });
+ async getWallet(privateKey: string, publicKey: string): Promise<Wallet> {
+  const encPrivateKey: string = Tokenizers.encryptPrivateKey(privateKey, publicKey)
+  // Below find utilizes the indexing created on encryptedPrivateKey field
+  // and is way faster than linear search on whole collection
+  const encWallet: mongoose.Document & { encryptedPrivateKey: string; encryptedWallet: string } 
+   = await this.model.findOne({encryptedPrivateKey: encPrivateKey});
+  const encryptedWallet: string = encWallet.encryptedWallet;
   const decryptedWallet: Wallet = Tokenizers.decryptWallet(encryptedWallet, privateKey);
   return Promise.resolve(decryptedWallet);
  }

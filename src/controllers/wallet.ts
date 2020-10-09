@@ -194,13 +194,13 @@ export class WalletController {
   }
  }
 
- static async getWallet(req: express.Request & { privateKey: string; }, res: express.Response): Promise<any> {
+ static async getWallet(req: express.Request & { privateKey: string, publicKey: string;}, res: express.Response): Promise<any> {
   try {
    // Private key would be deserialized from a token and passed into the request object
    const privateKey: string = req.privateKey;
-
+			const publicKey: string = req.publicKey;
    // Get wallet using private key
-   const wallet = await DBWallet.getWallet(privateKey);
+   const wallet = await DBWallet.getWallet(privateKey,publicKey);
 
    // Send response
    res.status(200).json({
