@@ -34,7 +34,7 @@ export class WalletModel {
   // Below find utilizes the indexing created on encryptedPrivateKey field
   // and is way faster than linear search on whole collection
   const encWallet: mongoose.Document & { encryptedPrivateKey: string; encryptedWallet: string } 
-   = await this.model.findOne({encryptedPrivateKey: encPrivateKey});
+   = (await this.model.findOne({encryptedPrivateKey: encPrivateKey})) as mongoose.Document & { encryptedPrivateKey: string; encryptedWallet: string; };
   const encryptedWallet: string = encWallet.encryptedWallet;
   const decryptedWallet: Wallet = Tokenizers.decryptWallet(encryptedWallet, privateKey);
   return Promise.resolve(decryptedWallet);
