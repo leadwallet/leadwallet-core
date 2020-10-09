@@ -1,9 +1,9 @@
-import { TONClient } from "ton-client-node-js";
+// import { TONClient } from "ton-client-node-js";
 
-let client: any;
+// let client: any;
 
- await ( async () => {
- client = await TONClient.create({
-  servers: []
- });
-})();
+//  await ( async () => {
+//  client = await TONClient.create({
+//   servers: []
+//  });
+// })();
