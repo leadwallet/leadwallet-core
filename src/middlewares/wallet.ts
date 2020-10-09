@@ -52,13 +52,13 @@ export class WalletMiddleware {
  }
 
  static async getWalletFromRequest(
-  req: express.Request & { privateKey: string; wallet: Wallet },
+  req: express.Request & { privateKey: string; publicKey: string; wallet: Wallet },
   res: express.Response,
   next: express.NextFunction
  ) {
   try {
    // Get wallet from privateKey
-   const wallet = await DBWallet.getWallet(req.privateKey);
+   const wallet = await DBWallet.getWallet(req.privateKey,req.publicKey);
 
    // Check if wallet is null
    if (!wallet)
@@ -97,7 +97,7 @@ export class WalletMiddleware {
    const keyPair = await Tokenizers.generateKeyPairs(phrase);
 
    // Get wallet using private key
-   const wallet: Wallet = await DBWallet.getWallet(keyPair.privateKey);
+   const wallet: Wallet = await DBWallet.getWallet(keyPair.privateKey, keyPair.publicKey);
 
    // Respond with a 404 if wallet is not found
    if (!wallet)
