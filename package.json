@@ -20,6 +20,7 @@
     "rimraf": "^3.0.2",
     "ton-client-node-js": "^0.26.1",
     "tronweb": "^3.0.0",
+    "tslib": "^2.0.2",
     "typescript": "^3.9.7",
     "uuid": "^8.3.0"
   },
