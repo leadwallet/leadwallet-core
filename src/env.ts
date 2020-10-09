@@ -27,4 +27,10 @@ export class Environment {
   test: process.env.NEAR_TEST_API,
   staging: process.env.NEAR_TEST_API
  };
+ static HARMONY = {
+  development: process.env.HMY_TESTNET,
+  production: process.env.HMY_MAINNET,
+  test: process.env.HMY_TESTNET,
+  staging: process.env.HMY_TESTNET
+ };
 }
