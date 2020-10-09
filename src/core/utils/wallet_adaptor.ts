@@ -8,7 +8,7 @@ export class WalletAdaptor {
 			balance: wallet.balance,
 			hash: wallet.hash,
 			coins: [{name: "btc", ...wallet.btc},{name: "eth", ...wallet.eth},{name: "ltc", ...wallet.ltc},
-			{name: "dash", ...wallet.dash},{name: "doge", ...wallet.doge},{name: "tron", ...wallet.tron}]
+			{name: "dash", ...wallet.dash},{name: "doge", ...wallet.doge},{name: "tron", ...wallet.tron}, {name: "hmy", ...wallet.hmy}]
   };
 	}
 }

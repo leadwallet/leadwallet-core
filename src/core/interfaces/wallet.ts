@@ -35,6 +35,10 @@ export interface Wallet {
   address: string;
   wif: string;
   balance: number;
+ },
+ hmy?: {
+  address: string;
+  balance: number;
  }
 }
 

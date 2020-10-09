@@ -3,7 +3,7 @@ import db from "../db";
 import { Wallet } from "../core/interfaces";
 import { Tokenizers } from "../core/utils";
 import { CustomError } from "../custom";
-import { BTC, ETH, DOGE, LTC, TRON, DASH } from "../core/handlers";
+import { BTC, ETH, DOGE, LTC, TRON, DASH, HMY } from "../core/handlers";
 import { TransactionService } from "../core/handlers/transaction_handler";
 import { CRYPTO_API_COINS } from "../core/handlers/commons";
 import { WalletAdaptor } from "../core/utils/wallet_adaptor";
@@ -84,6 +84,9 @@ export class WalletController {
    // Generate TRON address
    const tronAddressCreationResponse = await TRON.generateAddress();
 
+   // Generate HMY address
+   const hmyAddressCreationResponse = await HMY.createAddress(keyPair.privateKey);
+
    // Throw error if any
    // if (tronAddressCreationResponse.statusCode >= 400)
    //  throw new CustomError(tronAddressCreationResponse.statusCode, errorCodes[tronAddressCreationResponse.statusCode]);
@@ -135,7 +138,8 @@ export class WalletController {
      parseFloat(dogeAddressDetailsResponse.payload.balance) +
      parseFloat(ltcAddressDetailsResponse.payload.balance) +
      tronDetailsResponse.payload.balance +
-     parseFloat(dashAddressDetailsResponse.payload.balance)
+     parseFloat(dashAddressDetailsResponse.payload.balance) +
+     hmyAddressCreationResponse.payload.balance
     ),
     hash: Tokenizers.hash(keyPair.publicKey + keyPair.privateKey),
     btc: {
@@ -166,6 +170,10 @@ export class WalletController {
      address: dashAddressCreationResponse.payload.address,
      wif: dashAddressCreationResponse.payload.wif,
      balance: parseFloat(dashAddressDetailsResponse.payload.balance)
+    },
+    hmy: {
+     address: hmyAddressCreationResponse.payload.address,
+     balance: hmyAddressCreationResponse.payload.balance
     }
    };
 
@@ -258,6 +266,9 @@ export class WalletController {
    if (dashDetailsResponse.statusCode >= 400)
     throw new CustomError(dashDetailsResponse.statusCode, errorCodes[dashDetailsResponse.statusCode]);
 
+   // Get HMY address details
+   const hmyDetailsResponse = await HMY.getAddressDetails(wallet.hmy.address);
+
    // Update wallet
    wallet.balance = (
     parseFloat(btcDetailsResponse.payload.balance) + 
@@ -265,7 +276,8 @@ export class WalletController {
     parseFloat(dogeDetailsResponse.payload.balance) +
     parseFloat(ltcDetailsResponse.payload.balance) + 
     tronDetailsResponse.payload.balance +
-    parseFloat(dashDetailsResponse.payload.balance)
+    parseFloat(dashDetailsResponse.payload.balance) +
+    hmyDetailsResponse.payload.balance
    );
    wallet.btc.balance = parseFloat(btcDetailsResponse.payload.balance);
    wallet.eth.balance = parseFloat(ethDetailsResponse.payload.balance);
@@ -273,6 +285,7 @@ export class WalletController {
    wallet.ltc.balance = parseFloat(ltcDetailsResponse.payload.balance);
    wallet.tron.balance = tronDetailsResponse.payload.balance;
    wallet.dash.balance = parseFloat(dashDetailsResponse.payload.balance);
+   wallet.hmy.balance = hmyDetailsResponse.payload.balance;
 
    // Update wallet in db
    const newWallet = await DBWallet.updateWallet(wallet.privateKey, wallet);
@@ -320,13 +333,13 @@ export class WalletController {
    const senderWallet = req.wallet;
 
    // Empty array of wallets. Would serve as updated recipients' wallets
-   let wallets: Array<Wallet> = [];
+   // let wallets: Array<Wallet> = [];
 
    // Empty array of encrypted recipients' wallets
-   const encRecipientWallets: Array<string> = [];
+   // const encRecipientWallets: Array<string> = [];
 
    // All wallets in the database. Recipient's wallet would be singled out and updated
-   const allWallets = await DBWallet.getAllWallets();
+   // const allWallets = await DBWallet.getAllWallets();
 
    // Total balance to be sent
    let balance: number = 0;
@@ -346,10 +359,10 @@ export class WalletController {
      throw new CustomError(400, "Insufficient BTC balance");
 
     // Check for matching btc address
-    for (const o of req.body.outputs)
-     for (const w of allWallets)
-      if (!!w.btc && o.address === w.btc.address)
-       wallets = [...wallets, w];
+    // for (const o of req.body.outputs)
+    //  for (const w of allWallets)
+    //   if (!!w.btc && o.address === w.btc.address)
+    //    wallets = [...wallets, w];
     
     // Send BTC
     const btcSentResponse = await BTC.sendToken(
@@ -384,18 +397,18 @@ export class WalletController {
     throw new CustomError(broadcastTransactionResponse.statusCode, errorCodes[broadcastTransactionResponse.statusCode]);
     
      // Loop through array of recipients' wallets
-     for (const w of wallets)
-      for (const o of req.body.outputs)
-       if (o.address === w.btc.address) {
-        const wallet: Wallet = w;
-        wallet.balance = wallet.balance + o.value;
-        wallet.btc.balance = wallet.btc.balance + o.value;
-        encRecipientWallets.push(
-         Tokenizers.encryptWallet(
-          await DBWallet.updateWallet(wallet.privateKey, wallet)
-         )
-        );
-       }
+     // for (const w of wallets)
+     //  for (const o of req.body.outputs)
+     //   if (o.address === w.btc.address) {
+     //    const wallet: Wallet = w;
+     //    wallet.balance = wallet.balance + o.value;
+     //    wallet.btc.balance = wallet.btc.balance + o.value;
+     //    encRecipientWallets.push(
+     //     Tokenizers.encryptWallet(
+     //      await DBWallet.updateWallet(wallet.privateKey, wallet)
+     //     )
+     //    );
+     //   }
        // Update sender's btc balance
        senderWallet.btc.balance = senderWallet.btc.balance - balance;
       } else if (type === "eth") {
@@ -411,9 +424,9 @@ export class WalletController {
         throw new CustomError(400, "Insufficient ETH balance.");
 
        // Find matching wallet
-       for (const w of allWallets)
-        if (!!w.eth && w.eth.address === req.body.toAddress)
-         wallets = [...wallets, w];
+       // for (const w of allWallets)
+       //  if (!!w.eth && w.eth.address === req.body.toAddress)
+       //   wallets = [...wallets, w];
 
        // Send ETH
        const ethSentResponse = await ETH.sendToken({
@@ -431,17 +444,17 @@ export class WalletController {
         throw new CustomError(ethSentResponse.statusCode, errorCodes[ethSentResponse.statusCode]);
        
        // Loop through array
-       for (const w of wallets)
-        if (w.eth.address === req.body.toAddress) {
-         const wallet: Wallet = w;
-         wallet.balance = wallet.balance + req.body.value;
-         wallet.eth.balance = wallet.eth.balance + req.body.value;
-         encRecipientWallets.push(
-          Tokenizers.encryptWallet(
-           await DBWallet.updateWallet(wallet.privateKey, wallet)
-          )
-         );
-        }
+       // for (const w of wallets)
+       //  if (w.eth.address === req.body.toAddress) {
+       //   const wallet: Wallet = w;
+       //   wallet.balance = wallet.balance + req.body.value;
+       //   wallet.eth.balance = wallet.eth.balance + req.body.value;
+       //   encRecipientWallets.push(
+       //    Tokenizers.encryptWallet(
+       //     await DBWallet.updateWallet(wallet.privateKey, wallet)
+       //    )
+       //   );
+       //  }
        
        // Update sender's wallet eth balance
        senderWallet.eth.balance = senderWallet.eth.balance - balance;
@@ -459,10 +472,10 @@ export class WalletController {
         throw new CustomError(400, "Insufficient DOGE balance.");
 
        // Find matching wallet
-       for (const o of req.body.outputs)
-        for (const w of allWallets)
-         if (!!w.doge && w.doge.address === o.address)
-          wallets = [...wallets, w];
+       // for (const o of req.body.outputs)
+       //  for (const w of allWallets)
+       //   if (!!w.doge && w.doge.address === o.address)
+       //    wallets = [...wallets, w];
 
         // Send DOGE
         const dogeSentResponse = await DOGE.sendToken(
@@ -493,18 +506,18 @@ export class WalletController {
         throw new CustomError(broadcastTransactionResponse.statusCode, errorCodes[broadcastTransactionResponse.statusCode]);
 
         // Loop through recipients' wallets
-        for (const w of wallets)
-         for (const o of req.body.outputs)
-          if (o.address === w.doge.address) {
-           const wallet: Wallet = w;
-           wallet.balance = wallet.balance + o.value;
-           wallet.doge.balance = wallet.doge.balance + o.value;
-           encRecipientWallets.push(
-            Tokenizers.encryptWallet(
-             await DBWallet.updateWallet(wallet.privateKey, wallet)
-            )
-           );
-          }
+        // for (const w of wallets)
+        //  for (const o of req.body.outputs)
+        //   if (o.address === w.doge.address) {
+        //    const wallet: Wallet = w;
+        //    wallet.balance = wallet.balance + o.value;
+        //    wallet.doge.balance = wallet.doge.balance + o.value;
+        //    encRecipientWallets.push(
+        //     Tokenizers.encryptWallet(
+        //      await DBWallet.updateWallet(wallet.privateKey, wallet)
+        //     )
+        //    );
+        //   }
         
         // Update sender's wallet doge balance
         senderWallet.doge.balance = senderWallet.doge.balance - balance;
@@ -522,10 +535,10 @@ export class WalletController {
         throw new CustomError(400, "Insufficient LTC balance");
 
        // Find matching wallet
-       for (const o of req.body.outputs)
-        for (const w of allWallets)
-         if (!!w.ltc && w.ltc.address === o.address)
-          wallets = [...wallets, w];
+       // for (const o of req.body.outputs)
+       //  for (const w of allWallets)
+       //   if (!!w.ltc && w.ltc.address === o.address)
+       //    wallets = [...wallets, w];
        
        // Send LTC
        const ltcSentResponse = await LTC.sendToken(req.body.inputs, req.body.outputs, req.body.fee);
@@ -552,18 +565,18 @@ export class WalletController {
         throw new CustomError(broadcastTransactionResponse.statusCode, errorCodes[broadcastTransactionResponse.statusCode]);
 
        // Find matching wallets
-       for (const w of wallets)
-        for (const o of req.body.outputs)
-         if (o.address = w.ltc.address) {
-          const wallet: Wallet = w;
-          wallet.balance = wallet.balance + o.value;
-          wallet.ltc.balance = wallet.ltc.balance + o.value;
-          encRecipientWallets.push(
-           Tokenizers.encryptWallet(
-            await DBWallet.updateWallet(wallet.privateKey, wallet)
-           )
-          );
-         }
+       // for (const w of wallets)
+       //  for (const o of req.body.outputs)
+       //   if (o.address = w.ltc.address) {
+       //    const wallet: Wallet = w;
+       //    wallet.balance = wallet.balance + o.value;
+       //    wallet.ltc.balance = wallet.ltc.balance + o.value;
+       //    encRecipientWallets.push(
+       //     Tokenizers.encryptWallet(
+       //      await DBWallet.updateWallet(wallet.privateKey, wallet)
+       //     )
+       //    );
+       //   }
 
          // Update sender wallet's LTC balance
          senderWallet.ltc.balance = senderWallet.ltc.balance - balance;
@@ -578,9 +591,9 @@ export class WalletController {
         throw new CustomError(400, "Insufficient TRON balance");
 
        // Find matching wallet
-       for (const w of allWallets)
-        if (!!w.tron && w.tron.address === req.body.to)
-         wallets = [...wallets, w];
+       // for (const w of allWallets)
+       //  if (!!w.tron && w.tron.address === req.body.to)
+       //   wallets = [...wallets, w];
 
        // console.log(wallets[0]);
 
@@ -590,17 +603,17 @@ export class WalletController {
        // Sign transaction
        const signTransactionResponse = await TRON.signTransaction(tronSentResponse.payload, senderWallet.tron.pk);
        
-       for (const w of wallets)
-        if (w.tron.address === req.body.to) {
-         const wallet: Wallet = w;
-         wallet.balance = wallet.balance + balance;
-         wallet.tron.balance = wallet.tron.balance + balance;
-         encRecipientWallets.push(
-          Tokenizers.encryptWallet(
-           await DBWallet.updateWallet(wallet.privateKey, wallet)
-          )
-         );
-        }
+       // for (const w of wallets)
+       //  if (w.tron.address === req.body.to) {
+       //   const wallet: Wallet = w;
+       //   wallet.balance = wallet.balance + balance;
+       //   wallet.tron.balance = wallet.tron.balance + balance;
+       //   encRecipientWallets.push(
+       //    Tokenizers.encryptWallet(
+       //     await DBWallet.updateWallet(wallet.privateKey, wallet)
+       //    )
+       //   );
+       //  }
 
        // Update sender's wallet tron balance
        senderWallet.tron.balance = senderWallet.tron.balance - balance;
@@ -618,10 +631,10 @@ export class WalletController {
         throw new CustomError(400, "Insufficient DASH balance");
 
        // Find matching wallet
-       for (const o of req.body.outputs)
-        for (const w of allWallets)
-         if (w.dash.address === o.address)
-          wallets = [...wallets, w];
+       // for (const o of req.body.outputs)
+       //  for (const w of allWallets)
+       //   if (w.dash.address === o.address)
+       //    wallets = [...wallets, w];
        
        // Send LTC
        const dashSentResponse = await DASH.sendToken(req.body.inputs, req.body.outputs, req.body.fee);
@@ -648,21 +661,36 @@ export class WalletController {
         throw new CustomError(broadcastTransactionResponse.statusCode, errorCodes[broadcastTransactionResponse.statusCode]);
 
        // Find matching wallets
-       for (const w of wallets)
-        for (const o of req.body.outputs)
-         if (o.address = w.ltc.address) {
-          const wallet: Wallet = w;
-          wallet.balance = wallet.balance + o.value;
-          wallet.dash.balance = wallet.dash.balance + o.value;
-          encRecipientWallets.push(
-           Tokenizers.encryptWallet(
-            await DBWallet.updateWallet(wallet.privateKey, wallet)
-           )
-          );
-         }
+       // for (const w of wallets)
+       //  for (const o of req.body.outputs)
+       //   if (o.address = w.ltc.address) {
+       //    const wallet: Wallet = w;
+       //    wallet.balance = wallet.balance + o.value;
+       //    wallet.dash.balance = wallet.dash.balance + o.value;
+       //    encRecipientWallets.push(
+       //     Tokenizers.encryptWallet(
+       //      await DBWallet.updateWallet(wallet.privateKey, wallet)
+       //     )
+       //    );
+       //   }
 
          // Update sender wallet's LTC balance
          senderWallet.dash.balance = senderWallet.dash.balance - balance;
+      } else if (type === "hmy") {
+       balance = req.body.value;
+
+       if (senderWallet.balance < balance)
+        throw new CustomError(400, "Insufficient wallet balance.");
+
+       if (senderWallet.hmy.balance < balance)
+        throw new CustomError(400, "Insufficient HMY balance");
+
+       const hmySentResponse = await HMY.sendToken(senderWallet.hmy.address, req.body.to, balance, req.body.gasLimit);
+
+       const hmySignTransactionResponse = await HMY.signTransaction(hmySentResponse.payload);
+
+       senderWallet.hmy.balance = senderWallet.hmy.balance - balance;
+
       }
 
    // Update sender's wallet balance by deducting from it 
@@ -674,7 +702,7 @@ export class WalletController {
    // API response
    const response = {
     sender: Tokenizers.encryptWallet(updatedSenderWallet),
-    recipients: encRecipientWallets,
+    // recipients: encRecipientWallets,
     message: "Transaction successful."
    };
 
@@ -704,10 +732,8 @@ export class WalletController {
      statusCode: 200,
      response: response.payload
     });
-			} else if (ticker === "tron") {
-				throw new CustomError(400, ticker + " not supported yet");
 			} else {
-				throw new CustomError(400, ticker + " not supported yet");
+				throw new CustomError(400, ticker + " not supported yet.");
 			}
 		} catch (error) {
 			res.status(error.code || 500).json({
