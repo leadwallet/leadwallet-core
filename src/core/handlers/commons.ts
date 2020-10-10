@@ -77,5 +77,16 @@ async function getCoinsImageUrls(coins :Array<String>): Promise<Map<String,any>>
 	return Promise.resolve(coinsImageUrls);
 }
 
-export const COINS_IMAGE_URLS = await getCoinsImageUrls(ALL_COINS)
+export const COINS_IMAGE_URLS = await getCoinsImageUrls(ALL_COINS);
 
+function createSymbolToIdMapping() {
+	let symbolIdMap = new Map();
+	let idSymbolMap = new Map();
+	for (const coin in ALL_COINS) {
+		symbolIdMap.set(coin,COINS_MAP.get(coin)['id']);
+		idSymbolMap.set(COINS_MAP.get(coin)['id'],coin);
+	}
+	return [symbolIdMap,idSymbolMap];
+}
+
+export const [SYMBOL_ID_MAPPING,ID_SYMBOL_MAPPING] = createSymbolToIdMapping();
