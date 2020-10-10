@@ -36,9 +36,8 @@ export interface Wallet {
   wif: string;
   balance: number;
  },
- hmy?: {
+ one?: {
   address: string;
   balance: number;
  }
 }
-
