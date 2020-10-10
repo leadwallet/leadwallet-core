@@ -72,7 +72,7 @@ async function getCoinsImageUrls(coins :Array<String>): Promise<Map<String,any>>
 			}	
 		});
 		const imageUrls = response.body.payload.images;
-		coinsImageUrls.set(coinId, imageUrls);
+		coinsImageUrls.set(coin, imageUrls);
 	}
 	return Promise.resolve(coinsImageUrls);
 }
