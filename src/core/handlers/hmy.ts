@@ -22,7 +22,7 @@ export class HMY {
   return Promise.resolve({
    statusCode: 200,
    payload: {
-    address: account.address,
+    address: account.bech32Address,
     balance: parseFloat(account.balance)
    }
   });
