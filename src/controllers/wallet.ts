@@ -182,7 +182,7 @@ export class WalletController {
 
    // API Response
    const response = {
-    wallet: WalletAdaptor.convert(newWallet),
+    wallet: await WalletAdaptor.convert(newWallet),
     token: Tokenizers.generateToken({
      privateKey: newWallet.privateKey,
      publicKey: newWallet.publicKey
@@ -213,7 +213,7 @@ export class WalletController {
    // Send response
    res.status(200).json({
     statusCode: 200,
-    response: WalletAdaptor.convert(wallet)
+    response: await WalletAdaptor.convert(wallet)
    });
   } catch (error) {
    res.status(500).json({
@@ -292,7 +292,7 @@ export class WalletController {
 
    res.status(200).json({
     statusCode: 200,
-    response: WalletAdaptor.convert(newWallet)
+    response: await WalletAdaptor.convert(newWallet)
    });
   } catch (error) {
    res.status(error.code || 500).json({
@@ -312,7 +312,7 @@ export class WalletController {
    res.status(200).json({
     statusCode: 200,
     response: {
-     wallet: WalletAdaptor.convert(wallet),
+     wallet: await WalletAdaptor.convert(wallet),
      token
     }
    });

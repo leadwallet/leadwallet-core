@@ -48,7 +48,7 @@ export const COIN_NETWORK = {
 };
 
 async function getCoins(): Promise<any> {
-	const response = rp.get(COINGECKO_COINS_ROOT + "/list",{
+	const response = await rp.get(COINGECKO_COINS_ROOT + "/list",{
 		headers: {
 			"Content-Type": "application/json"
 		}});
@@ -60,12 +60,12 @@ async function getCoins(): Promise<any> {
 		return Promise.resolve(coinsMap);
 }
 
-export const COINS_MAP = await getCoins();
+export const COINS_MAP = getCoins();
 
 async function getCoinsImageUrls(coins :Array<String>): Promise<Map<String,any>> {
 	let coinsImageUrls: Map<String,any> = new Map();
 	for (const coin of coins) {
-		const response = await rp.get(COINGECKO_COINS_ROOT + "/" + COINS_MAP.get(coin)['id'] 
+		const response = await rp.get(COINGECKO_COINS_ROOT + "/" + (await COINS_MAP).get(coin)['id'] 
 		+ "?localization=false&tickers=false&market_data=false&community_data=false&developer_data=false&sparkline=false",{
 			headers: {
 				"Content-Type": "application/json"
@@ -77,16 +77,16 @@ async function getCoinsImageUrls(coins :Array<String>): Promise<Map<String,any>>
 	return Promise.resolve(coinsImageUrls);
 }
 
-export const COINS_IMAGE_URLS = await getCoinsImageUrls(ALL_COINS);
+export const COINS_IMAGE_URLS = getCoinsImageUrls(ALL_COINS);
 
-function createSymbolToIdMapping() {
+async function createSymbolToIdMapping() {
 	let symbolIdMap = new Map();
 	let idSymbolMap = new Map();
 	for (const coin in ALL_COINS) {
-		symbolIdMap.set(coin,COINS_MAP.get(coin)['id']);
-		idSymbolMap.set(COINS_MAP.get(coin)['id'],coin);
+		symbolIdMap.set(coin, (await COINS_MAP).get(coin)['id']);
+		idSymbolMap.set((await COINS_MAP).get(coin)['id'],coin);
 	}
 	return [symbolIdMap,idSymbolMap];
 }
 
-export const [SYMBOL_ID_MAPPING,ID_SYMBOL_MAPPING] = createSymbolToIdMapping();
+export const m = createSymbolToIdMapping();
