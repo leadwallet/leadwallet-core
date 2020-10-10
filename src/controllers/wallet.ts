@@ -171,7 +171,7 @@ export class WalletController {
      wif: dashAddressCreationResponse.payload.wif,
      balance: parseFloat(dashAddressDetailsResponse.payload.balance)
     },
-    hmy: {
+    one: {
      address: hmyAddressCreationResponse.payload.address,
      balance: hmyAddressCreationResponse.payload.balance
     }
@@ -267,7 +267,7 @@ export class WalletController {
     throw new CustomError(dashDetailsResponse.statusCode, errorCodes[dashDetailsResponse.statusCode]);
 
    // Get HMY address details
-   const hmyDetailsResponse = await HMY.getAddressDetails(wallet.hmy.address);
+   const hmyDetailsResponse = await HMY.getAddressDetails(wallet.one.address);
 
    // Update wallet
    wallet.balance = (
@@ -285,7 +285,7 @@ export class WalletController {
    wallet.ltc.balance = parseFloat(ltcDetailsResponse.payload.balance);
    wallet.tron.balance = tronDetailsResponse.payload.balance;
    wallet.dash.balance = parseFloat(dashDetailsResponse.payload.balance);
-   wallet.hmy.balance = hmyDetailsResponse.payload.balance;
+   wallet.one.balance = hmyDetailsResponse.payload.balance;
 
    // Update wallet in db
    const newWallet = await DBWallet.updateWallet(wallet.privateKey, wallet);
@@ -676,20 +676,20 @@ export class WalletController {
 
          // Update sender wallet's LTC balance
          senderWallet.dash.balance = senderWallet.dash.balance - balance;
-      } else if (type === "hmy") {
+      } else if (type === "one") {
        balance = req.body.value;
 
        if (senderWallet.balance < balance)
         throw new CustomError(400, "Insufficient wallet balance.");
 
-       if (senderWallet.hmy.balance < balance)
+       if (senderWallet.one.balance < balance)
         throw new CustomError(400, "Insufficient HMY balance");
 
-       const hmySentResponse = await HMY.sendToken(senderWallet.hmy.address, req.body.to, balance, req.body.gasLimit);
+       const hmySentResponse = await HMY.sendToken(senderWallet.one.address, req.body.to, balance, req.body.gasLimit);
 
        const hmySignTransactionResponse = await HMY.signTransaction(hmySentResponse.payload);
 
-       senderWallet.hmy.balance = senderWallet.hmy.balance - balance;
+       senderWallet.one.balance = senderWallet.one.balance - balance;
 
       }
 
