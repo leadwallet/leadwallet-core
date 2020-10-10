@@ -195,6 +195,7 @@ export class WalletController {
     response
    });
   } catch (error) {
+   // console.log(error);
    res.status(error.code || 500).json({
     statusCode: error.code || 500,
     response: error.message

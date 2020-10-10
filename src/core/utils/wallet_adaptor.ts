@@ -4,8 +4,9 @@ import { COINS_IMAGE_URLS, ALL_COINS } from "../handlers/commons";
 export class WalletAdaptor {
  static async convert(wallet: Wallet) : Promise<any> {
 		const coinList: Array<any> = [];
-		for (const coin in ALL_COINS) {
-			coinList.push({name: coin, ...wallet[coin], image: (await COINS_IMAGE_URLS).get(coin)})
+		for (const coin of ALL_COINS) {
+   const c = coin === "trx" ? "tron" : coin;
+			coinList.push({name: c, ...wallet[c], image: (await COINS_IMAGE_URLS).get(coin)})
 		}
   return {
 			privateKey: wallet.privateKey,
