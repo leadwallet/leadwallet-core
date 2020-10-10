@@ -35,6 +35,9 @@ export interface Wallet {
   address: string;
   wif: string;
   balance: number;
+ },
+ one?: {
+  address: string;
+  balance: number;
  }
 }
-
