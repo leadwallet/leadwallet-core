@@ -5,3 +5,4 @@ export * from "./ltc";
 // export * from "./polka";
 export * from "./tron";
 export * from "./dash";
+export * from "./hmy";
