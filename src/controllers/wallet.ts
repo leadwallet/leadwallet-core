@@ -3,7 +3,7 @@ import db from "../db";
 import { Wallet } from "../core/interfaces";
 import { Tokenizers } from "../core/utils";
 import { CustomError } from "../custom";
-import { BTC, ETH, DOGE, LTC, TRON, DASH, HMY } from "../core/handlers";
+import { BTC, ETH, DOGE, LTC, TRON, DASH } from "../core/handlers";
 import { TransactionService } from "../core/handlers/transaction_handler";
 import { CRYPTO_API_COINS } from "../core/handlers/commons";
 import { WalletAdaptor } from "../core/utils/wallet_adaptor";
@@ -85,7 +85,7 @@ export class WalletController {
    const tronAddressCreationResponse = await TRON.generateAddress();
 
    // Generate HMY address
-   const hmyAddressCreationResponse = await HMY.createAddress(keyPair.privateKey);
+   // const hmyAddressCreationResponse = await HMY.createAddress(keyPair.privateKey);
 
    // Throw error if any
    // if (tronAddressCreationResponse.statusCode >= 400)
@@ -138,8 +138,8 @@ export class WalletController {
      parseFloat(dogeAddressDetailsResponse.payload.balance) +
      parseFloat(ltcAddressDetailsResponse.payload.balance) +
      tronDetailsResponse.payload.balance +
-     parseFloat(dashAddressDetailsResponse.payload.balance) +
-     hmyAddressCreationResponse.payload.balance
+     parseFloat(dashAddressDetailsResponse.payload.balance)
+     // hmyAddressCreationResponse.payload.balance
     ),
     hash: Tokenizers.hash(keyPair.publicKey + keyPair.privateKey),
     btc: {
@@ -170,11 +170,11 @@ export class WalletController {
      address: dashAddressCreationResponse.payload.address,
      wif: dashAddressCreationResponse.payload.wif,
      balance: parseFloat(dashAddressDetailsResponse.payload.balance)
-    },
-    one: {
-     address: hmyAddressCreationResponse.payload.address,
-     balance: hmyAddressCreationResponse.payload.balance
     }
+    // one: {
+    //  address: hmyAddressCreationResponse.payload.address,
+    //  balance: hmyAddressCreationResponse.payload.balance
+    // }
    };
 
    // Save wallet to db and get as object
@@ -268,7 +268,7 @@ export class WalletController {
     throw new CustomError(dashDetailsResponse.statusCode, errorCodes[dashDetailsResponse.statusCode]);
 
    // Get HMY address details
-   const hmyDetailsResponse = await HMY.getAddressDetails(wallet.one.address);
+   // const hmyDetailsResponse = await HMY.getAddressDetails(wallet.one.address);
 
    // Update wallet
    wallet.balance = (
@@ -277,8 +277,8 @@ export class WalletController {
     parseFloat(dogeDetailsResponse.payload.balance) +
     parseFloat(ltcDetailsResponse.payload.balance) + 
     tronDetailsResponse.payload.balance +
-    parseFloat(dashDetailsResponse.payload.balance) +
-    hmyDetailsResponse.payload.balance
+    parseFloat(dashDetailsResponse.payload.balance)
+    // hmyDetailsResponse.payload.balance
    );
    wallet.btc.balance = parseFloat(btcDetailsResponse.payload.balance);
    wallet.eth.balance = parseFloat(ethDetailsResponse.payload.balance);
@@ -286,7 +286,7 @@ export class WalletController {
    wallet.ltc.balance = parseFloat(ltcDetailsResponse.payload.balance);
    wallet.tron.balance = tronDetailsResponse.payload.balance;
    wallet.dash.balance = parseFloat(dashDetailsResponse.payload.balance);
-   wallet.one.balance = hmyDetailsResponse.payload.balance;
+   // wallet.one.balance = hmyDetailsResponse.payload.balance;
 
    // Update wallet in db
    const newWallet = await DBWallet.updateWallet(wallet.privateKey, wallet);
@@ -677,21 +677,6 @@ export class WalletController {
 
          // Update sender wallet's LTC balance
          senderWallet.dash.balance = senderWallet.dash.balance - balance;
-      } else if (type === "one") {
-       balance = req.body.value;
-
-       if (senderWallet.balance < balance)
-        throw new CustomError(400, "Insufficient wallet balance.");
-
-       if (senderWallet.one.balance < balance)
-        throw new CustomError(400, "Insufficient HMY balance");
-
-       const hmySentResponse = await HMY.sendToken(senderWallet.one.address, req.body.to, balance, req.body.gasLimit);
-
-       const hmySignTransactionResponse = await HMY.signTransaction(hmySentResponse.payload);
-
-       senderWallet.one.balance = senderWallet.one.balance - balance;
-
       }
 
    // Update sender's wallet balance by deducting from it 

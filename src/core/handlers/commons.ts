@@ -12,7 +12,7 @@ export const options = {
     }
 };
 // ALL_COINS is the list of supported coins as of now
-export const ALL_COINS: Array<string> = ["btc","ltc","eth","dash","doge","trx","one"]
+export const ALL_COINS: Array<string> = ["btc","ltc","eth","dash","doge","trx"]
 export const CRYPTO_API_COINS: Array<string> = ["btc","ltc","eth","dash","doge"]
 export const COIN_NETWORK = {
     btc : {
