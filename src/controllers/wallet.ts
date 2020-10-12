@@ -5,8 +5,9 @@ import { Tokenizers } from "../core/utils";
 import { CustomError } from "../custom";
 import { BTC, ETH, DOGE, LTC, TRON, DASH } from "../core/handlers";
 import { TransactionService } from "../core/handlers/transaction_handler";
-import { CRYPTO_API_COINS } from "../core/handlers/commons";
+import { CRYPTO_API_COINS, SYMBOL_ID_MAPPING } from "../core/handlers/commons";
 import { WalletAdaptor } from "../core/utils/wallet_adaptor";
+import { CurrencyConverter } from "../core/utils/currency_converter";
 
 const { DBWallet } = db;
 const errorCodes = {
@@ -161,7 +162,7 @@ export class WalletController {
      wif: ltcAddressCreationResponse.payload.wif,
      balance: parseFloat(ltcAddressDetailsResponse.payload.balance)
     },
-    tron: {
+    trx: {
      address: tronAddressCreationResponse.payload.base58,
      balance: tronDetailsResponse.payload.balance,
      pk: tronAddressCreationResponse.payload.privateKey
@@ -258,7 +259,7 @@ export class WalletController {
     throw new CustomError(ltcDetailsResponse.statusCode, errorCodes[ltcDetailsResponse.statusCode]);
 
    // Get TRON address details
-   const tronDetailsResponse = await TRON.getAddressDetails(wallet.tron.address);
+   const tronDetailsResponse = await TRON.getAddressDetails(wallet.trx.address);
 
    // Get DASH address details
    const dashDetailsResponse = await DASH.getAddressDetails(wallet.dash.address);
@@ -284,7 +285,7 @@ export class WalletController {
    wallet.eth.balance = parseFloat(ethDetailsResponse.payload.balance);
    wallet.doge.balance = parseFloat(dogeDetailsResponse.payload.balance);
    wallet.ltc.balance = parseFloat(ltcDetailsResponse.payload.balance);
-   wallet.tron.balance = tronDetailsResponse.payload.balance;
+   wallet.trx.balance = tronDetailsResponse.payload.balance;
    wallet.dash.balance = parseFloat(dashDetailsResponse.payload.balance);
    // wallet.one.balance = hmyDetailsResponse.payload.balance;
 
@@ -582,13 +583,13 @@ export class WalletController {
          // Update sender wallet's LTC balance
          senderWallet.ltc.balance = senderWallet.ltc.balance - balance;
 
-      } else if (type === "tron") {
+      } else if (type === "trx") {
        balance = balance + req.body.amount;
 
        if (senderWallet.balance < balance)
         throw new CustomError(400, "Insufficient wallet balance.");
 
-       if (senderWallet.tron.balance < balance)
+       if (senderWallet.trx.balance < balance)
         throw new CustomError(400, "Insufficient TRON balance");
 
        // Find matching wallet
@@ -599,10 +600,10 @@ export class WalletController {
        // console.log(wallets[0]);
 
        // Send TRON
-       const tronSentResponse = await TRON.sendToken(senderWallet.tron.address, req.body.to, balance);
+       const tronSentResponse = await TRON.sendToken(senderWallet.trx.address, req.body.to, balance);
 
        // Sign transaction
-       const signTransactionResponse = await TRON.signTransaction(tronSentResponse.payload, senderWallet.tron.pk);
+       const signTransactionResponse = await TRON.signTransaction(tronSentResponse.payload, senderWallet.trx.pk);
        
        // for (const w of wallets)
        //  if (w.tron.address === req.body.to) {
@@ -617,7 +618,7 @@ export class WalletController {
        //  }
 
        // Update sender's wallet tron balance
-       senderWallet.tron.balance = senderWallet.tron.balance - balance;
+       senderWallet.trx.balance = senderWallet.trx.balance - balance;
       } else if (type === "dash") {
        // Increment balance
        for (const i of req.body.inputs)
@@ -726,6 +727,42 @@ export class WalletController {
     statusCode: error.code || 500,
     response: error.message
    });
+		}
+	}
+	static async refreshPrices(req: express.Request, res: express.Response): Promise<any> {
+		try {
+			const currencyConverter = await CurrencyConverter.getInstance();
+			const priceMap = currencyConverter.getAllPricesUSD();
+			let respObj = {};
+			priceMap.forEach((value,key) => {
+				respObj[key] = value;
+			})
+			res.status(200).json({
+				statusCode: 200,
+				prices: respObj
+			});
+		} catch (error) {
+			res.status(error.code || 500).json({
+			statusCode: error.code || 500,
+			response: error.message
+			});
+		}
+	}
+
+	static async refreshPrice(req: express.Request, res: express.Response): Promise<any> {
+		try {
+			let currencyConverter = await CurrencyConverter.getInstance();
+			const {ticker} = req.params;
+			console.log(ticker)
+			res.status(200).json({
+				statusCode: 200,
+				price: currencyConverter.getPriceInUSD(ticker)
+			});
+		} catch (error) {
+			res.status(error.code || 500).json({
+				statusCode: error.code || 500,
+				response: error.message
+			});
 		}
 	}
 }

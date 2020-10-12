@@ -26,7 +26,7 @@ export interface Wallet {
   address: string;
   balance: number;
  };
- tron?: {
+ trx?: {
   address: string;
   balance: number;
   pk?: string;

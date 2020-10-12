@@ -40,33 +40,17 @@ export class WalletModel {
   return Promise.resolve(decryptedWallet);
  }
 
- async getAllWallets(): Promise<Array<Wallet>> {
-  const allWallets = await this.model.find();
-  const allDecryptedWallets: Array<Wallet> = [];
-  for (const doc of (<mongoose.Document[] & { encryptedWallet: string; encryptedPrivateKey: string }[]> allWallets))
-   allDecryptedWallets.push(
-    Tokenizers.decryptWallet(
-     doc.encryptedWallet,
-     Tokenizers.decryptPrivateKey(doc.encryptedPrivateKey)
-    )
-   );
-  return Promise.resolve(allDecryptedWallets);
- }
-
  async updateWallet(privateKey: string, newWallet: Wallet): Promise<Wallet> {
   const allWallets = await this.model.find();
   let w: Wallet = null;
-  for (const wallet of (allWallets as Array<mongoose.Document> & Array<{ encryptedPrivateKey: string; }>))
-   if (Tokenizers.decryptPrivateKey(wallet.encryptedPrivateKey) === privateKey) {
-    const updatedWallet = await this.model.findOneAndUpdate({
-     encryptedPrivateKey: wallet.encryptedPrivateKey
-    }, {
-     encryptedWallet: Tokenizers.encryptWallet(newWallet)
-    }, {
-     new: true
-    }) as mongoose.Document & { encryptedWallet: string; encryptedPrivateKey: string; };
-    w = Tokenizers.decryptWallet(updatedWallet.encryptedWallet, privateKey);
-   }
+		const updatedWallet = (await this.model.findOneAndUpdate({
+   encryptedPrivateKey: Tokenizers.encryptPrivateKey(privateKey,newWallet.publicKey)
+  }, {
+   encryptedWallet: Tokenizers.encryptWallet(newWallet)
+  }, {
+   new: true
+  })) as mongoose.Document & { encryptedWallet: string; encryptedPrivateKey: string; };
+  w = Tokenizers.decryptWallet(updatedWallet.encryptedWallet, privateKey);
   return Promise.resolve(w);
  }
 }
