@@ -4,12 +4,12 @@
   "description": "",
   "main": "index.js",
   "dependencies": {
-    "@harmony-js/core": "^0.1.55",
     "cross-env": "^7.0.2",
     "crypto-js": "^4.0.0",
     "dotenv": "^8.2.0",
     "express": "^4.17.1",
     "jsonwebtoken": "^8.5.1",
+    "lerna": "^3.22.1",
     "mongoose": "^5.9.28",
     "morgan": "^1.10.0",
     "near-api-js": "^0.30.0",
@@ -19,6 +19,7 @@
     "sync-request": "^6.1.0",
     "ton-client-node-js": "^0.26.1",
     "tronweb": "^3.0.0",
+    "tslib": "^2.0.2",
     "typescript": "^3.9.7",
     "uuid": "^8.3.0"
   },
