@@ -1,6 +1,5 @@
 import { Environment } from "../../env";
-import rp from "request-promise";
-
+import syncReq from "sync-request";
 const COINGECKO_COINS_ROOT = "https://api.coingecko.com/api/v3/coins";
 export const options = {
     simple: false,
@@ -12,8 +11,8 @@ export const options = {
     }
 };
 // ALL_COINS is the list of supported coins as of now
-export const ALL_COINS: Array<String> = ["btc","ltc","eth","dash","doge","tron","one"]
-export const CRYPTO_API_COINS: Array<String> = ["btc","ltc","eth","dash","doge"]
+export const ALL_COINS: Array<string> = ["btc","ltc","eth","dash","doge","trx","one"]
+export const CRYPTO_API_COINS: Array<string> = ["btc","ltc","eth","dash","doge"]
 export const COIN_NETWORK = {
     btc : {
         development: "testnet",
@@ -47,44 +46,50 @@ export const COIN_NETWORK = {
     }
 };
 
-async function getCoins(): Promise<any> {
-	const response = rp.get(COINGECKO_COINS_ROOT + "/list",{
+function getCoins(): Map<string,any> {
+	const response = syncReq('GET',COINGECKO_COINS_ROOT + "/list",{
 		headers: {
 			"Content-Type": "application/json"
-		}});
-		let coinsMap = new Map();
-		const coinsList = response.body.payload;
-		for (const coin of coinsList) {
-			coinsMap.set(coin['symbol'],coin);
 		}
-		return Promise.resolve(coinsMap);
+	}).getBody("utf-8");
+	let coinsMap = new Map<string,any>();
+	const coinsList = JSON.parse(response) as Array<any>;
+	for (const coin of coinsList) {
+		if(coin["symbol"]==="one" && coin["name"]!=="Harmony") {
+			// putting a hack for harmony coins
+			// Its symbol clashes with other coins not currently in use
+			continue;
+		}
+		coinsMap.set(coin["symbol"],coin);
+	}
+	return coinsMap;
 }
 
-export const COINS_MAP = await getCoins();
+export const COINS_MAP: Map<string,any> = getCoins();
 
-async function getCoinsImageUrls(coins :Array<String>): Promise<Map<String,any>> {
-	let coinsImageUrls: Map<String,any> = new Map();
+function getCoinsImageUrls(coins :Array<string>): Map<string,any> {
+	let coinsImageUrls: Map<string,any> = new Map();
 	for (const coin of coins) {
-		const response = await rp.get(COINGECKO_COINS_ROOT + "/" + COINS_MAP.get(coin)['id'] 
+		const response = syncReq('GET',COINGECKO_COINS_ROOT + "/" + COINS_MAP.get(coin)["id"] 
 		+ "?localization=false&tickers=false&market_data=false&community_data=false&developer_data=false&sparkline=false",{
 			headers: {
 				"Content-Type": "application/json"
 			}	
-		});
-		const imageUrls = response.body.payload.images;
+		}).getBody("utf-8");
+		const imageUrls = JSON.parse(response)["image"];
 		coinsImageUrls.set(coin, imageUrls);
 	}
-	return Promise.resolve(coinsImageUrls);
+	return coinsImageUrls;
 }
 
-export const COINS_IMAGE_URLS = await getCoinsImageUrls(ALL_COINS);
+export const COINS_IMAGE_URLS: Map<string,any> = getCoinsImageUrls(ALL_COINS);
 
 function createSymbolToIdMapping() {
-	let symbolIdMap = new Map();
-	let idSymbolMap = new Map();
-	for (const coin in ALL_COINS) {
-		symbolIdMap.set(coin,COINS_MAP.get(coin)['id']);
-		idSymbolMap.set(COINS_MAP.get(coin)['id'],coin);
+	let symbolIdMap = new Map<string,string>();
+	let idSymbolMap = new Map<string,string>();
+	for (const coin of ALL_COINS) {
+		symbolIdMap.set(coin,COINS_MAP.get(coin)["id"]);
+		idSymbolMap.set(COINS_MAP.get(coin)["id"],coin);
 	}
 	return [symbolIdMap,idSymbolMap];
 }

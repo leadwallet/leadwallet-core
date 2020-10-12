@@ -16,6 +16,7 @@
     "request": "^2.88.2",
     "request-promise": "^4.2.6",
     "rimraf": "^3.0.2",
+    "sync-request": "^6.1.0",
     "ton-client-node-js": "^0.26.1",
     "tronweb": "^3.0.0",
     "typescript": "^3.9.7",

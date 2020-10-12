@@ -5,8 +5,9 @@ import { Tokenizers } from "../core/utils";
 import { CustomError } from "../custom";
 import { BTC, ETH, DOGE, LTC, TRON, DASH, HMY } from "../core/handlers";
 import { TransactionService } from "../core/handlers/transaction_handler";
-import { CRYPTO_API_COINS } from "../core/handlers/commons";
+import { CRYPTO_API_COINS, SYMBOL_ID_MAPPING } from "../core/handlers/commons";
 import { WalletAdaptor } from "../core/utils/wallet_adaptor";
+import { CurrencyConverter } from "../core/utils/currency_converter";
 
 const { DBWallet } = db;
 const errorCodes = {
@@ -735,6 +736,42 @@ export class WalletController {
 			} else {
 				throw new CustomError(400, ticker + " not supported yet.");
 			}
+		} catch (error) {
+			res.status(error.code || 500).json({
+    statusCode: error.code || 500,
+    response: error.message
+   });
+		}
+	}
+	static async refreshPrices(req: express.Request, res: express.Response): Promise<any> {
+		try {
+			const currencyConverter = await CurrencyConverter.getInstance();
+			const priceMap = currencyConverter.getAllPricesUSD();
+			let respObj = {};
+			priceMap.forEach((value,key) => {
+				respObj[key] = value;
+			})
+			res.status(200).json({
+				statusCode: 200,
+				prices: respObj
+			});
+		} catch (error) {
+			res.status(error.code || 500).json({
+    statusCode: error.code || 500,
+    response: error.message
+   });
+		}
+	}
+
+	static async refreshPrice(req: express.Request, res: express.Response): Promise<any> {
+		try {
+			let currencyConverter = await CurrencyConverter.getInstance();
+			const {ticker} = req.params;
+			console.log(ticker)
+			res.status(200).json({
+				statusCode: 200,
+				price: currencyConverter.getPriceInUSD(ticker)
+			});
 		} catch (error) {
 			res.status(error.code || 500).json({
     statusCode: error.code || 500,
