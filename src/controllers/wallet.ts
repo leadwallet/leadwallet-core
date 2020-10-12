@@ -162,7 +162,7 @@ export class WalletController {
      wif: ltcAddressCreationResponse.payload.wif,
      balance: parseFloat(ltcAddressDetailsResponse.payload.balance)
     },
-    tron: {
+    trx: {
      address: tronAddressCreationResponse.payload.base58,
      balance: tronDetailsResponse.payload.balance,
      pk: tronAddressCreationResponse.payload.privateKey
@@ -259,7 +259,7 @@ export class WalletController {
     throw new CustomError(ltcDetailsResponse.statusCode, errorCodes[ltcDetailsResponse.statusCode]);
 
    // Get TRON address details
-   const tronDetailsResponse = await TRON.getAddressDetails(wallet.tron.address);
+   const tronDetailsResponse = await TRON.getAddressDetails(wallet.trx.address);
 
    // Get DASH address details
    const dashDetailsResponse = await DASH.getAddressDetails(wallet.dash.address);
@@ -285,7 +285,7 @@ export class WalletController {
    wallet.eth.balance = parseFloat(ethDetailsResponse.payload.balance);
    wallet.doge.balance = parseFloat(dogeDetailsResponse.payload.balance);
    wallet.ltc.balance = parseFloat(ltcDetailsResponse.payload.balance);
-   wallet.tron.balance = tronDetailsResponse.payload.balance;
+   wallet.trx.balance = tronDetailsResponse.payload.balance;
    wallet.dash.balance = parseFloat(dashDetailsResponse.payload.balance);
    // wallet.one.balance = hmyDetailsResponse.payload.balance;
 
@@ -583,13 +583,13 @@ export class WalletController {
          // Update sender wallet's LTC balance
          senderWallet.ltc.balance = senderWallet.ltc.balance - balance;
 
-      } else if (type === "tron") {
+      } else if (type === "trx") {
        balance = balance + req.body.amount;
 
        if (senderWallet.balance < balance)
         throw new CustomError(400, "Insufficient wallet balance.");
 
-       if (senderWallet.tron.balance < balance)
+       if (senderWallet.trx.balance < balance)
         throw new CustomError(400, "Insufficient TRON balance");
 
        // Find matching wallet
@@ -600,10 +600,10 @@ export class WalletController {
        // console.log(wallets[0]);
 
        // Send TRON
-       const tronSentResponse = await TRON.sendToken(senderWallet.tron.address, req.body.to, balance);
+       const tronSentResponse = await TRON.sendToken(senderWallet.trx.address, req.body.to, balance);
 
        // Sign transaction
-       const signTransactionResponse = await TRON.signTransaction(tronSentResponse.payload, senderWallet.tron.pk);
+       const signTransactionResponse = await TRON.signTransaction(tronSentResponse.payload, senderWallet.trx.pk);
        
        // for (const w of wallets)
        //  if (w.tron.address === req.body.to) {
@@ -618,7 +618,7 @@ export class WalletController {
        //  }
 
        // Update sender's wallet tron balance
-       senderWallet.tron.balance = senderWallet.tron.balance - balance;
+       senderWallet.trx.balance = senderWallet.trx.balance - balance;
       } else if (type === "dash") {
        // Increment balance
        for (const i of req.body.inputs)

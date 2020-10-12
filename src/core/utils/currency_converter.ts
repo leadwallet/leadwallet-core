@@ -1,5 +1,5 @@
 import rp from "request-promise";
-import { SYMBOL_ID_MAPPING, ID_SYMBOL_MAPPING, COINS_MAP, ALL_COINS } from "../handlers/commons";
+import { SYMBOL_ID_MAPPING, ID_SYMBOL_MAPPING, COINS_MAP, CURRENT_COINS } from "../handlers/commons";
 
 const coinsList: string = Array.from(ID_SYMBOL_MAPPING.keys()).join(",");
 const COINGECKO_SIMPLE_PRICE_ROOT = "https://api.coingecko.com/api/v3/simple/price";
@@ -32,7 +32,7 @@ export class CurrencyConverter {
 			}
 		});
 		const priceData = JSON.parse(response);
-		for (const symbol of ALL_COINS) {
+		for (const symbol of CURRENT_COINS) {
 			CurrencyConverter.instance.currencyMap.set(symbol,priceData[SYMBOL_ID_MAPPING.get(symbol)]["usd"]);
 		}
 	}

@@ -10,8 +10,19 @@ export const options = {
         "X-API-Key": Environment.CRYPTO_API_KEY
     }
 };
-// ALL_COINS is the list of supported coins as of now
-export const ALL_COINS: Array<string> = ["btc","ltc","eth","dash","doge","trx"]
+
+// ALL_COINS is the list of top coins to be supported
+export const ALL_COINS = ["abbc", "ada", "algo", "ant", "ar", "atom", "avax", "bal",
+	"band", "bat", "bcd", "bch", "bnb", "bsv", "btc", "btg", "btt", "busd", "cel", 
+	"celo", "ckb", "comp", "cro", "cvt", "dai", "dash", "dcr", "dgb", "doge", "dot", 
+	"dx", "egld", "enj", "eos", "etc", "eth", "ewt", "ftt", "hbar", "hedg", "ht", "husd", 
+	"hyn", "icx", "knc", "ksm", "lend", "leo", "link", "lrc", "lsk", "ltc", "luna", 
+	"mana", "miota", "mkr", "nano", "neo", "nxm", "ocean", "okb", "omg", "ont", "oxt", 
+	"pax", "pma", "qnt", "qtum", "ren", "rep", "rev", "rvn", "sc", "snx", "sol", "storj", 
+	"stx", "sushi", "sxp", "theta", "tmtg", "trx", "tusd", "uma", "uni", "usdc", "usdt", 
+	"vet", "waves", "wbtc", "xem", "xlm", "xmr", "xrp", "xtz", "yfi", "zb", "zec", "zil", "zrx"]
+// CURRENT_COINS is the list of supported coins as of now
+export const CURRENT_COINS: Array<string> = ["btc","ltc","eth","dash","doge","trx"]
 export const CRYPTO_API_COINS: Array<string> = ["btc","ltc","eth","dash","doge"]
 export const COIN_NETWORK = {
     btc : {
@@ -77,16 +88,16 @@ function getCoinsImageUrls(coins :Array<string>): Map<string,any> {
 	return coinsImageUrls;
 }
 
-export const COINS_IMAGE_URLS: Map<string,any> = getCoinsImageUrls(ALL_COINS);
+export const COINS_IMAGE_URLS: Map<string,any> = getCoinsImageUrls(CURRENT_COINS);
 
 function createSymbolToIdMapping() {
 	let symbolIdMap = new Map<string,string>();
 	let idSymbolMap = new Map<string,string>();
-	for (const coin of ALL_COINS) {
+	for (const coin of CURRENT_COINS) {
 		symbolIdMap.set(coin,COINS_MAP.get(coin)["id"]);
 		idSymbolMap.set(COINS_MAP.get(coin)["id"],coin);
 	}
 	return [symbolIdMap,idSymbolMap];
 }
 
-export const m = createSymbolToIdMapping();
+export const [SYMBOL_ID_MAPPING, ID_SYMBOL_MAPPING] = createSymbolToIdMapping();

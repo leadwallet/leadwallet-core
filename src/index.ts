@@ -11,7 +11,8 @@ app = config(app);
 app.listen(port, async () => {
  console.log(`Server listening on port ${port} in ${process.env.NODE_ENV}`);
  const mongo = await mongoose.connect(Environment.MONGO_URI[process.env.NODE_ENV], {
-  useNewUrlParser: true
+  useNewUrlParser: true,
+  useFindAndModify: false
  });
  if (mongo)
   console.log("Connected to mongodb");
