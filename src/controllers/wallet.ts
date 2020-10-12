@@ -757,9 +757,9 @@ export class WalletController {
 			});
 		} catch (error) {
 			res.status(error.code || 500).json({
-    statusCode: error.code || 500,
-    response: error.message
-   });
+			statusCode: error.code || 500,
+			response: error.message
+			});
 		}
 	}
 
@@ -774,9 +774,9 @@ export class WalletController {
 			});
 		} catch (error) {
 			res.status(error.code || 500).json({
-    statusCode: error.code || 500,
-    response: error.message
-   });
+				statusCode: error.code || 500,
+				response: error.message
+			});
 		}
 	}
 }
