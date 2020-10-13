@@ -739,12 +739,12 @@ export class WalletController {
 			})
 			res.status(200).json({
 				statusCode: 200,
-				prices: respObj
+				response: respObj
 			});
 		} catch (error) {
 			res.status(error.code || 500).json({
-			statusCode: error.code || 500,
-			response: error.message
+			 statusCode: error.code || 500,
+			 response: error.message
 			});
 		}
 	}
@@ -756,7 +756,7 @@ export class WalletController {
 			console.log(ticker)
 			res.status(200).json({
 				statusCode: 200,
-				price: currencyConverter.getPriceInUSD(ticker)
+				response: currencyConverter.getPriceInUSD(ticker)
 			});
 		} catch (error) {
 			res.status(error.code || 500).json({
