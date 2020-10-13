@@ -45,9 +45,9 @@ router.get(
 router.get(
     "/price/:ticker",
     WalletController.refreshPrice
-)
+);
 router.get(
     "/prices",
     WalletController.refreshPrices
-)
+);
 export default router;
