@@ -714,10 +714,34 @@ export class WalletController {
 
     if (response.statusCode >= 400)
      throw new CustomError(response.statusCode, errorCodes[response.statusCode]);
+
+    let apiResponse = [];
+
+    if (ticker !== "eth") {
+     apiResponse = response.payload.map((item: any) => ({
+      hash: item.txid,
+      amount: item.amount,
+      fee: item.fee,
+      status: item.confirmations > 0 ? "Confirmed" : "Pending",
+      from: Object.keys(item.sent).map((key) => key).join(", "),
+      to: Object.keys(item.received).map((key) => key).join(", "),
+      date: item.datetime
+     }));
+    } else {
+     apiResponse = response.payload.map((item: any) => ({
+      hash: item.hash,
+      amount: item.amount,
+      fee: item.fee,
+      status: item.confirmations > 0 ? "Confirmed" : "Pending",
+      from: item.sent,
+      to: item.received,
+      date: item.datetime
+     }));
+    }
     
     res.status(200).json({
      statusCode: 200,
-     response: response.payload
+     response: apiResponse
     });
 			} else {
 				throw new CustomError(400, ticker + " not supported yet.");
