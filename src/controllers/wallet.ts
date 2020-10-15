@@ -789,4 +789,24 @@ export class WalletController {
 			});
 		}
 	}
+
+	static async getEstimatedTransactionFee(req: express.Request, res: express.Response) : Promise<any> {
+		try {
+			const {ticker} = req.params;
+			if(CRYPTO_API_COINS.includes(ticker)) {
+				if(ticker !== "eth") {
+
+				} else {
+
+				}
+			} else {
+
+			}
+		} catch (error) {
+			res.status(error.code || 500).json({
+				statusCode: error.code || 500,
+				response: error.message
+			});
+		}
+	}
 }

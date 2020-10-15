@@ -50,4 +50,8 @@ router.get(
     "/prices",
     WalletController.refreshPrices
 );
+// router.get(
+//     "/transaction/fee/:ticker",
+//     WalletController.getEstimatedTransactionFee
+// );
 export default router;
