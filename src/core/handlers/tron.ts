@@ -7,41 +7,69 @@ const tWeb = new Tronweb({
 
 export class TRON {
  static async generateAddress(): Promise<{ payload: any; statusCode: number; }> {
-  const account = await tWeb.createAccount();
+  try {
+   const account = await tWeb.createAccount();
   // console.log(account);
-  return Promise.resolve({
-   payload: {
-    ...account.address,
-    privateKey: account.privateKey
-   },
-   statusCode: 201
-  });
+   return Promise.resolve({
+    payload: {
+     ...account.address,
+     privateKey: account.privateKey
+    },
+    statusCode: 201
+   });
+  } catch (error) {
+   return Promise.resolve({
+    payload: error.message,
+    statusCode: 500
+   });
+  }
  }
 
  static async getAddressDetails(address: string): Promise<{ payload: any; statusCode: number; }> {
-  const balance = await tWeb.trx.getBalance(address);
+  try {
+   const balance = await tWeb.trx.getBalance(address);
   // console.log(balance);
-  return Promise.resolve({
-   payload: { balance },
-   statusCode: 200
-  });
+   return Promise.resolve({
+    payload: { balance },
+    statusCode: 200
+   });
+  } catch (error) {
+   return Promise.resolve({
+    payload: error.message,
+    statusCode: 500
+   });
+  }
  }
 
  static async sendToken(from: string, to: string, amount: number): Promise<{ payload: any; statusCode: number; }> {
-  const payload = await tWeb.transactionBuilder.sendTrx(to, amount, from);
-  // console.log(JSON.stringify(payload, null, 2));
-  return Promise.resolve({
-   payload,
-   statusCode: 200
-  });
+  try {
+   const payload = await tWeb.transactionBuilder.sendTrx(to, amount, from);
+   // console.log(JSON.stringify(payload, null, 2));
+   return Promise.resolve({
+    payload,
+    statusCode: 200
+   });
+  } catch (error) {
+   return Promise.resolve({
+    payload: error.message,
+    statusCode: 500
+   });
+  }
  }
 
  static async signTransaction(transaction: any, pk: string): Promise<{ payload: any; statusCode: number; }> {
-  const payload = await tWeb.trx.sign(transaction, pk);
-  // console.log(JSON.stringify(payload));
-  return Promise.resolve({
-   payload,
-   statusCode: 200
-  });
+  try {
+   const payload = await tWeb.trx.sign(transaction, pk);
+   // console.log(JSON.stringify(payload));
+   return Promise.resolve({
+    payload,
+    statusCode: 200
+   });
+  } catch (error) {
+   return Promise.resolve({
+    payload: error.message,
+    statusCode: 500
+   });
+  }
  }
 }
