@@ -1,11 +1,11 @@
 import { Wallet } from "../interfaces";
-import { COINS_IMAGE_URLS, CURRENT_COINS } from "../handlers/commons";
+import { COINS_IMAGE_URLS, CURRENT_COINS, COINS_MAP } from "../handlers/commons";
 
 export class WalletAdaptor {
  static async convert(wallet: Wallet) : Promise<any> {
 		const coinList: Array<any> = [];
 		for (const coin of CURRENT_COINS) {
-			coinList.push({name: coin, ...wallet[coin], image: COINS_IMAGE_URLS.get(coin)})
+			coinList.push({name: coin, coinFullName: COINS_MAP.get(coin)["name"], ...wallet[coin], image: COINS_IMAGE_URLS.get(coin)})
 		}
   return {
 			privateKey: wallet.privateKey,
