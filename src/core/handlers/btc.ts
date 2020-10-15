@@ -8,6 +8,7 @@ const BTCROOT = Environment.CRYPTO_API + btcPath;
 export class BTC {
  static async createAddress(): Promise<{ payload: any; statusCode: number }> {
   const response = await rp.post(BTCROOT + "/address", { ...options });
+  console.log(response.body);
   return Promise.resolve({
    statusCode: response.statusCode,
    payload: response.body.payload || response.body.meta.error.message
