@@ -11,7 +11,7 @@ export class ETH {
   // console.log(JSON.stringify(response));
   return Promise.resolve({
    statusCode: response.statusCode,
-   payload: response.body.payload
+   payload: response.body.payload || response.body.meta.error.message
   });
  }
 
@@ -19,7 +19,7 @@ export class ETH {
   const response = await rp.get(ETHROOT + "/address/" + address, { ...options });
   return Promise.resolve({
    statusCode: response.statusCode,
-   payload: response.body.payload
+   payload: response.body.payload || response.body.meta.error.message
   });
  }
 
@@ -32,9 +32,9 @@ export class ETH {
   // console.log(JSON.stringify(response));
   return Promise.resolve({
    statusCode: response.statusCode,
-   payload: response.body.payload
+   payload: response.body.payload || response.body.meta.error.message
   });
  }
 
- static async broadcastTransaction() {}
+ // static async broadcastTransaction() {}
 }

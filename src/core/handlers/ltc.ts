@@ -10,7 +10,7 @@ export class LTC {
   const response = await rp.post(LTCROOT + "/address", { ...options });
   return Promise.resolve({
    statusCode: response.statusCode,
-   payload: response.body.payload
+   payload: response.body.payload || response.body.meta.error.message
   });
  }
 
@@ -18,7 +18,7 @@ export class LTC {
   const response = await rp.get(LTCROOT + "/address/" + address, { ...options });
   return Promise.resolve({
    statusCode: response.statusCode,
-   payload: response.body.payload
+   payload: response.body.payload || response.body.meta.error.message
   });
  }
 
@@ -33,7 +33,7 @@ export class LTC {
   });
   return Promise.resolve({
    statusCode: response.statusCode,
-   payload: response.body.payload
+   payload: response.body.payload || response.body.meta.error.message
   });
  }
 
@@ -44,7 +44,7 @@ export class LTC {
   });
   return Promise.resolve({
    statusCode: response.statusCode,
-   payload: response.body.payload
+   payload: response.body.payload || response.body.meta.error.message
   });
  }
 
