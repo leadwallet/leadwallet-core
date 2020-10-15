@@ -10,7 +10,7 @@ export class BTC {
   const response = await rp.post(BTCROOT + "/address", { ...options });
   return Promise.resolve({
    statusCode: response.statusCode,
-   payload: response.body.payload
+   payload: response.body.payload || response.body.meta.error.message
   });
  }
 
@@ -18,7 +18,7 @@ export class BTC {
   const response = await rp.get(BTCROOT + "/address/" + address, { ...options });
   return Promise.resolve({
    statusCode: response.statusCode,
-   payload: response.body.payload
+   payload: response.body.payload || response.body.meta.error.message
   });
  }
 
@@ -34,9 +34,10 @@ export class BTC {
     inputs, outputs, fee, data
    }
   });
+  // console.log(response.body);
   return Promise.resolve({
    statusCode: response.statusCode,
-   payload: response.body.payload
+   payload: response.body.payload || response.body.meta.error.message
   });
  }
 
@@ -50,7 +51,7 @@ export class BTC {
   });
   return Promise.resolve({
    statusCode: response.statusCode,
-   payload: response.body.payload
+   payload: response.body.payload || response.body.meta.error.message
   });
  }
 
@@ -61,7 +62,7 @@ export class BTC {
   });
   return Promise.resolve({
    statusCode: response.statusCode,
-   payload: response.body.payload
+   payload: response.body.payload || response.body.meta.error.message
   });
  }
 }

@@ -10,7 +10,7 @@ export class DOGE {
   const response = await rp.post(DOGEROOT + "/address", { ...options });
   return Promise.resolve({
    statusCode: response.statusCode,
-   payload: response.body.payload
+   payload: response.body.payload || response.body.meta.error.message
   });
  }
 
@@ -18,7 +18,7 @@ export class DOGE {
   const response = await rp.get(DOGEROOT + "/address/" + address, { ...options });
   return Promise.resolve({
    statusCode: response.statusCode,
-   payload: response.body.payload
+   payload: response.body.payload || response.body.meta.error.message
   });
  }
 
@@ -35,7 +35,7 @@ export class DOGE {
   });
   return Promise.resolve({
    statusCode: response.statusCode,
-   payload: response.body.payload
+   payload: response.body.payload || response.body.meta.error.message
   });
  }
 
@@ -49,7 +49,7 @@ export class DOGE {
   });
   return Promise.resolve({
    statusCode: response.statusCode,
-   payload: response.body.payload
+   payload: response.body.payload || response.body.meta.error.message
   });
  }
 
@@ -60,7 +60,7 @@ export class DOGE {
   });
   return Promise.resolve({
    statusCode: response.statusCode,
-   payload: response.body.payload
+   payload: response.body.payload || response.body.meta.error.message
   });
  }
 }

@@ -10,7 +10,7 @@ export class DASH {
   const response = await rp.post(DASHROOT + "/address", { ...options });
   return Promise.resolve({
    statusCode: response.statusCode,
-   payload: response.body.payload
+   payload: response.body.payload || response.body.meta.error.message
   });
  }
 
@@ -18,7 +18,7 @@ export class DASH {
   const response = await rp.get(DASHROOT + "/address/" + address, { ...options });
   return Promise.resolve({
    statusCode: response.statusCode,
-   payload: response.body.payload
+   payload: response.body.payload || response.body.meta.error.message
   });
  }
 
@@ -33,7 +33,7 @@ export class DASH {
   });
   return Promise.resolve({
    statusCode: response.statusCode,
-   payload: response.body.payload
+   payload: response.body.payload || response.body.meta.error.message
   });
  }
 
@@ -44,7 +44,7 @@ export class DASH {
   });
   return Promise.resolve({
    statusCode: response.statusCode,
-   payload: response.body.payload
+   payload: response.body.payload || response.body.meta.error.message
   });
  }
 
@@ -55,7 +55,7 @@ export class DASH {
   });
   return Promise.resolve({
    statusCode: response.statusCode,
-   payload: response.body.payload
+   payload: response.body.payload || response.body.meta.error.message
   });
  }
 }

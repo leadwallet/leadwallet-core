@@ -46,7 +46,7 @@ export class WalletController {
    // Throw error if btc response code is within 4XX or 5XX range
 
    if (btcAddressCreationResponse.statusCode >= 400)
-    throw new CustomError(btcAddressCreationResponse.statusCode, errorCodes[btcAddressCreationResponse.statusCode]);
+    throw new CustomError(btcAddressCreationResponse.statusCode, btcAddressCreationResponse.payload || errorCodes[btcAddressCreationResponse.statusCode]);
 
    // Generate ETH address
    const ethAddressCreationResponse = await ETH.createAddress({
@@ -56,21 +56,21 @@ export class WalletController {
 
    // Throw error if eth response code is within 4XX or 5XX range
    if (ethAddressCreationResponse.statusCode >= 400)
-    throw new CustomError(ethAddressCreationResponse.statusCode, errorCodes[ethAddressCreationResponse.statusCode]);
+    throw new CustomError(ethAddressCreationResponse.statusCode, ethAddressCreationResponse.payload || errorCodes[ethAddressCreationResponse.statusCode]);
 
    // Generate DOGE address
    const dogeAddressCreationResponse = await DOGE.createAddress(); 
 
    // Throw error if doge response code is within 4XX or 5XX range
    if (dogeAddressCreationResponse.statusCode >= 400)
-    throw new CustomError(dogeAddressCreationResponse.statusCode, errorCodes[dogeAddressCreationResponse.statusCode]);
+    throw new CustomError(dogeAddressCreationResponse.statusCode, dogeAddressCreationResponse.payload || errorCodes[dogeAddressCreationResponse.statusCode]);
 
    // Generate LTC address
    const ltcAddressCreationResponse = await LTC.createAddress();
 
    // Throw error if ltc response code is within 4XX or 5XX range
    if (ltcAddressCreationResponse.statusCode >= 400)
-    throw new CustomError(ltcAddressCreationResponse.statusCode, errorCodes[ltcAddressCreationResponse.statusCode]);
+    throw new CustomError(ltcAddressCreationResponse.statusCode, ltcAddressCreationResponse.payload || errorCodes[ltcAddressCreationResponse.statusCode]);
 
    // Generate POLKA address
    // const polkaAddressCreation = await POLKA.createAddress(phrase, Tokenizers.hash(keyPair.publicKey + keyPair.privateKey));
@@ -80,10 +80,14 @@ export class WalletController {
 
    // Throw error if dash response code is within 4XX or 5XX range
    if (dashAddressCreationResponse.statusCode >= 400)
-    throw new CustomError(dashAddressCreationResponse.statusCode, errorCodes[dashAddressCreationResponse.statusCode]);
+    throw new CustomError(dashAddressCreationResponse.statusCode, dashAddressCreationResponse.payload || errorCodes[dashAddressCreationResponse.statusCode]);
 
    // Generate TRON address
    const tronAddressCreationResponse = await TRON.generateAddress();
+
+   // Throw error if any
+   if (tronAddressCreationResponse.statusCode >= 400)
+    throw new CustomError(tronAddressCreationResponse.statusCode, tronAddressCreationResponse.payload || errorCodes[tronAddressCreationResponse.statusCode]);
 
    // Generate HMY address
    // const hmyAddressCreationResponse = await HMY.createAddress(keyPair.privateKey);
@@ -97,25 +101,25 @@ export class WalletController {
    // console.log(btcAddressDetailsResponse.payload);
 
    if (btcAddressDetailsResponse.statusCode >= 400)
-    throw new CustomError(btcAddressDetailsResponse.statusCode, errorCodes[btcAddressDetailsResponse.statusCode]);
+    throw new CustomError(btcAddressDetailsResponse.statusCode, btcAddressDetailsResponse.payload || errorCodes[btcAddressDetailsResponse.statusCode]);
 
    // Get ETH address details
    const ethAddressDetailsResponse = await ETH.getAddressDetails(ethAddressCreationResponse.payload.address);
 
    if (ethAddressDetailsResponse.statusCode >= 400)
-    throw new CustomError(ethAddressDetailsResponse.statusCode, errorCodes[ethAddressDetailsResponse.statusCode]);
+    throw new CustomError(ethAddressDetailsResponse.statusCode, ethAddressDetailsResponse.payload || errorCodes[ethAddressDetailsResponse.statusCode]);
 
    // Get DOGE address details
    const dogeAddressDetailsResponse = await DOGE.getAddressDetails(dogeAddressCreationResponse.payload.address);
 
    if (dogeAddressDetailsResponse.statusCode >= 400)
-    throw new CustomError(dogeAddressDetailsResponse.statusCode, errorCodes[dogeAddressDetailsResponse.statusCode]);
+    throw new CustomError(dogeAddressDetailsResponse.statusCode, dogeAddressDetailsResponse.payload || errorCodes[dogeAddressDetailsResponse.statusCode]);
 
    // Get LTC address details
    const ltcAddressDetailsResponse = await LTC.getAddressDetails(ltcAddressCreationResponse.payload.address);
 
    if (ltcAddressDetailsResponse.statusCode >= 400)
-    throw new CustomError(ltcAddressDetailsResponse.statusCode, errorCodes[ltcAddressDetailsResponse.statusCode]);
+    throw new CustomError(ltcAddressDetailsResponse.statusCode, ltcAddressDetailsResponse.payload || errorCodes[ltcAddressDetailsResponse.statusCode]);
 
    // Get POLKA address details
    // const polkaAddressDetails = await POLKA.getAddressDetails(polkaAddressCreation.payload.address);
@@ -123,11 +127,14 @@ export class WalletController {
    // Get TRON address details
    const tronDetailsResponse = await TRON.getAddressDetails(tronAddressCreationResponse.payload.base58);
 
+   if (tronDetailsResponse.statusCode >= 400)
+    throw new CustomError(tronDetailsResponse.statusCode, tronDetailsResponse.payload);
+
    // Get DASH address details
    const dashAddressDetailsResponse = await DASH.getAddressDetails(dashAddressCreationResponse.payload.address);
 
    if (dashAddressDetailsResponse.statusCode >= 400)
-    throw new CustomError(dashAddressDetailsResponse.statusCode, errorCodes[dashAddressDetailsResponse.statusCode]);
+    throw new CustomError(dashAddressDetailsResponse.statusCode, dashAddressDetailsResponse.payload || errorCodes[dashAddressDetailsResponse.statusCode]);
    
    // Instantiate wallet
    const wallet: Wallet = {
@@ -379,7 +386,7 @@ export class WalletController {
 
     // Throw error for 4XX or 5XX status code ranges
     if (btcSentResponse.statusCode >= 400)
-     throw new CustomError(btcSentResponse.statusCode, errorCodes[btcSentResponse.statusCode]);
+     throw new CustomError(btcSentResponse.statusCode, btcSentResponse.payload || errorCodes[btcSentResponse.statusCode]);
 
    // Sign transaction immediately
    const signTransactionResponse = await BTC.signTransaction(
@@ -389,14 +396,14 @@ export class WalletController {
 
    // Throw error for 4XX or 5XX status code ranges
    if (signTransactionResponse.statusCode >= 400)
-    throw new CustomError(signTransactionResponse.statusCode, errorCodes[signTransactionResponse.statusCode]);
+    throw new CustomError(signTransactionResponse.statusCode, signTransactionResponse.payload || errorCodes[signTransactionResponse.statusCode]);
 
    // Broadcast the transaction to the Bitcoin blockchain
    const broadcastTransactionResponse = await BTC.broadcastTransaction(signTransactionResponse.payload.hex);
 
    // Throw error for 4XX or 5XX status code ranges
    if (broadcastTransactionResponse.statusCode >= 400)
-    throw new CustomError(broadcastTransactionResponse.statusCode, errorCodes[broadcastTransactionResponse.statusCode]);
+    throw new CustomError(broadcastTransactionResponse.statusCode, broadcastTransactionResponse.payload || errorCodes[broadcastTransactionResponse.statusCode]);
     
      // Loop through array of recipients' wallets
      // for (const w of wallets)
@@ -443,7 +450,7 @@ export class WalletController {
 
        // Throw error for 4XX or 5XX status code ranges
        if (ethSentResponse.statusCode >= 400)
-        throw new CustomError(ethSentResponse.statusCode, errorCodes[ethSentResponse.statusCode]);
+        throw new CustomError(ethSentResponse.statusCode, ethSentResponse.payload || errorCodes[ethSentResponse.statusCode]);
        
        // Loop through array
        // for (const w of wallets)
@@ -488,7 +495,7 @@ export class WalletController {
 
         // Throw error if status code is within 4XX and 5XX ranges
         if (dogeSentResponse.statusCode >= 400)
-         throw new CustomError(dogeSentResponse.statusCode, errorCodes[dogeSentResponse.statusCode]);
+         throw new CustomError(dogeSentResponse.statusCode, dogeSentResponse.payload || errorCodes[dogeSentResponse.statusCode]);
         
         // Sign transaction immediately
         const signTransactionResponse = await DOGE.signTransaction(
@@ -498,14 +505,14 @@ export class WalletController {
 
         // Throw error if status code is within 4XX and 5XX ranges
         if (signTransactionResponse.statusCode >= 400)
-         throw new CustomError(signTransactionResponse.statusCode, errorCodes[signTransactionResponse.statusCode]);
+         throw new CustomError(signTransactionResponse.statusCode, signTransactionResponse.payload || errorCodes[signTransactionResponse.statusCode]);
 
         // Broadcast transaction to the Dogecoin blockchain
         const broadcastTransactionResponse = await DOGE.broadcastTransaction(signTransactionResponse.payload.hex);
 
         // Throw error if status code is within 4XX and 5XX ranges
         if (broadcastTransactionResponse.statusCode >= 400)
-        throw new CustomError(broadcastTransactionResponse.statusCode, errorCodes[broadcastTransactionResponse.statusCode]);
+        throw new CustomError(broadcastTransactionResponse.statusCode, broadcastTransactionResponse.payload || errorCodes[broadcastTransactionResponse.statusCode]);
 
         // Loop through recipients' wallets
         // for (const w of wallets)
@@ -547,7 +554,7 @@ export class WalletController {
 
        // Throw error if status code is within 4XX and 5XX
        if (ltcSentResponse.statusCode >= 400)
-        throw new CustomError(ltcSentResponse.statusCode, errorCodes[ltcSentResponse.statusCode]);
+        throw new CustomError(ltcSentResponse.statusCode, ltcSentResponse.payload || errorCodes[ltcSentResponse.statusCode]);
 
        // Sign transaction
        const transactionSignResponse = await LTC.signTransaction(
@@ -557,14 +564,14 @@ export class WalletController {
 
        // Throw error for 4XX and 5XX status codes
        if (transactionSignResponse.statusCode >= 400)
-        throw new CustomError(transactionSignResponse.statusCode, errorCodes[transactionSignResponse.statusCode]);
+        throw new CustomError(transactionSignResponse.statusCode, transactionSignResponse.payload || errorCodes[transactionSignResponse.statusCode]);
 
        // Broadcast transaction to the Litecoin blockchain
        const broadcastTransactionResponse = await LTC.broadcastTransaction(transactionSignResponse.payload.hex);
 
        // Throw error if there is any
        if (broadcastTransactionResponse.statusCode >= 400)
-        throw new CustomError(broadcastTransactionResponse.statusCode, errorCodes[broadcastTransactionResponse.statusCode]);
+        throw new CustomError(broadcastTransactionResponse.statusCode, broadcastTransactionResponse.payload || errorCodes[broadcastTransactionResponse.statusCode]);
 
        // Find matching wallets
        // for (const w of wallets)
@@ -602,8 +609,16 @@ export class WalletController {
        // Send TRON
        const tronSentResponse = await TRON.sendToken(senderWallet.trx.address, req.body.to, balance);
 
+       // Check for errors
+       if (tronSentResponse.statusCode >= 400)
+        throw new CustomError(tronSentResponse.statusCode, tronSentResponse.payload);
+
        // Sign transaction
        const signTransactionResponse = await TRON.signTransaction(tronSentResponse.payload, senderWallet.trx.pk);
+
+       // Check for errors
+       if (signTransactionResponse.statusCode >= 400)
+        throw new CustomError(signTransactionResponse.statusCode, signTransactionResponse.payload);
        
        // for (const w of wallets)
        //  if (w.tron.address === req.body.to) {
@@ -643,7 +658,7 @@ export class WalletController {
 
        // Throw error if status code is within 4XX and 5XX
        if (dashSentResponse.statusCode >= 400)
-        throw new CustomError(dashSentResponse.statusCode, errorCodes[dashSentResponse.statusCode]);
+        throw new CustomError(dashSentResponse.statusCode, dashSentResponse.payload || errorCodes[dashSentResponse.statusCode]);
 
        // Sign transaction
        const transactionSignResponse = await DASH.signTransaction(
@@ -653,14 +668,14 @@ export class WalletController {
 
        // Throw error for 4XX and 5XX status codes
        if (transactionSignResponse.statusCode >= 400)
-        throw new CustomError(transactionSignResponse.statusCode, errorCodes[transactionSignResponse.statusCode]);
+        throw new CustomError(transactionSignResponse.statusCode, transactionSignResponse.payload || errorCodes[transactionSignResponse.statusCode]);
 
        // Broadcast transaction to the Litecoin blockchain
        const broadcastTransactionResponse = await DASH.broadcastTransaction(transactionSignResponse.payload.hex);
 
        // Throw error if there is any
        if (broadcastTransactionResponse.statusCode >= 400)
-        throw new CustomError(broadcastTransactionResponse.statusCode, errorCodes[broadcastTransactionResponse.statusCode]);
+        throw new CustomError(broadcastTransactionResponse.statusCode, broadcastTransactionResponse.payload || errorCodes[broadcastTransactionResponse.statusCode]);
 
        // Find matching wallets
        // for (const w of wallets)
