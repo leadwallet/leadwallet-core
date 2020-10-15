@@ -18,7 +18,6 @@ export class TRON {
     statusCode: 201
    });
   } catch (error) {
-   console.log(error);
    return Promise.resolve({
     payload: error.message,
     statusCode: 500
