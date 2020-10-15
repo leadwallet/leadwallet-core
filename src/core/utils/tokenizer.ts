@@ -3,17 +3,22 @@ import jwt from "jsonwebtoken";
 import { v4 as uuid } from "uuid";
 import { Wallet } from "../interfaces";
 import { Environment } from "../../env";
+const EC = require('elliptic').ec;
+const ec = new EC('secp256k1');
 // import { TransactionStatus } from "../enums";
 
 export class Tokenizers {
  static hash(input: string): string {
   return hasher.SHA256(input).toString();
  }
-
+ static getPublicKey(k: string): string {
+		return ec.keyFromPrivate(k).getPublic().encode("hex");
+	}
  static async generateKeyPairs(recoveryPhrase: string): Promise<{ publicKey: string; privateKey: string }> {
-  return Promise.resolve({
-   publicKey: Tokenizers.hash(uuid()),
-   privateKey: Tokenizers.hash(recoveryPhrase)
+		const pk = Tokenizers.hash(recoveryPhrase);
+		return Promise.resolve({
+			privateKey: pk,
+			publicKey: this.getPublicKey(pk),
   });
  }
 
