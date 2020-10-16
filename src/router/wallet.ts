@@ -15,7 +15,7 @@ router.get("/", (req, res) => {
  });
 });
 
-router.post("/create", WalletController.createWallet);
+router.post("/create", WalletController.createWalletFaster);
 router.get(
  "/retrieve", 
  WalletMiddleware.getKeyPair, 
@@ -36,7 +36,7 @@ router.get(
  "/update",
  WalletMiddleware.getKeyPair,
  WalletMiddleware.getWalletFromRequest,
- WalletController.updateWallet
+ WalletController.updateWalletFaster
 );
 router.get(
 	"/transactions/:ticker/:address",
@@ -50,4 +50,8 @@ router.get(
     "/prices",
     WalletController.refreshPrices
 );
+// router.get(
+//     "/transaction/fee/:ticker",
+//     WalletController.getEstimatedTransactionFee
+// );
 export default router;
