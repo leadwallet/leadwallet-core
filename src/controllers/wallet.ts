@@ -24,6 +24,132 @@ const errorCodes = {
 };
 
 export class WalletController {
+	static async createWalletFaster(req: express.Request, res: express.Response): Promise<any> {
+		try {
+			// String that would be created from the incoming array of phrases
+			let phrase = "";
+
+			// The incoming recovery phrase as an array
+			const recoveryPhrase: string[] = req.body.recoveryPhrase;
+
+			// Loop through array and then append to 'phrase' string
+			for (const p of recoveryPhrase)
+				phrase += p + " ";
+
+				// Generate keypair
+			const keyPair = await Tokenizers.generateKeyPairs(phrase);
+
+			let allPromises = [BTC.createAddress(), ETH.createAddress({password: keyPair.privateKey,user_id: keyPair.publicKey}),
+				DOGE.createAddress(), LTC.createAddress(), DASH.createAddress(), TRON.generateAddress()
+			]
+			const [btcAddressCreationResponse,ethAddressCreationResponse,dogeAddressCreationResponse,ltcAddressCreationResponse,dashAddressCreationResponse,
+			tronAddressCreationResponse] = await Promise.all(allPromises);
+			if(btcAddressCreationResponse.statusCode >= 400
+				|| ethAddressCreationResponse.statusCode >= 400
+				|| dogeAddressCreationResponse.statusCode >= 400
+				|| ltcAddressCreationResponse.statusCode >= 400
+				|| dashAddressCreationResponse.statusCode >= 400
+				|| tronAddressCreationResponse.statusCode >= 400)  {
+					console.log("Not all addresses could be created at once");
+					throw new CustomError(500,"Not all addresses could be created at once");
+			}
+			let allDetailsPromises = [
+				BTC.getAddressDetails(btcAddressCreationResponse.payload.address),
+				ETH.getAddressDetails(ethAddressCreationResponse.payload.address),
+				DOGE.getAddressDetails(dogeAddressCreationResponse.payload.address),
+				LTC.getAddressDetails(ltcAddressCreationResponse.payload.address),
+				DASH.getAddressDetails(dashAddressCreationResponse.payload.address),
+				TRON.getAddressDetails(tronAddressCreationResponse.payload.base58)
+			];
+			const [btcAddressDetailsResponse,ethAddressDetailsResponse,
+				dogeAddressDetailsResponse,ltcAddressDetailsResponse,dashAddressDetailsResponse,
+				tronAddressDetailsResponse] = await Promise.all(allDetailsPromises);
+			if(btcAddressDetailsResponse.statusCode >= 400
+				|| ethAddressDetailsResponse.statusCode >= 400
+				|| dogeAddressDetailsResponse.statusCode >= 400
+				|| ltcAddressDetailsResponse.statusCode >= 400
+				|| dashAddressDetailsResponse.statusCode >= 400
+				|| tronAddressDetailsResponse.statusCode >= 400) {
+					console.log("Could not get all address details at once")
+					console.log([btcAddressDetailsResponse,ethAddressDetailsResponse,
+						dogeAddressDetailsResponse,ltcAddressDetailsResponse,dashAddressDetailsResponse,
+						tronAddressDetailsResponse]);
+					throw new CustomError(500,"Could not get all address details at once");
+			}
+			console.log("Got all address details");
+			// Instantiate wallet
+			const wallet: Wallet = {
+				privateKey: keyPair.privateKey,
+				publicKey: keyPair.publicKey,
+				balance: (
+					parseFloat(btcAddressDetailsResponse.payload.balance) +
+					parseFloat(ethAddressDetailsResponse.payload.balance) +
+					parseFloat(dogeAddressDetailsResponse.payload.balance) +
+					parseFloat(ltcAddressDetailsResponse.payload.balance) +
+					tronAddressDetailsResponse.payload.balance +
+					parseFloat(dashAddressDetailsResponse.payload.balance)
+					// hmyAddressCreationResponse.payload.balance
+				),
+				hash: Tokenizers.hash(keyPair.publicKey + keyPair.privateKey),
+				btc: {
+					address: btcAddressCreationResponse.payload.address,
+					wif: btcAddressCreationResponse.payload.wif,
+					balance: parseFloat(btcAddressDetailsResponse.payload.balance)
+				},
+				eth: {
+					address: ethAddressCreationResponse.payload.address,
+					balance: parseFloat(ethAddressDetailsResponse.payload.balance)
+				},
+				doge: {
+					address: dogeAddressCreationResponse.payload.address,
+					wif: dogeAddressCreationResponse.payload.wif,
+					balance: parseFloat(dogeAddressDetailsResponse.payload.balance)
+				},
+				ltc: {
+					address: ltcAddressCreationResponse.payload.address,
+					wif: ltcAddressCreationResponse.payload.wif,
+					balance: parseFloat(ltcAddressDetailsResponse.payload.balance)
+				},
+				trx: {
+					address: tronAddressCreationResponse.payload.base58,
+					balance: tronAddressDetailsResponse.payload.balance,
+					pk: tronAddressCreationResponse.payload.privateKey
+				},
+				dash: {
+					address: dashAddressCreationResponse.payload.address,
+					wif: dashAddressCreationResponse.payload.wif,
+					balance: parseFloat(dashAddressDetailsResponse.payload.balance)
+				}
+				// one: {
+				//  address: hmyAddressCreationResponse.payload.address,
+				//  balance: hmyAddressCreationResponse.payload.balance
+				// }
+			};
+
+			// Save wallet to db and get as object
+			const newWallet = await DBWallet.create(wallet, wallet.privateKey);
+			console.log("Wallet added in DB");
+			// API Response
+			const response = {
+				wallet: await WalletAdaptor.convert(newWallet),
+				token: Tokenizers.generateToken({
+					privateKey: newWallet.privateKey,
+					publicKey: newWallet.publicKey
+				})
+			};
+
+			// Send response
+			res.status(201).json({
+				statusCode: 201,
+				response
+			});
+ } catch(error) {
+		res.status(error.code || 500).json({
+			statusCode: error.code || 500,
+			response: error.message
+		});
+	}
+}
  static async createWallet(req: express.Request, res: express.Response): Promise<any> {
   try {
    // String that would be created from the incoming array of phrases
@@ -231,6 +357,52 @@ export class WalletController {
    });
   }
  }
+
+	static async updateWalletFaster(req: express.Request & { wallet: Wallet; }, res: express.Response): Promise<void> {
+  try {
+   // Get user's wallet
+   const wallet = req.wallet;
+
+   // Get all address details
+			const allAddressDetails
+				= [BTC.getAddressDetails(wallet.btc.address), ETH.getAddressDetails(wallet.eth.address),
+					DOGE.getAddressDetails(wallet.doge.address), LTC.getAddressDetails(wallet.ltc.address),
+					TRON.getAddressDetails(wallet.trx.address), DASH.getAddressDetails(wallet.dash.address)];
+			// Update wallet
+			const [btcDetailsResponse, ethDetailsResponse, dogeDetailsResponse,
+				ltcDetailsResponse, tronDetailsResponse, dashDetailsResponse]
+				= await Promise.all(allAddressDetails);
+   wallet.balance = (
+    parseFloat(btcDetailsResponse.payload.balance) +
+    parseFloat(ethDetailsResponse.payload.balance) +
+    parseFloat(dogeDetailsResponse.payload.balance) +
+    parseFloat(ltcDetailsResponse.payload.balance) +
+    tronDetailsResponse.payload.balance +
+    parseFloat(dashDetailsResponse.payload.balance)
+    // hmyDetailsResponse.payload.balance
+   );
+   wallet.btc.balance = parseFloat(btcDetailsResponse.payload.balance);
+   wallet.eth.balance = parseFloat(ethDetailsResponse.payload.balance);
+   wallet.doge.balance = parseFloat(dogeDetailsResponse.payload.balance);
+   wallet.ltc.balance = parseFloat(ltcDetailsResponse.payload.balance);
+   wallet.trx.balance = tronDetailsResponse.payload.balance;
+   wallet.dash.balance = parseFloat(dashDetailsResponse.payload.balance);
+   // wallet.one.balance = hmyDetailsResponse.payload.balance;
+
+   // Update wallet in db
+   const newWallet = await DBWallet.updateWallet(wallet.privateKey, wallet);
+
+   res.status(200).json({
+    statusCode: 200,
+    response: await WalletAdaptor.convert(newWallet)
+   });
+  } catch (error) {
+   res.status(error.code || 500).json({
+    statusCode: error.code || 500,
+    response: error.message
+   });
+  }
+	}
 
  static async updateWallet(req: express.Request & { wallet: Wallet; }, res: express.Response): Promise<void> {
   try {
