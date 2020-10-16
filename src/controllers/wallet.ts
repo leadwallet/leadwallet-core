@@ -372,6 +372,18 @@ export class WalletController {
 			const [btcDetailsResponse, ethDetailsResponse, dogeDetailsResponse,
 				ltcDetailsResponse, tronDetailsResponse, dashDetailsResponse]
 				= await Promise.all(allAddressDetails);
+				if(btcDetailsResponse.statusCode >= 400
+					|| ethDetailsResponse.statusCode >= 400
+					|| dogeDetailsResponse.statusCode >= 400
+					|| ltcDetailsResponse.statusCode >= 400
+					|| dashDetailsResponse.statusCode >= 400
+					|| tronDetailsResponse.statusCode >= 400) {
+						console.log("Could not get all address details at once")
+						console.log([btcDetailsResponse,ethDetailsResponse,
+							dogeDetailsResponse,ltcDetailsResponse,dashDetailsResponse,
+							tronDetailsResponse]);
+					throw new CustomError(500,"Could not get all address details at once");
+			}
    wallet.balance = (
     parseFloat(btcDetailsResponse.payload.balance) +
     parseFloat(ethDetailsResponse.payload.balance) +
