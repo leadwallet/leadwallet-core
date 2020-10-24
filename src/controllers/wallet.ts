@@ -8,6 +8,7 @@ import { TransactionService } from "../core/handlers/transaction_handler";
 import { CRYPTO_API_COINS, SYMBOL_ID_MAPPING } from "../core/handlers/commons";
 import { WalletAdaptor } from "../core/utils/wallet_adaptor";
 import { CurrencyConverter } from "../core/utils/currency_converter";
+import { TransactionFeeService } from "../core/handlers/transaction_fee_service";
 
 const { DBWallet } = db;
 const errorCodes = {
@@ -992,15 +993,14 @@ export class WalletController {
 	static async getEstimatedTransactionFee(req: express.Request, res: express.Response) : Promise<any> {
 		try {
 			const {ticker} = req.params;
-			if(CRYPTO_API_COINS.includes(ticker)) {
-				if(ticker !== "eth") {
-
-				} else {
-
-				}
-			} else {
-
-			}
+			const fromAddress: string = req.body.fromAddress;
+			const toAddress: string =  req.body.toAddress;
+			const value: number = req.body.value;
+			const txFee: any = await TransactionFeeService.getTransactionFee(ticker,fromAddress,toAddress,value);
+			res.status(200).json({
+				statusCode: 200,
+				txFee
+			});
 		} catch (error) {
 			res.status(error.code || 500).json({
 				statusCode: error.code || 500,
