@@ -50,7 +50,7 @@ router.get(
     "/prices",
     WalletController.refreshPrices
 );
-router.get(
+router.post(
     "/transaction/fee/:ticker",
     WalletController.getEstimatedTransactionFee
 );
