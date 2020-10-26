@@ -58,7 +58,7 @@ export class Tokenizers {
   return (jwt.decode(encryptedKey) as string);
  }
 
- static generateToken(payload: { privateKey: string; publicKey: string; ethKey: string; }): string {
+ static generateToken(payload: { privateKey: string; publicKey: string; }): string {
   return jwt.sign(payload, Environment.JWT_SECRET);
  }
 
