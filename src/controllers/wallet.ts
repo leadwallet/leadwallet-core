@@ -99,8 +99,7 @@ export class WalletController {
 				},
 				eth: {
 					address: ethAddressCreationResponse.payload.address,
-     balance: parseFloat(ethAddressDetailsResponse.payload.balance),
-     pk: ethAddressCreationResponse.payload.privateKey
+     balance: parseFloat(ethAddressDetailsResponse.payload.balance)
 				},
 				doge: {
 					address: dogeAddressCreationResponse.payload.address,
@@ -136,8 +135,7 @@ export class WalletController {
 				wallet: await WalletAdaptor.convert(newWallet),
 				token: Tokenizers.generateToken({
 					privateKey: newWallet.privateKey,
-     publicKey: newWallet.publicKey,
-     ethKey: ethAddressCreationResponse.payload.privateKey
+     publicKey: newWallet.publicKey
 				})
 			};
 
@@ -322,8 +320,7 @@ export class WalletController {
     wallet: await WalletAdaptor.convert(newWallet),
     token: Tokenizers.generateToken({
      privateKey: newWallet.privateKey,
-     publicKey: newWallet.publicKey,
-     ethKey: ethAddressCreationResponse.payload.privateKey
+     publicKey: newWallet.publicKey
     })
    };
 
@@ -504,8 +501,7 @@ export class WalletController {
    const { wallet } = req;
    const token = Tokenizers.generateToken({
     privateKey: wallet.privateKey,
-    publicKey: wallet.publicKey,
-    ethKey: wallet.eth.pk
+    publicKey: wallet.publicKey
    });
    res.status(200).json({
     statusCode: 200,
