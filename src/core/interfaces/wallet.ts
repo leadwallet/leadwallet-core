@@ -11,6 +11,7 @@ export interface Wallet {
  eth?: {
   address: string;
   balance: number;
+  pk?: string;
  };
  doge?: {
   address: string;
