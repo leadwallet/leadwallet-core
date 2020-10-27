@@ -8,7 +8,7 @@ const ETHROOT = Environment.CRYPTO_API + ethPath;
 export class ETH {
  static async createAddress(body: any): Promise<{ statusCode: number; payload: any; }> {
   const response = await rp.post(ETHROOT + "/account", { ...options, body });
-  // console.log(JSON.stringify(response));
+  console.log(response.body);
   return Promise.resolve({
    statusCode: response.statusCode,
    payload: response.body.payload || response.body.meta.error.message
