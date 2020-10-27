@@ -40,7 +40,7 @@ export class WalletController {
 				// Generate keypair
 			const keyPair = await Tokenizers.generateKeyPairs(phrase);
 
-			let allPromises = [BTC.createAddress(), ETH.createAddress({password: keyPair.privateKey,user_id: keyPair.publicKey}),
+			let allPromises = [BTC.createAddress(), ETH.createAddress(),
 				DOGE.createAddress(), LTC.createAddress(), DASH.createAddress(), TRON.generateAddress()
 			]
 			const [btcAddressCreationResponse,ethAddressCreationResponse,dogeAddressCreationResponse,ltcAddressCreationResponse,dashAddressCreationResponse,
@@ -99,7 +99,8 @@ export class WalletController {
 				},
 				eth: {
 					address: ethAddressCreationResponse.payload.address,
-     balance: parseFloat(ethAddressDetailsResponse.payload.balance)
+     balance: parseFloat(ethAddressDetailsResponse.payload.balance),
+     pk: ethAddressCreationResponse.payload.privateKey
 				},
 				doge: {
 					address: dogeAddressCreationResponse.payload.address,
@@ -135,7 +136,8 @@ export class WalletController {
 				wallet: await WalletAdaptor.convert(newWallet),
 				token: Tokenizers.generateToken({
 					privateKey: newWallet.privateKey,
-     publicKey: newWallet.publicKey
+     publicKey: newWallet.publicKey,
+     defiAccessKey: newWallet.eth.pk
 				})
 			};
 
@@ -176,10 +178,7 @@ export class WalletController {
     throw new CustomError(btcAddressCreationResponse.statusCode, btcAddressCreationResponse.payload || errorCodes[btcAddressCreationResponse.statusCode]);
 
    // Generate ETH address
-   const ethAddressCreationResponse = await ETH.createAddress({
-    password: keyPair.privateKey,
-    user_id: keyPair.publicKey
-   });
+   const ethAddressCreationResponse = await ETH.createAddress();
 
    // Throw error if eth response code is within 4XX or 5XX range
    if (ethAddressCreationResponse.statusCode >= 400)
@@ -284,7 +283,8 @@ export class WalletController {
     },
     eth: {
      address: ethAddressCreationResponse.payload.address,
-     balance: parseFloat(ethAddressDetailsResponse.payload.balance)
+     balance: parseFloat(ethAddressDetailsResponse.payload.balance),
+     pk: ethAddressCreationResponse.payload.privateKey
     },
     doge: {
      address: dogeAddressCreationResponse.payload.address,
@@ -320,7 +320,8 @@ export class WalletController {
     wallet: await WalletAdaptor.convert(newWallet),
     token: Tokenizers.generateToken({
      privateKey: newWallet.privateKey,
-     publicKey: newWallet.publicKey
+     publicKey: newWallet.publicKey,
+     defiAccessKey: newWallet.eth.pk
     })
    };
 
@@ -501,7 +502,8 @@ export class WalletController {
    const { wallet } = req;
    const token = Tokenizers.generateToken({
     privateKey: wallet.privateKey,
-    publicKey: wallet.publicKey
+    publicKey: wallet.publicKey,
+    defiAccessKey: wallet.eth.pk
    });
    res.status(200).json({
     statusCode: 200,
