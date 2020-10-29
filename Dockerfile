@@ -7,4 +7,4 @@ RUN npm cache clean --force
 RUN npm install
 COPY . .
 EXPOSE $PORT
-ENTRYPOINT ["npm", "run", "stage"]
+ENTRYPOINT ["npm", "run", "prod"]
