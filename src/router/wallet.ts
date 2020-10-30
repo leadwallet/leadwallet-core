@@ -54,4 +54,19 @@ router.post(
     "/transaction/fee/:ticker",
     WalletController.getEstimatedTransactionFee
 );
+
+router.get(
+ "/erc20",
+ WalletMiddleware.getKeyPair,
+ WalletMiddleware.getWalletFromRequest,
+ WalletController.getERC20Tokens
+);
+
+router.post(
+ "/transferERC20",
+ WalletMiddleware.getKeyPair,
+ WalletMiddleware.getWalletFromRequest,
+ WalletController.transferERC20Token
+);
+
 export default router;

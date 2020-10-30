@@ -36,5 +36,34 @@ export class ETH {
   });
  }
 
+ static async transferERC20(
+  fromAddress: string, 
+  toAddress: string,
+  contract: string,
+  privateKey: string,
+  gasPrice: number,
+  gasLimit: number
+ ): Promise<{ statusCode: number; payload: any; }> {
+  const response = await rp.post(ETHROOT + "/token/transfer", {
+   ...options,
+   body: {
+    fromAddress, toAddress, privateKey, gasPrice, gasLimit, contract
+   }
+  });
+
+  return Promise.resolve({
+   statusCode: response.statusCode,
+   payload: response.body.payload || response.body.meta.error.message
+  });
+ }
+
+ static async getERC20Tokens(address: string): Promise<{ statusCode: number; payload: any; }> {
+  const response = await rp.get(ETHROOT + "/tokens/address/" + address, { ...options });
+  return Promise.resolve({
+   statusCode: response.statusCode,
+   payload: response.body.payload || response.body.meta.error.message
+  });
+ }
+
  // static async broadcastTransaction() {}
 }
