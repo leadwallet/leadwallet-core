@@ -1,4 +1,5 @@
 import express from "express";
+import rp from "request-promise";
 import db from "../db";
 import { Wallet } from "../core/interfaces";
 import { Tokenizers } from "../core/utils";
@@ -1009,5 +1010,76 @@ export class WalletController {
 				response: error.message
 			});
 		}
-	}
+ }
+ 
+ static async getERC20Tokens(req: express.Request & { wallet: Wallet; }, res: express.Response): Promise<any> {
+  try {
+   const { wallet } = req;
+   const tokensResponse = await ETH.getERC20Tokens(wallet.eth.address);
+
+   if (tokensResponse.statusCode >= 400)
+    throw new CustomError(tokensResponse.statusCode, tokensResponse.payload || errorCodes[tokensResponse.payload]);
+
+   const response = tokensResponse.payload.length > 0 ? [
+    ...tokensResponse.payload.map(async (token: any) => {
+     const contractDetails = await rp.get("https://api.coingecko.com/api/v3/coins/ethereum/contract/" + token.contract, {
+      simple: false,
+      json: true,
+      resolveWithFullResponse: true
+     });
+     
+     if (contractDetails.statusCode >= 400)
+      throw new CustomError(contractDetails.statusCode, "Could not retrieve image for " + token.contract);
+     
+     return {
+      ...token,
+      image: contractDetails.body.image
+     }
+    })
+   ] : [];
+
+   res.status(200).json({
+    statusCode: 200,
+    response
+   });
+  } catch (error) {
+   res.status(error.code || 500).json({
+    statusCode: error.code || 500,
+    response: error.message
+   });
+  }
+ }
+
+ static async transferERC20Token(req: express.Request & { wallet: Wallet; }, res: express.Response): Promise<any> {
+  try {
+   const { wallet } = req;
+   const transferTokenResponse = await ETH.transferERC20(
+    wallet.eth.address, 
+    req.body.to, 
+    req.body.contract, 
+    wallet.eth.pk,
+    req.body.gasPrice || 21000000000,
+    req.body.gasLimit || 100000
+   );
+
+   if (transferTokenResponse.statusCode >= 400)
+    throw new CustomError(transferTokenResponse.statusCode, transferTokenResponse.payload || errorCodes[transferTokenResponse.statusCode]);
+
+   const response = {
+    message: "Successfully transferred token.",
+    txHex: transferTokenResponse.payload.hex,
+    explorer: transferTokenResponse.payload.view_in_explorer
+   };
+
+   res.status(200).json({
+    statusCode: 200,
+    response
+   });
+  } catch (error) {
+   res.status(error.code || 500).json({
+    statusCode: error.code || 500,
+    response: error.message
+   });
+  }
+ }
 }
