@@ -1,3 +1,5 @@
+import { ERCToken } from "./token";
+
 export interface Wallet {
  publicKey: string;
  privateKey: string;
@@ -11,6 +13,7 @@ export interface Wallet {
  eth?: {
   address: string;
   balance: number;
+  tokens?: Array<ERCToken>;
  };
  doge?: {
   address: string;

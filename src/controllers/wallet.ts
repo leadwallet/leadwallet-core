@@ -99,7 +99,8 @@ export class WalletController {
 				},
 				eth: {
 					address: ethAddressCreationResponse.payload.address,
-					balance: parseFloat(ethAddressDetailsResponse.payload.balance)
+          balance: parseFloat(ethAddressDetailsResponse.payload.balance),
+          tokens: ethAddressDetailsResponse.payload.tokens
 				},
 				doge: {
 					address: dogeAddressCreationResponse.payload.address,
@@ -396,6 +397,7 @@ export class WalletController {
    );
    wallet.btc.balance = parseFloat(btcDetailsResponse.payload.balance);
    wallet.eth.balance = parseFloat(ethDetailsResponse.payload.balance);
+   wallet.eth.tokens = ethDetailsResponse.payload.tokens;
    wallet.doge.balance = parseFloat(dogeDetailsResponse.payload.balance);
    wallet.ltc.balance = parseFloat(ltcDetailsResponse.payload.balance);
    wallet.trx.balance = tronDetailsResponse.payload.balance;
