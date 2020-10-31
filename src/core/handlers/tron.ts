@@ -19,7 +19,7 @@ export class TRON {
    });
   } catch (error) {
    return Promise.resolve({
-    payload: error.message,
+    payload: error,
     statusCode: 500
    });
   }
@@ -34,8 +34,9 @@ export class TRON {
     statusCode: 200
    });
   } catch (error) {
+   console.error(error)
    return Promise.resolve({
-    payload: error.message,
+    payload: error,
     statusCode: 500
    });
   }
@@ -50,8 +51,9 @@ export class TRON {
     statusCode: 200
    });
   } catch (error) {
+   console.error(error);
    return Promise.resolve({
-    payload: error.message,
+    payload: error,
     statusCode: 500
    });
   }
@@ -59,15 +61,17 @@ export class TRON {
 
  static async signTransaction(transaction: any, pk: string): Promise<{ payload: any; statusCode: number; }> {
   try {
-   const payload = await tWeb.trx.sign(transaction, pk);
-   // console.log(JSON.stringify(payload));
+   const signedTransaction = await tWeb.trx.sign(transaction, pk);
+   const receipt = await tWeb.trx.sendRawTransaction(signedTransaction);
+   //console.log(JSON.stringify(receipt));
    return Promise.resolve({
-    payload,
+    payload: receipt,
     statusCode: 200
    });
   } catch (error) {
+   console.error(error);
    return Promise.resolve({
-    payload: error.message,
+    payload: error,
     statusCode: 500
    });
   }

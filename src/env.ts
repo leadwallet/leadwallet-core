@@ -18,6 +18,13 @@ export class Environment {
   test: process.env.TRON_TEST_API,
   staging: process.env.TRON_TEST_API
  }
+ static TRON_EXPLORER = {
+  development: process.env.TEST_TRONSCAN_URL || "https://shasta.tronscan.org/#/transaction",
+  production: process.env.PROD_TRONSCAN_URL || "https://tronscan.org/#/transaction",
+  test: process.env.TEST_TRONSCAN_URL || "https://shasta.tronscan.org/#/transaction",
+  staging: process.env.TEST_TRONSCAN_URL || "https://shasta.tronscan.org/#/transaction"
+ }
+ static BLOCK_EXPLORER: string  = "https://blockexplorer.one";
  static POLKA_URL = {
   development: "wss://rpc.polkadot.io"
  };

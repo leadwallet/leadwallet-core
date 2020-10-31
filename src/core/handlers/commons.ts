@@ -101,3 +101,9 @@ function createSymbolToIdMapping() {
 }
 
 export const [SYMBOL_ID_MAPPING, ID_SYMBOL_MAPPING] = createSymbolToIdMapping();
+
+export function getExplorerLink(type: string, txHash: string) : string {
+    return type == "trx"
+      ? Environment.TRON_EXPLORER[process.env.NODE_ENV] + "/" + txHash
+      : Environment.BLOCK_EXPLORER + "/" + type + "/" + COIN_NETWORK[type][process.env.NODE_ENV] + "/tx/" + txHash;
+}
