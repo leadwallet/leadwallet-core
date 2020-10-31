@@ -6,7 +6,7 @@ import { Tokenizers } from "../core/utils";
 import { CustomError } from "../custom";
 import { BTC, ETH, DOGE, LTC, TRON, DASH } from "../core/handlers";
 import { TransactionService } from "../core/handlers/transaction_handler";
-import { CRYPTO_API_COINS, SYMBOL_ID_MAPPING } from "../core/handlers/commons";
+import { CRYPTO_API_COINS, getExplorerLink } from "../core/handlers/commons";
 import { WalletAdaptor } from "../core/utils/wallet_adaptor";
 import { CurrencyConverter } from "../core/utils/currency_converter";
 import { TransactionFeeService } from "../core/handlers/transaction_fee_service";
@@ -903,7 +903,8 @@ export class WalletController {
     sender: Tokenizers.encryptWallet(updatedSenderWallet),
     // recipients: encRecipientWallets,
     message: "Transaction successful.",
-    txHash: txHash
+    txHash: txHash,
+    view_in_explorer: getExplorerLink(type, txHash)
    };
 
    //Send response
@@ -938,7 +939,8 @@ export class WalletController {
       status: item.confirmations > 0 ? "Confirmed" : "Pending",
       from: Object.keys(item.sent).map((key) => key).join(", "),
       to: Object.keys(item.received).map((key) => key).join(", "),
-      date: item.datetime
+      date: item.datetime,
+      view_in_explorer: getExplorerLink(ticker, item.txid)
      }));
     } else {
      apiResponse = response.payload.map((item: any) => ({
@@ -948,7 +950,8 @@ export class WalletController {
       status: item.confirmations > 0 ? "Confirmed" : "Pending",
       from: item.sent,
       to: item.received,
-      date: item.datetime
+      date: item.datetime,
+      view_in_explorer: getExplorerLink(ticker, item.hash)
      }));
     }
     

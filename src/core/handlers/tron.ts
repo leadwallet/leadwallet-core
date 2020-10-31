@@ -61,7 +61,7 @@ export class TRON {
 
  static async signTransaction(transaction: any, pk: string): Promise<{ payload: any; statusCode: number; }> {
   try {
-   const signedTransaction = await tWeb.trx.sign(transaction, "");
+   const signedTransaction = await tWeb.trx.sign(transaction, pk);
    const receipt = await tWeb.trx.sendRawTransaction(signedTransaction);
    //console.log(JSON.stringify(receipt));
    return Promise.resolve({

@@ -1,7 +1,9 @@
 import rp from "request-promise";
 import { Environment } from "../../env";
 import { COIN_NETWORK, options } from "./commons";
-
+export const BLOCK_EXPLORER_URL = "https://blockexplorer.one";
+export const TEST_TRONSCAN_URL = "https://shasta.tronscan.org/#/transaction";
+export const PROD_TRONSCAN_URL = "https://tronscan.org/#/transaction";
 export class TransactionService {
 	static async getTransactions(ticker: string, address: string): Promise<{ payload: any; statusCode: number }> {
 		const api = Environment.CRYPTO_API + "/v1/bc/" + ticker + "/" + COIN_NETWORK[ticker][process.env.NODE_ENV] + "/address/"
