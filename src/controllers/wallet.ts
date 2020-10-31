@@ -1,4 +1,5 @@
 import express from "express";
+import rp from "request-promise";
 import db from "../db";
 import { Wallet } from "../core/interfaces";
 import { Tokenizers } from "../core/utils";
@@ -40,7 +41,7 @@ export class WalletController {
 				// Generate keypair
 			const keyPair = await Tokenizers.generateKeyPairs(phrase);
 
-			let allPromises = [BTC.createAddress(), ETH.createAddress({password: keyPair.privateKey,user_id: keyPair.publicKey}),
+			let allPromises = [BTC.createAddress(), ETH.createAddress(),
 				DOGE.createAddress(), LTC.createAddress(), DASH.createAddress(), TRON.generateAddress()
 			]
 			const [btcAddressCreationResponse,ethAddressCreationResponse,dogeAddressCreationResponse,ltcAddressCreationResponse,dashAddressCreationResponse,
@@ -100,7 +101,8 @@ export class WalletController {
 				eth: {
 					address: ethAddressCreationResponse.payload.address,
           balance: parseFloat(ethAddressDetailsResponse.payload.balance),
-          tokens: ethAddressDetailsResponse.payload.tokens
+          tokens: ethAddressDetailsResponse.payload.tokens,
+          pk: ethAddressCreationResponse.payload.privateKey
 				},
 				doge: {
 					address: dogeAddressCreationResponse.payload.address,
@@ -136,7 +138,8 @@ export class WalletController {
 				wallet: await WalletAdaptor.convert(newWallet),
 				token: Tokenizers.generateToken({
 					privateKey: newWallet.privateKey,
-					publicKey: newWallet.publicKey
+     publicKey: newWallet.publicKey,
+     defiAccessKey: newWallet.eth.pk
 				})
 			};
 
@@ -146,8 +149,8 @@ export class WalletController {
 				response
 			});
  } catch(error) {
-		res.status(error.code || 500).json({
-			statusCode: error.code || 500,
+		res.status(500).json({
+			statusCode: 500,
 			response: error.message
 		});
 	}
@@ -177,10 +180,7 @@ export class WalletController {
     throw new CustomError(btcAddressCreationResponse.statusCode, btcAddressCreationResponse.payload || errorCodes[btcAddressCreationResponse.statusCode]);
 
    // Generate ETH address
-   const ethAddressCreationResponse = await ETH.createAddress({
-    password: keyPair.privateKey,
-    user_id: keyPair.publicKey
-   });
+   const ethAddressCreationResponse = await ETH.createAddress();
 
    // Throw error if eth response code is within 4XX or 5XX range
    if (ethAddressCreationResponse.statusCode >= 400)
@@ -285,7 +285,8 @@ export class WalletController {
     },
     eth: {
      address: ethAddressCreationResponse.payload.address,
-     balance: parseFloat(ethAddressDetailsResponse.payload.balance)
+     balance: parseFloat(ethAddressDetailsResponse.payload.balance),
+     pk: ethAddressCreationResponse.payload.privateKey
     },
     doge: {
      address: dogeAddressCreationResponse.payload.address,
@@ -321,7 +322,8 @@ export class WalletController {
     wallet: await WalletAdaptor.convert(newWallet),
     token: Tokenizers.generateToken({
      privateKey: newWallet.privateKey,
-     publicKey: newWallet.publicKey
+     publicKey: newWallet.publicKey,
+     defiAccessKey: newWallet.eth.pk
     })
    };
 
@@ -503,7 +505,8 @@ export class WalletController {
    const { wallet } = req;
    const token = Tokenizers.generateToken({
     privateKey: wallet.privateKey,
-    publicKey: wallet.publicKey
+    publicKey: wallet.publicKey,
+    defiAccessKey: wallet.eth.pk
    });
    res.status(200).json({
     statusCode: 200,
@@ -1009,5 +1012,76 @@ export class WalletController {
 				response: error.message
 			});
 		}
-	}
+ }
+ 
+ static async getERC20Tokens(req: express.Request & { wallet: Wallet; }, res: express.Response): Promise<any> {
+  try {
+   const { wallet } = req;
+   const tokensResponse = await ETH.getERC20Tokens(wallet.eth.address);
+
+   if (tokensResponse.statusCode >= 400)
+    throw new CustomError(tokensResponse.statusCode, tokensResponse.payload || errorCodes[tokensResponse.payload]);
+
+   const response = tokensResponse.payload.length > 0 ? [
+    ...tokensResponse.payload.map(async (token: any) => {
+     const contractDetails = await rp.get("https://api.coingecko.com/api/v3/coins/ethereum/contract/" + token.contract, {
+      simple: false,
+      json: true,
+      resolveWithFullResponse: true
+     });
+     
+     if (contractDetails.statusCode >= 400)
+      throw new CustomError(contractDetails.statusCode, "Could not retrieve image for " + token.contract);
+     
+     return {
+      ...token,
+      image: contractDetails.body.image
+     }
+    })
+   ] : [];
+
+   res.status(200).json({
+    statusCode: 200,
+    response
+   });
+  } catch (error) {
+   res.status(error.code || 500).json({
+    statusCode: error.code || 500,
+    response: error.message
+   });
+  }
+ }
+
+ static async transferERC20Token(req: express.Request & { wallet: Wallet; }, res: express.Response): Promise<any> {
+  try {
+   const { wallet } = req;
+   const transferTokenResponse = await ETH.transferERC20(
+    wallet.eth.address, 
+    req.body.to, 
+    req.body.contract, 
+    wallet.eth.pk,
+    req.body.gasPrice || 21000000000,
+    req.body.gasLimit || 100000
+   );
+
+   if (transferTokenResponse.statusCode >= 400)
+    throw new CustomError(transferTokenResponse.statusCode, transferTokenResponse.payload || errorCodes[transferTokenResponse.statusCode]);
+
+   const response = {
+    message: "Successfully transferred token.",
+    txHex: transferTokenResponse.payload.hex,
+    explorer: transferTokenResponse.payload.view_in_explorer
+   };
+
+   res.status(200).json({
+    statusCode: 200,
+    response
+   });
+  } catch (error) {
+   res.status(error.code || 500).json({
+    statusCode: error.code || 500,
+    response: error.message
+   });
+  }
+ }
 }
