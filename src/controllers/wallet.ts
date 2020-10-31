@@ -542,7 +542,7 @@ export class WalletController {
 
    // Total balance to be sent
    let balance: number = 0;
-
+   let txHash: string = "";
    if (type === "btc") {
 
     // Increment balance for every input
@@ -610,6 +610,7 @@ export class WalletController {
      //   }
        // Update sender's btc balance
        senderWallet.btc.balance = senderWallet.btc.balance - balance;
+       txHash = broadcastTransactionResponse.payload.txid;
       } else if (type === "eth") {
        // Increment balance
        balance = balance + req.body.value;
@@ -657,6 +658,7 @@ export class WalletController {
        
        // Update sender's wallet eth balance
        senderWallet.eth.balance = senderWallet.eth.balance - balance;
+       txHash = ethSentResponse.payload.hex;
       } else if (type === "doge") {
        // Increment balance
        for (const i of req.body.inputs)
@@ -720,6 +722,7 @@ export class WalletController {
         
         // Update sender's wallet doge balance
         senderWallet.doge.balance = senderWallet.doge.balance - balance;
+        txHash = broadcastTransactionResponse.payload.txid;
       } else if (type === "ltc") {
        // Increment balance
        for (const i of req.body.inputs)
@@ -779,7 +782,7 @@ export class WalletController {
 
          // Update sender wallet's LTC balance
          senderWallet.ltc.balance = senderWallet.ltc.balance - balance;
-
+         txHash = broadcastTransactionResponse.payload.txid;
       } else if (type === "trx") {
        balance = balance + req.body.amount;
 
@@ -797,11 +800,13 @@ export class WalletController {
        // console.log(wallets[0]);
 
        // Send TRON
-       const tronSentResponse = await TRON.sendToken(senderWallet.trx.address, req.body.to, balance);
+       const tronSentResponse = await TRON.sendToken(senderWallet.trx.address, req.body.to, req.body.amount);
 
        // Check for errors
-       if (tronSentResponse.statusCode >= 400)
+       if (tronSentResponse.statusCode >= 400){
+         console.log(tronSentResponse);
         throw new CustomError(tronSentResponse.statusCode, tronSentResponse.payload);
+       }
 
        // Sign transaction
        const signTransactionResponse = await TRON.signTransaction(tronSentResponse.payload, senderWallet.trx.pk);
@@ -824,6 +829,7 @@ export class WalletController {
 
        // Update sender's wallet tron balance
        senderWallet.trx.balance = senderWallet.trx.balance - balance;
+       txHash = signTransactionResponse.payload.txid;
       } else if (type === "dash") {
        // Increment balance
        for (const i of req.body.inputs)
@@ -883,6 +889,7 @@ export class WalletController {
 
          // Update sender wallet's LTC balance
          senderWallet.dash.balance = senderWallet.dash.balance - balance;
+         txHash = broadcastTransactionResponse.payload.txid;
       }
 
    // Update sender's wallet balance by deducting from it 
@@ -895,7 +902,8 @@ export class WalletController {
    const response = {
     sender: Tokenizers.encryptWallet(updatedSenderWallet),
     // recipients: encRecipientWallets,
-    message: "Transaction successful."
+    message: "Transaction successful.",
+    txHash: txHash
    };
 
    //Send response
