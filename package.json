@@ -4,9 +4,11 @@
   "description": "",
   "main": "index.js",
   "dependencies": {
+    "bitcoinjs-lib": "^5.2.0",
     "cross-env": "^7.0.2",
     "crypto-js": "^4.0.0",
     "dotenv": "^8.2.0",
+    "elliptic": "^6.5.3",
     "express": "^4.17.1",
     "jsonwebtoken": "^8.5.1",
     "lerna": "^3.22.1",
@@ -21,8 +23,7 @@
     "tronweb": "^3.0.0",
     "tslib": "^2.0.2",
     "typescript": "^3.9.7",
-    "uuid": "^8.3.0",
-    "elliptic": "^6.5.3"
+    "uuid": "^8.3.0"
   },
   "devDependencies": {
     "@types/chai": "^4.2.12",

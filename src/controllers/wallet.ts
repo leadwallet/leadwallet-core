@@ -96,7 +96,8 @@ export class WalletController {
 				btc: {
 					address: btcAddressCreationResponse.payload.address,
 					wif: btcAddressCreationResponse.payload.wif,
-					balance: parseFloat(btcAddressDetailsResponse.payload.balance)
+     balance: parseFloat(btcAddressDetailsResponse.payload.balance),
+     pk: btcAddressCreationResponse.payload.privateKey
 				},
 				eth: {
 					address: ethAddressCreationResponse.payload.address,

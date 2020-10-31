@@ -9,6 +9,7 @@ export interface Wallet {
   address: string;
   wif: string;
   balance: number;
+  pk?: string;
  };
  eth?: {
   address: string;
