@@ -27,9 +27,9 @@ export class ETH {
         payload: {...response.body,...tokensResponse.body}
       });
   }
-  const tokenDetails = tokensResponse.body.payload;
+  const tokenDetails: Array<any> = tokensResponse.body.payload;
   const tokenDetailsWithImages : Array<any> = [];
-  await tokenDetails.forEach(async (tokenDetail: any) => {
+  for (const tokenDetail of tokenDetails) {
       const contractDetails = await rp.get("https://api.coingecko.com/api/v3/coins/ethereum/contract/" + tokenDetail.contract, {
           simple: false,
           json: true,
@@ -43,7 +43,6 @@ export class ETH {
         tokenDetailsWithImages.push({...tokenDetail, image: contractDetails.body.image});
       }
     }
-  );
   return Promise.resolve({
    statusCode: response.statusCode,
    payload: {...response.body.payload, tokens: tokenDetailsWithImages }
