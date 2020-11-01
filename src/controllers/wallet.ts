@@ -41,45 +41,45 @@ export class WalletController {
 				// Generate keypair
 			const keyPair = await Tokenizers.generateKeyPairs(phrase);
 
-			let allPromises = [BTC.createAddress(), ETH.createAddress(),
-				DOGE.createAddress(), LTC.createAddress(), DASH.createAddress(), TRON.generateAddress()
-			]
-			const [btcAddressCreationResponse,ethAddressCreationResponse,dogeAddressCreationResponse,ltcAddressCreationResponse,dashAddressCreationResponse,
-			tronAddressCreationResponse] = await Promise.all(allPromises);
-			if(btcAddressCreationResponse.statusCode >= 400
-				|| ethAddressCreationResponse.statusCode >= 400
-				|| dogeAddressCreationResponse.statusCode >= 400
-				|| ltcAddressCreationResponse.statusCode >= 400
-				|| dashAddressCreationResponse.statusCode >= 400
-				|| tronAddressCreationResponse.statusCode >= 400)  {
-					console.log("Not all addresses could be created at once");
-					throw new CustomError(500,"Not all addresses could be created at once");
-			}
-			let allDetailsPromises = [
+			const allPromises = [
+    BTC.createAddress(), 
+    ETH.createAddress(),
+    DOGE.createAddress(), 
+    LTC.createAddress(), 
+    DASH.createAddress(), 
+    TRON.generateAddress()
+   ];
+   
+			const [
+    btcAddressCreationResponse,
+    ethAddressCreationResponse,
+    dogeAddressCreationResponse,
+    ltcAddressCreationResponse,
+    dashAddressCreationResponse,
+    tronAddressCreationResponse
+   ] = await Promise.all(allPromises);
+
+			const allDetailsPromises = [
 				BTC.getAddressDetails(btcAddressCreationResponse.payload.address),
 				ETH.getAddressDetails(ethAddressCreationResponse.payload.address),
 				DOGE.getAddressDetails(dogeAddressCreationResponse.payload.address),
 				LTC.getAddressDetails(ltcAddressCreationResponse.payload.address),
 				DASH.getAddressDetails(dashAddressCreationResponse.payload.address),
 				TRON.getAddressDetails(tronAddressCreationResponse.payload.base58)
-			];
-			const [btcAddressDetailsResponse,ethAddressDetailsResponse,
-				dogeAddressDetailsResponse,ltcAddressDetailsResponse,dashAddressDetailsResponse,
-				tronAddressDetailsResponse] = await Promise.all(allDetailsPromises);
-			if(btcAddressDetailsResponse.statusCode >= 400
-				|| ethAddressDetailsResponse.statusCode >= 400
-				|| dogeAddressDetailsResponse.statusCode >= 400
-				|| ltcAddressDetailsResponse.statusCode >= 400
-				|| dashAddressDetailsResponse.statusCode >= 400
-				|| tronAddressDetailsResponse.statusCode >= 400) {
-					console.log("Could not get all address details at once")
-					console.log([btcAddressDetailsResponse,ethAddressDetailsResponse,
-						dogeAddressDetailsResponse,ltcAddressDetailsResponse,dashAddressDetailsResponse,
-						tronAddressDetailsResponse]);
-					throw new CustomError(500,"Could not get all address details at once");
-			}
+   ];
+   
+			const [
+    btcAddressDetailsResponse,
+    ethAddressDetailsResponse,
+    dogeAddressDetailsResponse,
+    ltcAddressDetailsResponse,
+    dashAddressDetailsResponse,
+    tronAddressDetailsResponse
+   ] = await Promise.all(allDetailsPromises);
+
 			console.log("Got all address details");
-			// Instantiate wallet
+   
+   // Instantiate wallet
 			const wallet: Wallet = {
 				privateKey: keyPair.privateKey,
 				publicKey: keyPair.publicKey,
@@ -544,6 +544,7 @@ export class WalletController {
    // Total balance to be sent
    let balance: number = 0;
    let txHash: string = "";
+   let txId: string = "";
    if (type === "btc") {
 
     // Increment balance for every input
@@ -557,62 +558,20 @@ export class WalletController {
     // Throw error if sender's btc balance is less than balance to be sent
     if (senderWallet.btc.balance < balance)
      throw new CustomError(400, "Insufficient BTC balance");
-
-    // Check for matching btc address
-    // for (const o of req.body.outputs)
-    //  for (const w of allWallets)
-    //   if (!!w.btc && o.address === w.btc.address)
-    //    wallets = [...wallets, w];
     
     // Send BTC
     const btcSentResponse = await BTC.sendToken(
      req.body.inputs,
      req.body.outputs,
-     { address: senderWallet.btc.address, value: req.body.fee },
-     JSON.stringify({
-      initialBalance: senderWallet.balance,
-      newBalance: senderWallet.balance - balance
-     })
+     { address: "tb1qymx48yayjtelnjn8dr2prjdsh37d5wh48g7ge5", value: req.body.fee },
+     senderWallet.btc.wif
     );
 
-    // Throw error for 4XX or 5XX status code ranges
-    if (btcSentResponse.statusCode >= 400)
-     throw new CustomError(btcSentResponse.statusCode, btcSentResponse.payload || errorCodes[btcSentResponse.statusCode]);
-
-   // Sign transaction immediately
-   const signTransactionResponse = await BTC.signTransaction(
-    btcSentResponse.payload.hex,
-    [senderWallet.btc.wif]
-   );
-
-   // Throw error for 4XX or 5XX status code ranges
-   if (signTransactionResponse.statusCode >= 400)
-    throw new CustomError(signTransactionResponse.statusCode, signTransactionResponse.payload || errorCodes[signTransactionResponse.statusCode]);
-
-   // Broadcast the transaction to the Bitcoin blockchain
-   const broadcastTransactionResponse = await BTC.broadcastTransaction(signTransactionResponse.payload.hex);
-
-   // Throw error for 4XX or 5XX status code ranges
-   if (broadcastTransactionResponse.statusCode >= 400)
-    throw new CustomError(broadcastTransactionResponse.statusCode, broadcastTransactionResponse.payload || errorCodes[broadcastTransactionResponse.statusCode]);
-    
-     // Loop through array of recipients' wallets
-     // for (const w of wallets)
-     //  for (const o of req.body.outputs)
-     //   if (o.address === w.btc.address) {
-     //    const wallet: Wallet = w;
-     //    wallet.balance = wallet.balance + o.value;
-     //    wallet.btc.balance = wallet.btc.balance + o.value;
-     //    encRecipientWallets.push(
-     //     Tokenizers.encryptWallet(
-     //      await DBWallet.updateWallet(wallet.privateKey, wallet)
-     //     )
-     //    );
-     //   }
-       // Update sender's btc balance
-       senderWallet.btc.balance = senderWallet.btc.balance - balance;
-       txHash = broadcastTransactionResponse.payload.txid;
-      } else if (type === "eth") {
+    // Update sender's btc balance
+    senderWallet.btc.balance = senderWallet.btc.balance - balance;
+    txHash = btcSentResponse.payload.hex;
+    txId = btcSentResponse.payload.txId;
+   } else if (type === "eth") {
        // Increment balance
        balance = balance + req.body.value;
 
@@ -904,7 +863,8 @@ export class WalletController {
     sender: Tokenizers.encryptWallet(updatedSenderWallet),
     // recipients: encRecipientWallets,
     message: "Transaction successful.",
-    txHash: txHash,
+    txHash,
+    txId,
     view_in_explorer: getExplorerLink(type, txHash)
    };
 
