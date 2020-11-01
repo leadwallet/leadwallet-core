@@ -50,12 +50,12 @@ export class ETH {
  }
 
  static async sendToken(
-  body: { fromAddress: string; toAddress: string; gasPrice: number; gasLimit: number; value: number; password: string; nonce?: number; }
+  body: { fromAddress: string; toAddress: string; gasPrice: number; gasLimit: number; value: number; privateKey: string; nonce?: number; }
  ): Promise<{ statusCode: number; payload: any; }> {
-  const response = await rp.post(ETHROOT + "/txs/new", {
+  const response = await rp.post(ETHROOT + "/txs/new-pvtkey", {
    ...options, body
   });
-  // console.log(JSON.stringify(response));
+  console.error(JSON.stringify(response));
   return Promise.resolve({
    statusCode: response.statusCode,
    payload: response.body.payload || response.body.meta.error.message
