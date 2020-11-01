@@ -72,23 +72,33 @@ export class TransactionFeeService {
 		const GAS_LIMIT_API: string = Environment.CRYPTO_API + "/v1/bc/eth/" + COIN_NETWORK["eth"][process.env.NODE_ENV] +"/txs/gas";
 		const [gasPriceResponse,gasLimitResponse] = await Promise.all([
 			rp.get(GAS_PRICE_API, {...options}),
-			rp.post(GAS_LIMIT_API, {...options, body: {"fromAddress": fromAddress, "toAddress": toAddress, "value": value}})
+			rp.post(GAS_LIMIT_API, {...options, body: {fromAddress, toAddress, value}})
 		]);
-		if(gasPriceResponse.statusCode >= 400 || gasLimitResponse.statusCode>= 400) {
-			console.log("Couldn't get gas price/limit");
-			console.log(gasPriceResponse);
-			console.log(gasLimitResponse);
-			throw new CustomError(500, "Couldn't get gas price/limit")
+		const gasPrice: number = 2.1e10;
+		let gasPriceFlag: boolean = false;
+		if(gasPriceResponse.statusCode >= 400 ) {
+			console.error("Couldn't get gas price going ahead with 21000000000 wei");
+			console.error(gasLimitResponse.body);
+		} else {
+			gasPriceFlag = true;
+		}
+		let gasLimit: number = 21000;
+		if(gasLimitResponse.statusCode>= 400) {
+			console.error("Couldn't get gas limit going ahead with 21000 wei");
+			console.error(gasLimitResponse.body);
+		} else {
+			gasLimit = parseFloat(gasLimitResponse.body.payload.gasLimit);
 		}
 		return Promise.resolve({
-			"min_gas_price" : parseFloat(gasPriceResponse.body.payload.min),
-			"average_gas_price" : parseFloat(gasPriceResponse.body.payload.average),
-			"max_gas_price": parseFloat(gasPriceResponse.body.payload.max),
-			"slow_gas_price" : parseFloat(gasPriceResponse.body.payload.slow),
-			"standard_gas_price" : parseFloat(gasPriceResponse.body.payload.standard),
-			"fast_gas_price": parseFloat(gasPriceResponse.body.payload.fast),
-			"gasLimit" : parseFloat(gasLimitResponse.body.payload.gasLimit),
-			"unit" : gasPriceResponse.body.payload.unit
+			//GasPrices converted to wei to be used in send token api
+			"min_gas_price" : gasPriceFlag ? parseFloat(gasPriceResponse.body.payload.min)*1e9 : gasPrice,
+			"average_gas_price" : gasPriceFlag ? parseFloat(gasPriceResponse.body.payload.average)*1e9 : gasPrice,
+			"max_gas_price": gasPriceFlag ? parseFloat(gasPriceResponse.body.payload.max)*1e9 : gasPrice,
+			"slow_gas_price" : gasPriceFlag ? parseFloat(gasPriceResponse.body.payload.slow)*1e9 : gasPrice,
+			"standard_gas_price" : gasPriceFlag ? parseFloat(gasPriceResponse.body.payload.standard)*1e9 : gasPrice,
+			"fast_gas_price": gasPriceFlag ? parseFloat(gasPriceResponse.body.payload.fast)*1e9 : gasPrice,
+			"gasLimit" : gasLimit,
+			"unit" : "wei"
 		});
 	}
 }

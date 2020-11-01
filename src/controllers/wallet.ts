@@ -414,6 +414,7 @@ export class WalletController {
     response: await WalletAdaptor.convert(newWallet)
    });
   } catch (error) {
+   console.error(error)
    res.status(error.code || 500).json({
     statusCode: error.code || 500,
     response: error.message
@@ -635,13 +636,14 @@ export class WalletController {
         gasPrice: req.body.gasPrice,
         gasLimit: req.body.gasLimit,
         value: req.body.value,
-        password: senderWallet.privateKey,
-        nonce: 0
+        privateKey: senderWallet.eth.pk
        });
 
        // Throw error for 4XX or 5XX status code ranges
-       if (ethSentResponse.statusCode >= 400)
+       if (ethSentResponse.statusCode >= 400) {
+        console.error(ethSentResponse);
         throw new CustomError(ethSentResponse.statusCode, ethSentResponse.payload || errorCodes[ethSentResponse.statusCode]);
+       }
        
        // Loop through array
        // for (const w of wallets)
