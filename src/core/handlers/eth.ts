@@ -67,13 +67,14 @@ export class ETH {
   toAddress: string,
   contract: string,
   privateKey: string,
+  token: number,
   gasPrice: number,
   gasLimit: number
  ): Promise<{ statusCode: number; payload: any; }> {
-  const response = await rp.post(ETHROOT + "/token/transfer", {
+  const response = await rp.post(ETHROOT + "/tokens/transfer", {
    ...options,
    body: {
-    fromAddress, toAddress, privateKey, gasPrice, gasLimit, contract
+    fromAddress, toAddress, privateKey, gasPrice, gasLimit, contract, token
    }
   });
 

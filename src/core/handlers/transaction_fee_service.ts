@@ -4,6 +4,37 @@ import { CRYPTO_API_COINS, options, COIN_NETWORK } from "./commons";
 import { CustomError } from "../../custom";
 
 export class TransactionFeeService {
+  	public static async getERC20TransactionFee(fromAddress: string, toAddress: string, contract: string, value: number): Promise<any> {
+		const CONTRACT_GAS_PRICE_API: string = Environment.CRYPTO_API + "/v1/bc/eth/" + COIN_NETWORK["eth"][process.env.NODE_ENV] +"/contracts/gas-price";
+		const TOKENS_GAS_LIMIT_API: string = Environment.CRYPTO_API + "/v1/bc/eth/" + COIN_NETWORK["eth"][process.env.NODE_ENV] +"/tokens/transfer/gas-limit";
+		const [gasPriceResponse,gasLimitResponse] = await Promise.all([
+			rp.get(CONTRACT_GAS_PRICE_API, {...options}),
+			rp.post(TOKENS_GAS_LIMIT_API, {...options, body: {fromAddress, toAddress, contract, "tokenAmount": value}})
+		]);
+		const gasPrice: number = 2.5e10;
+		let gasPriceFlag: boolean = false;
+		if(gasPriceResponse.statusCode >= 400 ) {
+			console.error("Couldn't get gas price going ahead with 25000000000 wei");
+			console.error(gasPriceResponse.body);
+		} else {
+			gasPriceFlag = true;
+		}
+		let gasLimit: number = 70000;
+		if(gasLimitResponse.statusCode>= 400) {
+			console.error("Couldn't get gas limit going ahead with 70000");
+			console.error(gasLimitResponse.body);
+		} else {
+			gasLimit = parseFloat(gasLimitResponse.body.payload.gasLimit);
+		}
+		return Promise.resolve({
+			//GasPrices converted to wei to be used in transferERC20 token api
+			"slow_gas_price" : gasPriceFlag ? parseFloat(gasPriceResponse.body.payload.slow)*1e9 : gasPrice,
+			"standard_gas_price" : gasPriceFlag ? parseFloat(gasPriceResponse.body.payload.standard)*1e9 : gasPrice,
+			"fast_gas_price": gasPriceFlag ? parseFloat(gasPriceResponse.body.payload.fast)*1e9 : gasPrice,
+			"gasLimit" : gasLimit,
+			"unit" : "wei"
+		});
+	}
     public static async getTransactionFee(ticker : string, fromAddress: string, toAddress: string, value: number) : Promise<any> {
         if(CRYPTO_API_COINS.includes(ticker)) {
             if(ticker === "eth") {
@@ -78,13 +109,13 @@ export class TransactionFeeService {
 		let gasPriceFlag: boolean = false;
 		if(gasPriceResponse.statusCode >= 400 ) {
 			console.error("Couldn't get gas price going ahead with 21000000000 wei");
-			console.error(gasLimitResponse.body);
+			console.error(gasPriceResponse.body);
 		} else {
 			gasPriceFlag = true;
 		}
 		let gasLimit: number = 21000;
 		if(gasLimitResponse.statusCode>= 400) {
-			console.error("Couldn't get gas limit going ahead with 21000 wei");
+			console.error("Couldn't get gas limit going ahead with 21000");
 			console.error(gasLimitResponse.body);
 		} else {
 			gasLimit = parseFloat(gasLimitResponse.body.payload.gasLimit);
