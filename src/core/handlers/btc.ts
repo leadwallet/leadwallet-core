@@ -1,7 +1,5 @@
 import * as bitcoin from "bitcoinjs-lib";
 import rp from "request-promise";
-import explorers from "bitcore-explorers";
-import util from "util";
 import { Environment } from "../../env";
 import { COIN_NETWORK, options } from "./commons";
 
@@ -61,7 +59,7 @@ export class BTC {
  static async sendToken(
   inputs: { address: string; value: number; }[], 
   outputs: { address: string; value: number; }[],
-  localFee: { address: string; value: number; },
+  fee: { address: string; value: number; },
   wif?: string
  ): Promise<{ payload: any; statusCode: number; }> {
   try {
@@ -71,20 +69,18 @@ export class BTC {
     network
    });
    const txb = new bitcoin.Psbt({ network });
-   const feeValue = outputs.map(o => o.value)
-    .concat(localFee.value)
-    .reduce((prev, current) => prev + current);
-   const inputValue = inputs.map(i => i.value)
-    .concat(localFee.value)
-    .reduce((prev, current) => prev + current);
+   // const feeValue = outputs.map(o => o.value)
+   //  .concat(localFee.value)
+   //  .reduce((prev, current) => prev + current);
+   // const inputValue = inputs.map(i => i.value)
+   //  .concat(localFee.value)
+   //  .reduce((prev, current) => prev + current);
    const txPrepareResponse = await rp.post(CRYPTOAPI + "/txs/create", {
     ...options,
     body: {
-     inputs: [
-      { address: inputs[0].address, value: inputValue }
-     ],
-     outputs: outputs.concat(localFee),
-     fee: { address: payments.address, value: 0.00001}
+     inputs,
+     outputs,
+     fee
     }
    });
 

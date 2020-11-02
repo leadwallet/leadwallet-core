@@ -10,6 +10,7 @@ import { CRYPTO_API_COINS, getExplorerLink } from "../core/handlers/commons";
 import { WalletAdaptor } from "../core/utils/wallet_adaptor";
 import { CurrencyConverter } from "../core/utils/currency_converter";
 import { TransactionFeeService } from "../core/handlers/transaction_fee_service";
+import { Environment } from "../env";
 
 const { DBWallet } = db;
 const errorCodes = {
@@ -43,7 +44,7 @@ export class WalletController {
 
 			const allPromises = [
     BTC.createAddress(), 
-    ETH.createAddress(),
+    ETH.createAddress(keyPair.privateKey),
     DOGE.createAddress(), 
     LTC.createAddress(), 
     DASH.createAddress(), 
@@ -85,7 +86,7 @@ export class WalletController {
 				publicKey: keyPair.publicKey,
 				balance: (
 					parseFloat(btcAddressDetailsResponse.payload.balance) +
-					parseFloat(ethAddressDetailsResponse.payload.balance) +
+					parseFloat(ethAddressDetailsResponse.payload.final_balance) +
 					parseFloat(dogeAddressDetailsResponse.payload.balance) +
 					parseFloat(ltcAddressDetailsResponse.payload.balance) +
 					tronAddressDetailsResponse.payload.balance +
@@ -101,9 +102,9 @@ export class WalletController {
 				},
 				eth: {
 					address: ethAddressCreationResponse.payload.address,
-          balance: parseFloat(ethAddressDetailsResponse.payload.balance),
-          tokens: ethAddressDetailsResponse.payload.tokens,
-          pk: ethAddressCreationResponse.payload.privateKey
+     balance: parseFloat(ethAddressDetailsResponse.payload.final_balance) / (10 ** 18),
+     tokens: ethAddressDetailsResponse.payload.tokens,
+     pk: ethAddressCreationResponse.payload.privateKey
 				},
 				doge: {
 					address: dogeAddressCreationResponse.payload.address,
@@ -156,206 +157,21 @@ export class WalletController {
 		});
 	}
 }
- static async createWallet(req: express.Request, res: express.Response): Promise<any> {
-  try {
-   // String that would be created from the incoming array of phrases
-   let phrase = "";
 
-   // The incoming recovery phrase as an array
-   const recoveryPhrase: string[] = req.body.recoveryPhrase;
+static async getWallet(req: express.Request & { privateKey: string, publicKey: string;}, res: express.Response): Promise<any> {
+ try {
+  // Private key would be deserialized from a token and passed into the request object
+  const privateKey: string = req.privateKey;
+		const publicKey: string = req.publicKey;
+  // Get wallet using private key
+  const wallet = await DBWallet.getWallet(privateKey,publicKey);
 
-   // Loop through array and then append to 'phrase' string
-   for (const p of recoveryPhrase) 
-    phrase += p + " ";
-   
-    // Generate keypair
-   const keyPair = await Tokenizers.generateKeyPairs(phrase);
-
-   // Generate BTC address
-   const btcAddressCreationResponse = await BTC.createAddress();
-   // console.log(btcAddressCreationResponse.payload);
-
-   // Throw error if btc response code is within 4XX or 5XX range
-
-   if (btcAddressCreationResponse.statusCode >= 400)
-    throw new CustomError(btcAddressCreationResponse.statusCode, btcAddressCreationResponse.payload || errorCodes[btcAddressCreationResponse.statusCode]);
-
-   // Generate ETH address
-   const ethAddressCreationResponse = await ETH.createAddress();
-
-   // Throw error if eth response code is within 4XX or 5XX range
-   if (ethAddressCreationResponse.statusCode >= 400)
-    throw new CustomError(ethAddressCreationResponse.statusCode, ethAddressCreationResponse.payload || errorCodes[ethAddressCreationResponse.statusCode]);
-
-   // Generate DOGE address
-   const dogeAddressCreationResponse = await DOGE.createAddress(); 
-
-   // Throw error if doge response code is within 4XX or 5XX range
-   if (dogeAddressCreationResponse.statusCode >= 400)
-    throw new CustomError(dogeAddressCreationResponse.statusCode, dogeAddressCreationResponse.payload || errorCodes[dogeAddressCreationResponse.statusCode]);
-
-   // Generate LTC address
-   const ltcAddressCreationResponse = await LTC.createAddress();
-
-   // Throw error if ltc response code is within 4XX or 5XX range
-   if (ltcAddressCreationResponse.statusCode >= 400)
-    throw new CustomError(ltcAddressCreationResponse.statusCode, ltcAddressCreationResponse.payload || errorCodes[ltcAddressCreationResponse.statusCode]);
-
-   // Generate POLKA address
-   // const polkaAddressCreation = await POLKA.createAddress(phrase, Tokenizers.hash(keyPair.publicKey + keyPair.privateKey));
-
-   // Generate DASH address
-   const dashAddressCreationResponse = await DASH.createAddress();
-
-   // Throw error if dash response code is within 4XX or 5XX range
-   if (dashAddressCreationResponse.statusCode >= 400)
-    throw new CustomError(dashAddressCreationResponse.statusCode, dashAddressCreationResponse.payload || errorCodes[dashAddressCreationResponse.statusCode]);
-
-   // Generate TRON address
-   const tronAddressCreationResponse = await TRON.generateAddress();
-
-   // Throw error if any
-   if (tronAddressCreationResponse.statusCode >= 400)
-    throw new CustomError(tronAddressCreationResponse.statusCode, tronAddressCreationResponse.payload || errorCodes[tronAddressCreationResponse.statusCode]);
-
-   // Generate HMY address
-   // const hmyAddressCreationResponse = await HMY.createAddress(keyPair.privateKey);
-
-   // Throw error if any
-   // if (tronAddressCreationResponse.statusCode >= 400)
-   //  throw new CustomError(tronAddressCreationResponse.statusCode, errorCodes[tronAddressCreationResponse.statusCode]);
-   
-   // Get BTC address details
-   const btcAddressDetailsResponse = await BTC.getAddressDetails(btcAddressCreationResponse.payload.address);
-   // console.log(btcAddressDetailsResponse.payload);
-
-   if (btcAddressDetailsResponse.statusCode >= 400)
-    throw new CustomError(btcAddressDetailsResponse.statusCode, btcAddressDetailsResponse.payload || errorCodes[btcAddressDetailsResponse.statusCode]);
-
-   // Get ETH address details
-   const ethAddressDetailsResponse = await ETH.getAddressDetails(ethAddressCreationResponse.payload.address);
-
-   if (ethAddressDetailsResponse.statusCode >= 400)
-    throw new CustomError(ethAddressDetailsResponse.statusCode, ethAddressDetailsResponse.payload || errorCodes[ethAddressDetailsResponse.statusCode]);
-
-   // Get DOGE address details
-   const dogeAddressDetailsResponse = await DOGE.getAddressDetails(dogeAddressCreationResponse.payload.address);
-
-   if (dogeAddressDetailsResponse.statusCode >= 400)
-    throw new CustomError(dogeAddressDetailsResponse.statusCode, dogeAddressDetailsResponse.payload || errorCodes[dogeAddressDetailsResponse.statusCode]);
-
-   // Get LTC address details
-   const ltcAddressDetailsResponse = await LTC.getAddressDetails(ltcAddressCreationResponse.payload.address);
-
-   if (ltcAddressDetailsResponse.statusCode >= 400)
-    throw new CustomError(ltcAddressDetailsResponse.statusCode, ltcAddressDetailsResponse.payload || errorCodes[ltcAddressDetailsResponse.statusCode]);
-
-   // Get POLKA address details
-   // const polkaAddressDetails = await POLKA.getAddressDetails(polkaAddressCreation.payload.address);
-
-   // Get TRON address details
-   const tronDetailsResponse = await TRON.getAddressDetails(tronAddressCreationResponse.payload.base58);
-
-   if (tronDetailsResponse.statusCode >= 400)
-    throw new CustomError(tronDetailsResponse.statusCode, tronDetailsResponse.payload);
-
-   // Get DASH address details
-   const dashAddressDetailsResponse = await DASH.getAddressDetails(dashAddressCreationResponse.payload.address);
-
-   if (dashAddressDetailsResponse.statusCode >= 400)
-    throw new CustomError(dashAddressDetailsResponse.statusCode, dashAddressDetailsResponse.payload || errorCodes[dashAddressDetailsResponse.statusCode]);
-   
-   // Instantiate wallet
-   const wallet: Wallet = {
-    privateKey: keyPair.privateKey,
-    publicKey: keyPair.publicKey,
-    balance: (
-     parseFloat(btcAddressDetailsResponse.payload.balance) + 
-     parseFloat(ethAddressDetailsResponse.payload.balance) + 
-     parseFloat(dogeAddressDetailsResponse.payload.balance) +
-     parseFloat(ltcAddressDetailsResponse.payload.balance) +
-     tronDetailsResponse.payload.balance +
-     parseFloat(dashAddressDetailsResponse.payload.balance)
-     // hmyAddressCreationResponse.payload.balance
-    ),
-    hash: Tokenizers.hash(keyPair.publicKey + keyPair.privateKey),
-    btc: {
-     address: btcAddressCreationResponse.payload.address,
-     wif: btcAddressCreationResponse.payload.wif,
-     balance: parseFloat(btcAddressDetailsResponse.payload.balance)
-    },
-    eth: {
-     address: ethAddressCreationResponse.payload.address,
-     balance: parseFloat(ethAddressDetailsResponse.payload.balance),
-     pk: ethAddressCreationResponse.payload.privateKey
-    },
-    doge: {
-     address: dogeAddressCreationResponse.payload.address,
-     wif: dogeAddressCreationResponse.payload.wif,
-     balance: parseFloat(dogeAddressDetailsResponse.payload.balance)
-    },
-    ltc: {
-     address: ltcAddressCreationResponse.payload.address,
-     wif: ltcAddressCreationResponse.payload.wif,
-     balance: parseFloat(ltcAddressDetailsResponse.payload.balance)
-    },
-    trx: {
-     address: tronAddressCreationResponse.payload.base58,
-     balance: tronDetailsResponse.payload.balance,
-     pk: tronAddressCreationResponse.payload.privateKey
-    },
-    dash: {
-     address: dashAddressCreationResponse.payload.address,
-     wif: dashAddressCreationResponse.payload.wif,
-     balance: parseFloat(dashAddressDetailsResponse.payload.balance)
-    }
-    // one: {
-    //  address: hmyAddressCreationResponse.payload.address,
-    //  balance: hmyAddressCreationResponse.payload.balance
-    // }
-   };
-
-   // Save wallet to db and get as object
-   const newWallet = await DBWallet.create(wallet, wallet.privateKey);
-
-   // API Response
-   const response = {
-    wallet: await WalletAdaptor.convert(newWallet),
-    token: Tokenizers.generateToken({
-     privateKey: newWallet.privateKey,
-     publicKey: newWallet.publicKey,
-     defiAccessKey: newWallet.eth.pk
-    })
-   };
-
-   // Send response
-   res.status(201).json({
-    statusCode: 201,
-    response
-   });
-  } catch (error) {
-   // console.log(error);
-   res.status(error.code || 500).json({
-    statusCode: error.code || 500,
-    response: error.message
-   });
-  }
- }
-
- static async getWallet(req: express.Request & { privateKey: string, publicKey: string;}, res: express.Response): Promise<any> {
-  try {
-   // Private key would be deserialized from a token and passed into the request object
-   const privateKey: string = req.privateKey;
-			const publicKey: string = req.publicKey;
-   // Get wallet using private key
-   const wallet = await DBWallet.getWallet(privateKey,publicKey);
-
-   // Send response
-   res.status(200).json({
-    statusCode: 200,
-    response: await WalletAdaptor.convert(wallet)
-   });
-  } catch (error) {
+  // Send response
+  res.status(200).json({
+   statusCode: 200,
+   response: await WalletAdaptor.convert(wallet)
+  });
+ } catch (error) {
    res.status(500).json({
     statusCode: 500,
     response: error.message
@@ -563,7 +379,7 @@ export class WalletController {
     const btcSentResponse = await BTC.sendToken(
      req.body.inputs,
      req.body.outputs,
-     { address: "tb1qymx48yayjtelnjn8dr2prjdsh37d5wh48g7ge5", value: req.body.fee },
+     { address: senderWallet.btc.address, value: req.body.fee },
      senderWallet.btc.wif
     );
 
@@ -572,16 +388,16 @@ export class WalletController {
     txHash = btcSentResponse.payload.hex;
     txId = btcSentResponse.payload.txId;
    } else if (type === "eth") {
-       // Increment balance
+      // Increment balance
        balance = balance + req.body.value;
 
-       // Throw error if balance is more than sender's wallet balance
-       if (senderWallet.balance < balance)
-        throw new CustomError(400, "Wallet balance is not sufficient.");
+     // Throw error if balance is more than sender's wallet balance
+      if (senderWallet.balance < balance)
+       throw new CustomError(400, "Wallet balance is not sufficient.");
 
-       // Throw error if sender's ethereum balance is less than balance to be sent
-       if (senderWallet.eth.balance < balance)
-        throw new CustomError(400, "Insufficient ETH balance.");
+     // Throw error if sender's ethereum balance is less than balance to be sent
+      if (senderWallet.eth.balance < balance)
+       throw new CustomError(400, "Insufficient ETH balance.");
 
        // Find matching wallet
        // for (const w of allWallets)
@@ -589,15 +405,7 @@ export class WalletController {
        //   wallets = [...wallets, w];
 
        // Send ETH
-       const ethSentResponse = await ETH.sendToken({
-        fromAddress: senderWallet.eth.address,
-        toAddress: req.body.toAddress,
-        gasPrice: req.body.gasPrice,
-        gasLimit: req.body.gasLimit,
-        value: req.body.value,
-        password: senderWallet.privateKey,
-        nonce: 0
-       });
+       const ethSentResponse = await ETH.sendToken(senderWallet.eth.pk, req.body);
 
        // Throw error for 4XX or 5XX status code ranges
        if (ethSentResponse.statusCode >= 400)
