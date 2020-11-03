@@ -11,14 +11,14 @@ const COINGECKO_SIMPLE_PRICE_ROOT = "https://api.coingecko.com/api/v3/simple/pri
 
 export class CurrencyConverter {
 	private static instance: CurrencyConverter;
-	private currencyMap: Map<string,number>;
+ private currencyMap: Map<string,number>;
 
 	private constructor() {}
 
 	public static async getInstance(): Promise<CurrencyConverter> {
 		if(!CurrencyConverter.instance) {
 			CurrencyConverter.instance = new CurrencyConverter();
-			CurrencyConverter.instance.currencyMap = new Map<string,number>();
+   CurrencyConverter.instance.currencyMap = new Map<string,number>();
 			await CurrencyConverter.refreshCurrencyMap();
 			setInterval(async() => {CurrencyConverter.refreshCurrencyMap()},60000);
 		}
@@ -43,5 +43,18 @@ export class CurrencyConverter {
 
 	public getPriceInUSD(id: string) : number {
 		return CurrencyConverter.instance.currencyMap.has(id) ? CurrencyConverter.instance.currencyMap.get(id) : 0;
-	}
+ }
+ 
+ public async getERC20InUSD(contract: string): Promise<number> {
+  const response = await rp.get(COINGECKO_SIMPLE_PRICE_ROOT.replace("price", "token_price") + "/ethereum?contract_addresses=" + contract + "&vs_currencies=usd", {
+   simple: true,
+   json: true,
+   resolveWithFullResponse: true,
+   headers: {
+    "Content-Type": "application/json"
+   }
+  });
+  const value = response.body[contract].usd;
+  return Promise.resolve(value);
+ }
 }

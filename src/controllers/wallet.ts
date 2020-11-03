@@ -802,7 +802,23 @@ static async getWallet(req: express.Request & { privateKey: string, publicKey: s
 				response: error.message
 			});
 		}
-	}
+ }
+ 
+ static async getErc20Price(req: express.Request, res: express.Response): Promise<any> {
+  try {
+   const currencyConverter = await CurrencyConverter.getInstance();
+   const { contract } = req.params;
+   res.status(200).json({
+    statusCode: 200,
+    response: await currencyConverter.getERC20InUSD(contract)
+   });
+  } catch (error) {
+   res.status(500).json({
+    statusCode: 500,
+    response: error.message
+   });
+  }
+ }
 
 	static async getEstimatedTransactionFee(req: express.Request, res: express.Response) : Promise<any> {
 		try {
