@@ -47,17 +47,23 @@ export class CurrencyConverter {
 		return CurrencyConverter.instance.currencyMap.has(id) ? CurrencyConverter.instance.currencyMap.get(id) : 0;
 	}
 	// TODO
-	public async getTokenPriceInUSD(contract: string) : Promise<number> {
-		const response = await rp.get(COINGECKO_TOKEN_PRICE_ROOT+"/ethereum?contract_addresses="+contract + "&vs_currencies=usd",{
+	public async getTokenPriceInUSD(contracts: string) : Promise<any> {
+		const response = await rp.get(COINGECKO_TOKEN_PRICE_ROOT+"/ethereum?contract_addresses="+contracts + "&vs_currencies=usd",{
 			headers: {
 				"Accept": "application/json"
 			}
 		});
 		if(response.statusCode >= 400) {
 			console.error(response);
-			throw new CustomError(response.statusCode, "Couldn't get usd conversion for " + contract);
+			throw new CustomError(response.statusCode, "Couldn't get usd conversion for " + contracts);
 		}
-		const value = JSON.parse(response)[contract]['usd'];
-		return Promise.resolve(value);
+		const values = JSON.parse(response);
+		let responseValues = [];
+		for (const contract of contracts.split(",")) {
+			const value = {};
+			value[contract] = values[contract]['usd'];
+			responseValues.push(value);
+		}
+		return Promise.resolve(responseValues);
 	}
 }
