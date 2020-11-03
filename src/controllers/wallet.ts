@@ -701,7 +701,7 @@ static async getWallet(req: express.Request & { privateKey: string, publicKey: s
         if (ticker !== "eth") {
           apiResponse = response.payload.map((item: any) => ({
               hash: item.txid,
-              amount: Object.keys(item.received).includes(address) ? "+" + item.amount : "-" + item.amount,
+              amount: Object.keys(item.received).includes(address.toLowerCase()) ? "+" + item.amount : "-" + item.amount,
               fee: item.fee,
               status: item.confirmations > 0 ? "Confirmed" : "Pending",
               from: Object.keys(item.sent).map((key) => key).join(", "),
@@ -710,9 +710,10 @@ static async getWallet(req: express.Request & { privateKey: string, publicKey: s
               view_in_explorer: getExplorerLink(ticker, item.txid)
             }));
         } else {
+            // console.log(response.payload);
             apiResponse = response.payload.map((item: any) => ({
               hash: item.hash,
-              amount: item.received === address ? "+" + item.amount : "-" + item.amount,
+              amount: item.sent === address.toLowerCase() ? "-" + item.amount : "+" + item.amount,
               fee: item.fee,
               status: item.confirmations > 0 ? "Confirmed" : "Pending",
               from: item.sent,
