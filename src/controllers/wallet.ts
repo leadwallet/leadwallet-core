@@ -599,7 +599,7 @@ static async getWallet(req: express.Request & { privateKey: string, publicKey: s
 
        // Update sender's wallet tron balance
        senderWallet.trx.balance = senderWallet.trx.balance - balance;
-       txHash = signTransactionResponse.payload.txid;
+       txHash = signTransactionResponse.payload.transaction.txID;
       } else if (type === "dash") {
        // Increment balance
        for (const i of req.body.inputs)
@@ -701,7 +701,7 @@ static async getWallet(req: express.Request & { privateKey: string, publicKey: s
         if (ticker !== "eth") {
           apiResponse = response.payload.map((item: any) => ({
               hash: item.txid,
-              amount: item.amount,
+              amount: Object.keys(item.received).includes(address) ? "+" + item.amount : "-" + item.amount,
               fee: item.fee,
               status: item.confirmations > 0 ? "Confirmed" : "Pending",
               from: Object.keys(item.sent).map((key) => key).join(", "),
@@ -712,7 +712,7 @@ static async getWallet(req: express.Request & { privateKey: string, publicKey: s
         } else {
             apiResponse = response.payload.map((item: any) => ({
               hash: item.hash,
-              amount: item.amount,
+              amount: item.received === address ? "+" + item.amount : "-" + item.amount,
               fee: item.fee,
               status: item.confirmations > 0 ? "Confirmed" : "Pending",
               from: item.sent,
@@ -726,7 +726,7 @@ static async getWallet(req: express.Request & { privateKey: string, publicKey: s
         statusCode: 200,
         response: apiResponse
         });
-			} else if(ticker.toLowerCase() === 'erc-20') {
+			} else if (ticker.toLowerCase() === 'erc-20') {
         const response = await TransactionService.getERC20Transactions(address);
         const apiResponse: Array<any> = response.payload.map((txn: any) => ({
           hash: txn.txHash,
@@ -743,8 +743,22 @@ static async getWallet(req: express.Request & { privateKey: string, publicKey: s
           statusCode: 200,
           response: apiResponse
         });
-      } else {
-				throw new CustomError(400, ticker + " not supported yet.");
+      } else if (ticker.toLowerCase() === "trx") {
+       const response = await TRON.getTransactions(address);
+       const apiResponse = response.payload.map((item: any) => ({
+        hash: item.txID,
+        from: item.raw_data.contract[0].from,
+        to: item.raw_data.contract[0].to,
+        date: new Date(item.raw_data.timestamp),
+        amount: item.raw_data.contract[0].value,
+        fee: item.net_fee / (10 ** 6),
+        status: item.ret[0].contractRet === "SUCCESS" ? "Confirmed" : "Failed",
+        view_in_explorer: getExplorerLink(ticker, item.txID)
+       }));
+       res.status(200).json({
+        statusCode: 200,
+        response: apiResponse
+       });
 			}
 		} catch (error) {
 			res.status(error.code || 500).json({
