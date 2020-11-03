@@ -18,7 +18,7 @@ const ethPrefix = {
 };
 const bcn = blockCypherNetworks[environment];
 const ethP = ethPrefix[environment];
-const EXPLORER = "https://api.blockcypher.com/v1/" + ethP + "/" + bcn;
+// const EXPLORER = "https://api.blockcypher.com/v1/" + ethP + "/" + bcn;
 const CRYPTOAPI = Environment.CRYPTO_API + "/v1/bc/eth/" + COIN_NETWORK["eth"][environment];
 
 const web3 = new Web3(
@@ -46,7 +46,7 @@ export class ETH {
 
  static async getAddressDetails(address: string): Promise<{ statusCode: number; payload: any; }> {
   try {
-   const response = await rp.get(EXPLORER + "/addrs/" + address, { ...options });
+   const response = await rp.get(CRYPTOAPI + "/address/" + address, { ...options });
    const tokensResponse = await rp.get(CRYPTOAPI + "/tokens/address/" + address, { ...options});
    const tokenDetails = tokensResponse.body.payload;
    const tokenDetailsWithImages : Array<any> = [];
@@ -67,7 +67,7 @@ export class ETH {
    );
     return Promise.resolve({
      statusCode: response.statusCode,
-     payload: { ...response.body, tokens: tokenDetailsWithImages }
+     payload: { ...response.body.payload, tokens: tokenDetailsWithImages }
     });
   } catch (error) {
    return Promise.reject(

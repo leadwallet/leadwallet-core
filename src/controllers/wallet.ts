@@ -86,7 +86,7 @@ export class WalletController {
 				publicKey: keyPair.publicKey,
 				balance: (
 					parseFloat(btcAddressDetailsResponse.payload.balance) +
-					parseFloat(ethAddressDetailsResponse.payload.final_balance) +
+					parseFloat(ethAddressDetailsResponse.payload.balance) +
 					parseFloat(dogeAddressDetailsResponse.payload.balance) +
 					parseFloat(ltcAddressDetailsResponse.payload.balance) +
 					tronAddressDetailsResponse.payload.balance +
@@ -102,7 +102,7 @@ export class WalletController {
 				},
 				eth: {
 					address: ethAddressCreationResponse.payload.address,
-     balance: parseFloat(ethAddressDetailsResponse.payload.final_balance) / (10 ** 18),
+     balance: parseFloat(ethAddressDetailsResponse.payload.balance),
      tokens: ethAddressDetailsResponse.payload.tokens,
      pk: ethAddressCreationResponse.payload.privateKey
 				},
