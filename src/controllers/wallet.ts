@@ -790,12 +790,20 @@ static async getWallet(req: express.Request & { privateKey: string, publicKey: s
 	static async refreshPrice(req: express.Request, res: express.Response): Promise<any> {
 		try {
 			let currencyConverter = await CurrencyConverter.getInstance();
-			const {ticker} = req.params;
-			console.log(ticker)
-			res.status(200).json({
-				statusCode: 200,
-				response: currencyConverter.getPriceInUSD(ticker)
-			});
+      const {ticker} = req.params;
+			if(ticker.startsWith("0x")) {
+        const values = await currencyConverter.getTokenPriceInUSD(ticker);
+        res.status(200).json({
+          statusCode: 200,
+          response: values
+        });
+      } else {
+        const value = currencyConverter.getPriceInUSD(ticker);
+        res.status(200).json({
+          statusCode: 200,
+          response: value
+        });
+      }
 		} catch (error) {
 			res.status(error.code || 500).json({
 				statusCode: error.code || 500,
@@ -804,21 +812,21 @@ static async getWallet(req: express.Request & { privateKey: string, publicKey: s
 		}
  }
  
- static async getErc20Price(req: express.Request, res: express.Response): Promise<any> {
-  try {
-   const currencyConverter = await CurrencyConverter.getInstance();
-   const { contract } = req.params;
-   res.status(200).json({
-    statusCode: 200,
-    response: await currencyConverter.getERC20InUSD(contract)
-   });
-  } catch (error) {
-   res.status(500).json({
-    statusCode: 500,
-    response: error.message
-   });
-  }
- }
+ // static async getErc20Price(req: express.Request, res: express.Response): Promise<any> {
+ //  try {
+ //   const currencyConverter = await CurrencyConverter.getInstance();
+ //   const { contract } = req.params;
+ //   res.status(200).json({
+ //    statusCode: 200,
+ //    response: await currencyConverter.getERC20InUSD(contract)
+ //   });
+ //  } catch (error) {
+ //   res.status(500).json({
+ //    statusCode: 500,
+ //    response: error.message
+ //   });
+ //  }
+ // }
 
 	static async getEstimatedTransactionFee(req: express.Request, res: express.Response) : Promise<any> {
 		try {

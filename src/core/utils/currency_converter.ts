@@ -1,8 +1,10 @@
 import rp from "request-promise";
-import { SYMBOL_ID_MAPPING, ID_SYMBOL_MAPPING, COINS_MAP, CURRENT_COINS } from "../handlers/commons";
+import { CustomError } from "../../custom";
+import { SYMBOL_ID_MAPPING, ID_SYMBOL_MAPPING, COINS_MAP, CURRENT_COINS, ALL_COINS } from "../handlers/commons";
 
 const coinsList: string = Array.from(ID_SYMBOL_MAPPING.keys()).join(",");
 const COINGECKO_SIMPLE_PRICE_ROOT = "https://api.coingecko.com/api/v3/simple/price";
+const COINGECKO_TOKEN_PRICE_ROOT = "https://api.coingecko.com/api/v3/simple/token_price";
 /*
 	This class uses COINGECKO API to get the latest price in USD
 	of all the supported coins in leadwallet. It keeps refreshing
@@ -43,18 +45,25 @@ export class CurrencyConverter {
 
 	public getPriceInUSD(id: string) : number {
 		return CurrencyConverter.instance.currencyMap.has(id) ? CurrencyConverter.instance.currencyMap.get(id) : 0;
- }
- 
- public async getERC20InUSD(contract: string): Promise<number> {
-  const response = await rp.get(COINGECKO_SIMPLE_PRICE_ROOT.replace("price", "token_price") + "/ethereum?contract_addresses=" + contract + "&vs_currencies=usd", {
-   simple: true,
-   json: true,
-   resolveWithFullResponse: true,
-   headers: {
-    "Content-Type": "application/json"
-   }
-  });
-  const value = response.body[contract].usd;
-  return Promise.resolve(value);
- }
+	}
+	// TODO
+	public async getTokenPriceInUSD(contracts: string) : Promise<any> {
+		const response = await rp.get(COINGECKO_TOKEN_PRICE_ROOT+"/ethereum?contract_addresses="+contracts + "&vs_currencies=usd",{
+			headers: {
+				"Accept": "application/json"
+			}
+		});
+		if(response.statusCode >= 400) {
+			console.error(response);
+			throw new CustomError(response.statusCode, "Couldn't get usd conversion for " + contracts);
+		}
+		const values = JSON.parse(response);
+		let responseValues = [];
+		for (const contract of contracts.split(",")) {
+			const value = {};
+			value[contract] = values[contract]['usd'];
+			responseValues.push(value);
+		}
+		return Promise.resolve(responseValues);
+	}
 }
