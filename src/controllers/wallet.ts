@@ -1007,11 +1007,16 @@ export class WalletController {
 	static async refreshPrice(req: express.Request, res: express.Response): Promise<any> {
 		try {
 			let currencyConverter = await CurrencyConverter.getInstance();
-			const {ticker} = req.params;
-			console.log(ticker)
+      const {ticker} = req.params;
+      let value: number = 0;
+			if(ticker.startsWith("0x")) {
+        value = await currencyConverter.getTokenPriceInUSD(ticker);
+      } else {
+        value = currencyConverter.getPriceInUSD(ticker);
+      }
 			res.status(200).json({
 				statusCode: 200,
-				response: currencyConverter.getPriceInUSD(ticker)
+				response: value
 			});
 		} catch (error) {
 			res.status(error.code || 500).json({
