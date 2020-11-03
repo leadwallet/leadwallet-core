@@ -10,7 +10,6 @@ import { CRYPTO_API_COINS, getExplorerLink } from "../core/handlers/commons";
 import { WalletAdaptor } from "../core/utils/wallet_adaptor";
 import { CurrencyConverter } from "../core/utils/currency_converter";
 import { TransactionFeeService } from "../core/handlers/transaction_fee_service";
-import { Environment } from "../env";
 
 const { DBWallet } = db;
 const errorCodes = {
@@ -231,6 +230,7 @@ static async getWallet(req: express.Request & { privateKey: string, publicKey: s
     response: await WalletAdaptor.convert(newWallet)
    });
   } catch (error) {
+   console.error(error)
    res.status(error.code || 500).json({
     statusCode: error.code || 500,
     response: error.message
@@ -408,8 +408,10 @@ static async getWallet(req: express.Request & { privateKey: string, publicKey: s
        const ethSentResponse = await ETH.sendToken(senderWallet.eth.pk, req.body);
 
        // Throw error for 4XX or 5XX status code ranges
-       if (ethSentResponse.statusCode >= 400)
+       if (ethSentResponse.statusCode >= 400) {
+        console.error(ethSentResponse);
         throw new CustomError(ethSentResponse.statusCode, ethSentResponse.payload || errorCodes[ethSentResponse.statusCode]);
+       }
        
        // Loop through array
        // for (const w of wallets)
@@ -693,42 +695,55 @@ static async getWallet(req: express.Request & { privateKey: string, publicKey: s
 		try {
 			const {ticker , address} = req.params
 			if (CRYPTO_API_COINS.includes(ticker)) {
-    const response = await TransactionService.getTransactions(ticker,address);
-
-    if (response.statusCode >= 400)
-     throw new CustomError(response.statusCode, errorCodes[response.statusCode]);
-
-    let apiResponse = [];
-
-    if (ticker !== "eth") {
-     apiResponse = response.payload.map((item: any) => ({
-      hash: item.txid,
-      amount: item.amount,
-      fee: item.fee,
-      status: item.confirmations > 0 ? "Confirmed" : "Pending",
-      from: Object.keys(item.sent).map((key) => key).join(", "),
-      to: Object.keys(item.received).map((key) => key).join(", "),
-      date: item.datetime,
-      view_in_explorer: getExplorerLink(ticker, item.txid)
-     }));
-    } else {
-     apiResponse = response.payload.map((item: any) => ({
-      hash: item.hash,
-      amount: item.amount,
-      fee: item.fee,
-      status: item.confirmations > 0 ? "Confirmed" : "Pending",
-      from: item.sent,
-      to: item.received,
-      date: item.datetime,
-      view_in_explorer: getExplorerLink(ticker, item.hash)
-     }));
-    }
+        const response = await TransactionService.getTransactions(ticker,address);
     
-    res.status(200).json({
-     statusCode: 200,
-     response: apiResponse
-    });
-			} else {
+        let apiResponse = [];
+        if (ticker !== "eth") {
+          apiResponse = response.payload.map((item: any) => ({
+              hash: item.txid,
+              amount: item.amount,
+              fee: item.fee,
+              status: item.confirmations > 0 ? "Confirmed" : "Pending",
+              from: Object.keys(item.sent).map((key) => key).join(", "),
+              to: Object.keys(item.received).map((key) => key).join(", "),
+              date: item.datetime,
+              view_in_explorer: getExplorerLink(ticker, item.txid)
+            }));
+        } else {
+            apiResponse = response.payload.map((item: any) => ({
+              hash: item.hash,
+              amount: item.amount,
+              fee: item.fee,
+              status: item.confirmations > 0 ? "Confirmed" : "Pending",
+              from: item.sent,
+              to: item.received,
+              date: item.datetime,
+              view_in_explorer: getExplorerLink(ticker, item.hash)
+            }));
+        }
+
+        res.status(200).json({
+        statusCode: 200,
+        response: apiResponse
+        });
+			} else if(ticker.toLowerCase() === 'erc-20') {
+        const response = await TransactionService.getERC20Transactions(address);
+        const apiResponse: Array<any> = response.payload.map((txn: any) => ({
+          hash: txn.txHash,
+          from: txn.from,
+          to: txn.to,
+          date: txn.datetime,
+          amount: txn.value,
+          name: txn.name,
+          symbol: txn.symbol,
+          type: txn.type,
+          view_in_explorer: getExplorerLink("eth", txn.txHash)
+        }));
+        res.status(200).json({
+          statusCode: 200,
+          response: apiResponse
+        });
+      } else {
 				throw new CustomError(400, ticker + " not supported yet.");
 			}
 		} catch (error) {
@@ -780,8 +795,11 @@ static async getWallet(req: express.Request & { privateKey: string, publicKey: s
 			const {ticker} = req.params;
 			const fromAddress: string = req.body.fromAddress;
 			const toAddress: string =  req.body.toAddress;
-			const value: number = req.body.value;
-			const txFee: any = await TransactionFeeService.getTransactionFee(ticker,fromAddress,toAddress,value);
+      const value: number = req.body.value;
+      const contract: string = req.body.contract;
+      const txFee: any = (ticker.toLowerCase() === "erc-20")
+       ? await TransactionFeeService.getERC20TransactionFee(fromAddress,toAddress,contract,value)
+			 : await TransactionFeeService.getTransactionFee(ticker,fromAddress,toAddress,value);
 			res.status(200).json({
 				statusCode: 200,
 				txFee
@@ -840,8 +858,9 @@ static async getWallet(req: express.Request & { privateKey: string, publicKey: s
     req.body.to, 
     req.body.contract, 
     wallet.eth.pk,
-    req.body.gasPrice || 21000000000,
-    req.body.gasLimit || 100000
+    req.body.tokens,
+    req.body.gasPrice,
+    req.body.gasLimit
    );
 
    if (transferTokenResponse.statusCode >= 400)
@@ -850,7 +869,7 @@ static async getWallet(req: express.Request & { privateKey: string, publicKey: s
    const response = {
     message: "Successfully transferred token.",
     txHex: transferTokenResponse.payload.hex,
-    explorer: transferTokenResponse.payload.view_in_explorer
+    view_in_explorer: getExplorerLink("eth", transferTokenResponse.payload.hex)
    };
 
    res.status(200).json({

@@ -4,20 +4,20 @@ import { Environment } from "../../env";
 import { COIN_NETWORK, options } from "./commons";
 
 const environment = process.env.NODE_ENV;
-const blockCypherNetworks = {
- development: "test",
- production: "main",
- test: "test",
- staging: "test"
-};
-const ethPrefix = {
- development: "beth",
- production: "eth",
- test: "beth",
- staging: "beth"
-};
-const bcn = blockCypherNetworks[environment];
-const ethP = ethPrefix[environment];
+// const blockCypherNetworks = {
+//  development: "test",
+//  production: "main",
+//  test: "test",
+//  staging: "test"
+// };
+// const ethPrefix = {
+//  development: "beth",
+//  production: "eth",
+//  test: "beth",
+//  staging: "beth"
+// };
+// const bcn = blockCypherNetworks[environment];
+// const ethP = ethPrefix[environment];
 // const EXPLORER = "https://api.blockcypher.com/v1/" + ethP + "/" + bcn;
 const CRYPTOAPI = Environment.CRYPTO_API + "/v1/bc/eth/" + COIN_NETWORK["eth"][environment];
 
@@ -107,13 +107,14 @@ export class ETH {
   toAddress: string,
   contract: string,
   privateKey: string,
+  token: number,
   gasPrice: number,
   gasLimit: number
  ): Promise<{ statusCode: number; payload: any; }> {
   const response = await rp.post(CRYPTOAPI + "/token/transfer", {
    ...options,
    body: {
-    fromAddress, toAddress, privateKey, gasPrice, gasLimit, contract
+    fromAddress, toAddress, privateKey, gasPrice, gasLimit, contract, token
    }
   });
 
