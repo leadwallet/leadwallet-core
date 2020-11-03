@@ -1008,16 +1008,19 @@ export class WalletController {
 		try {
 			let currencyConverter = await CurrencyConverter.getInstance();
       const {ticker} = req.params;
-      let value: number = 0;
 			if(ticker.startsWith("0x")) {
-        value = await currencyConverter.getTokenPriceInUSD(ticker);
+        const values = await currencyConverter.getTokenPriceInUSD(ticker);
+        res.status(200).json({
+          statusCode: 200,
+          response: values
+        });
       } else {
-        value = currencyConverter.getPriceInUSD(ticker);
+        const value = currencyConverter.getPriceInUSD(ticker);
+        res.status(200).json({
+          statusCode: 200,
+          response: value
+        });
       }
-			res.status(200).json({
-				statusCode: 200,
-				response: value
-			});
 		} catch (error) {
 			res.status(error.code || 500).json({
 				statusCode: error.code || 500,
