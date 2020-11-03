@@ -1,5 +1,6 @@
 import rp from "request-promise";
 import Web3 from "web3";
+import abi from "human-standard-token-abi";
 import { Environment } from "../../env";
 import { COIN_NETWORK, options } from "./commons";
 
@@ -111,7 +112,7 @@ export class ETH {
   gasPrice: number,
   gasLimit: number
  ): Promise<{ statusCode: number; payload: any; }> {
-  const response = await rp.post(CRYPTOAPI + "/token/transfer", {
+  const response = await rp.post(CRYPTOAPI + "/tokens/transfer", {
    ...options,
    body: {
     fromAddress, toAddress, privateKey, gasPrice, gasLimit, contract, token

@@ -69,4 +69,9 @@ router.post(
  WalletController.transferERC20Token
 );
 
+// router.get(
+//  "/price/erc20/:contract",
+//  WalletController.getErc20Price
+// );
+
 export default router;

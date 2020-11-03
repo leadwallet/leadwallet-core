@@ -13,14 +13,14 @@ const COINGECKO_TOKEN_PRICE_ROOT = "https://api.coingecko.com/api/v3/simple/toke
 
 export class CurrencyConverter {
 	private static instance: CurrencyConverter;
-	private currencyMap: Map<string,number>;
+ private currencyMap: Map<string,number>;
 
 	private constructor() {}
 
 	public static async getInstance(): Promise<CurrencyConverter> {
 		if(!CurrencyConverter.instance) {
 			CurrencyConverter.instance = new CurrencyConverter();
-			CurrencyConverter.instance.currencyMap = new Map<string,number>();
+   CurrencyConverter.instance.currencyMap = new Map<string,number>();
 			await CurrencyConverter.refreshCurrencyMap();
 			setInterval(async() => {CurrencyConverter.refreshCurrencyMap()},60000);
 		}
