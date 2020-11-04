@@ -716,7 +716,7 @@ static async getWallet(req: express.Request & { privateKey: string, publicKey: s
             }));
         } else {
             // console.log(response.payload);
-            apiResponse = response.payload.map((item: any) => ({
+            apiResponse = response.payload.map( async (item: any) => ({
               hash: item.hash,
               amount: item.sent === address.toLowerCase() ? "-" + item.amount : "+" + item.amount,
               fee: item.fee,
@@ -724,6 +724,7 @@ static async getWallet(req: express.Request & { privateKey: string, publicKey: s
               from: item.sent,
               to: item.received,
               date: item.datetime,
+              nonce: (await ETH.getTransactionDetails(item.hash, address)).payload.nonce,
               view_in_explorer: getExplorerLink(ticker, item.hash)
             }));
         }
