@@ -1010,8 +1010,8 @@ static async getWallet(req: express.Request & { privateKey: string, publicKey: s
     }
    });
   } catch (error) {
-   res.status(500).json({
-    statusCode: 500,
+   res.status(error.code || 500).json({
+    statusCode: error.code || 500,
     response: error.message
    });
   }
