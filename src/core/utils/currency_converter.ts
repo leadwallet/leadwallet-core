@@ -43,7 +43,6 @@ export class CurrencyConverter {
 		} else {
 			const values = JSON.parse(response);
 			for (const contract of contracts.split(",")) {
-				const value = {};
 				CurrencyConverter.instance.erc20TokensMap.set(contract, values[contract]['usd']);
 			}
 		}
