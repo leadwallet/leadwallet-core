@@ -992,6 +992,8 @@ static async getWallet(req: express.Request & { privateKey: string, publicKey: s
     wallet.balance = wallet.balance - wallet.trx.balance;
     wallet.trx = details;
     wallet.balance = wallet.balance + wallet.trx.balance;
+   } else {
+    throw new CustomError(400, "Type " + type + " not avaliable yet");
    }
    const newWallet = await DBWallet.updateWallet(wallet.privateKey, wallet);
    const token = Tokenizers.generateToken({
@@ -1008,8 +1010,8 @@ static async getWallet(req: express.Request & { privateKey: string, publicKey: s
     }
    });
   } catch (error) {
-   res.status(500).json({
-    statusCode: 500,
+   res.status(error.code || 500).json({
+    statusCode: error.code || 500,
     response: error.message
    });
   }
