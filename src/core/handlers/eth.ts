@@ -155,5 +155,22 @@ export class ETH {
   }
  }
 
+ static async importWallet(privateKey: string): Promise<{ payload: any; statusCode: any; }> {
+  try {
+   const account = web3.eth.accounts.privateKeyToAccount(privateKey);
+   return Promise.resolve({
+    statusCode: 200,
+    payload: {
+     address: account.address,
+     privateKey: account.privateKey
+    }
+   });
+  } catch (error) {
+   return Promise.reject(
+    new Error(error.message)
+   );
+  }
+ }
+
  // static async broadcastTransaction() {}
 }

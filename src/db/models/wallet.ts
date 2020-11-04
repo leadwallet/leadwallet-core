@@ -40,6 +40,19 @@ export class WalletModel {
   return Promise.resolve(decryptedWallet);
  }
 
+ async findByPrivateKey(privateKey: string): Promise<Wallet> {
+  let wallet: Wallet = null;
+  const allWallets = (await this.model.find()) as any;
+  
+  for (const doc of allWallets) {
+   const pk = Tokenizers.decryptPrivateKey(doc.encryptedPrivateKey);
+   if (pk === privateKey)
+    wallet = Tokenizers.decryptWallet(doc.encryptedWallet, privateKey);
+  }
+
+  return Promise.resolve(wallet);
+ }
+
  async updateWallet(privateKey: string, newWallet: Wallet): Promise<Wallet> {
   const allWallets = await this.model.find();
   let w: Wallet = null;

@@ -945,4 +945,105 @@ static async getWallet(req: express.Request & { privateKey: string, publicKey: s
    });
   }
  }
+
+ static async importCoin(req: express.Request & { wallet: Wallet; }, res: express.Response): Promise<any> {
+  try {
+   const { wallet, body } = req;
+   const { privateKey, type } = body;
+   
+   if (type === "btc") {
+    const btc = await BTC.importWallet(privateKey);
+    const balanceResponse = await BTC.getAddressDetails(btc.payload.address);
+    const details = {
+     address: btc.payload.address,
+     wif: btc.payload.wif,
+     pk: privateKey,
+     balance: parseFloat(balanceResponse.payload.balance)
+    };
+    wallet.balance = wallet.balance - wallet.btc.balance;
+    wallet.btc = details;
+    wallet.balance = wallet.balance + wallet.btc.balance;
+   } else if (type === "eth") {
+    const eth = await ETH.importWallet(privateKey);
+    const ethExtraDetails = await ETH.getAddressDetails(eth.payload.address);
+    const details = {
+     address: eth.payload.address,
+     pk: eth.payload.privateKey,
+     balance: parseFloat(ethExtraDetails.payload.balance),
+     tokens: ethExtraDetails.payload.tokens
+    };
+    wallet.balance = wallet.balance - wallet.eth.balance;
+    wallet.eth = details;
+    wallet.balance = wallet.balance + wallet.eth.balance;
+   } else if (type === "ltc") {
+    const ltc = await LTC.importWallet(privateKey);
+    const ltcExtraDetails = await LTC.getAddressDetails(ltc.payload.address);
+    const details = {
+     address: ltc.payload.address,
+     wif: ltc.payload.wif,
+     balance: parseFloat(ltcExtraDetails.payload.balance)
+    };
+    wallet.balance = wallet.balance - wallet.ltc.balance;
+    wallet.ltc = details;
+    wallet.balance = wallet.balance + wallet.ltc.balance;
+   } else if (type === "trx") {
+    const trx = await TRON.importWallet(privateKey);
+    const tronDetails = await TRON.getAddressDetails(trx.payload.address);
+    const details = {
+     address: trx.payload.address,
+     pk: trx.payload.privateKey,
+     balance: parseFloat(tronDetails.payload.balance)
+    };
+    wallet.balance = wallet.balance - wallet.trx.balance;
+    wallet.trx = details;
+    wallet.balance = wallet.balance + wallet.trx.balance;
+   }
+   const newWallet = await DBWallet.updateWallet(wallet.privateKey, wallet);
+   const token = Tokenizers.generateToken({
+    privateKey: newWallet.privateKey,
+    publicKey: newWallet.publicKey,
+    defiAccessKey: newWallet.eth.pk
+   });
+
+   res.status(200).json({
+    statusCode: 200,
+    response: {
+     wallet: await WalletAdaptor.convert(newWallet),
+     token
+    }
+   });
+  } catch (error) {
+   res.status(500).json({
+    statusCode: 500,
+    response: error.message
+   });
+  }
+ }
+
+ static async importByPrivateKey(req: express.Request, res: express.Response) {
+  try {
+   const wallet = await DBWallet.findByPrivateKey(req.body.privateKey);
+
+   if (!wallet)
+    throw new CustomError(404, "Wallet not found");
+
+   const token = Tokenizers.generateToken({
+    privateKey: wallet.privateKey,
+    publicKey: wallet.publicKey,
+    defiAccessKey: wallet.eth.pk
+   });
+   res.status(200).json({
+    statusCode: 200,
+    response: {
+     token,
+     wallet
+    }
+   });
+  } catch (error) {
+   res.status(error.code || 500).json({
+    statusCode: error.code || 500,
+    response: error.message
+   });
+  }
+ }
 }
