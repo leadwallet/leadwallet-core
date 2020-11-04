@@ -199,9 +199,6 @@ static async getWallet(req: express.Request & { privateKey: string, publicKey: s
 					|| dashDetailsResponse.statusCode >= 400
 					|| tronDetailsResponse.statusCode >= 400) {
 						console.log("Could not get all address details at once")
-						console.log([btcDetailsResponse,ethDetailsResponse,
-							dogeDetailsResponse,ltcDetailsResponse,dashDetailsResponse,
-							tronDetailsResponse]);
 					throw new CustomError(500,"Could not get all address details at once");
 			}
    wallet.balance = (
@@ -221,8 +218,6 @@ static async getWallet(req: express.Request & { privateKey: string, publicKey: s
    wallet.trx.balance = tronDetailsResponse.payload.balance;
    wallet.dash.balance = parseFloat(dashDetailsResponse.payload.balance);
    // wallet.one.balance = hmyDetailsResponse.payload.balance;
-
-   console.log(ethDetailsResponse.payload.tokens);
 
    // Update wallet in db
    const newWallet = await DBWallet.updateWallet(wallet.privateKey, wallet);

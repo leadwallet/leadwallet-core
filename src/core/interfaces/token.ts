@@ -3,5 +3,6 @@ export interface ERCToken {
     symbol: string,
     name: string,
     type: string,
-    balance: string
+    balance: string,
+    rate_in_usd?: number
 }

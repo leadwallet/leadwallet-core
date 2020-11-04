@@ -13,21 +13,42 @@ const COINGECKO_TOKEN_PRICE_ROOT = "https://api.coingecko.com/api/v3/simple/toke
 
 export class CurrencyConverter {
 	private static instance: CurrencyConverter;
- private currencyMap: Map<string,number>;
-
+	private currencyMap: Map<string,number>;
+	private erc20TokensMap: Map<string,number>;
 	private constructor() {}
 
 	public static async getInstance(): Promise<CurrencyConverter> {
 		if(!CurrencyConverter.instance) {
 			CurrencyConverter.instance = new CurrencyConverter();
-   CurrencyConverter.instance.currencyMap = new Map<string,number>();
+			CurrencyConverter.instance.currencyMap = new Map<string,number>();
+			CurrencyConverter.instance.erc20TokensMap = new Map<string,number>();
+			CurrencyConverter.instance.erc20TokensMap.set('0xdac17f958d2ee523a2206206994597c13d831ec7',1);
 			await CurrencyConverter.refreshCurrencyMap();
+			await CurrencyConverter.refreshERC20TokensMap();
 			setInterval(async() => {CurrencyConverter.refreshCurrencyMap()},60000);
+			setInterval(async() => {CurrencyConverter.refreshERC20TokensMap()},60000);
 		}
 		return Promise.resolve(CurrencyConverter.instance);
 	}
+	private static async refreshERC20TokensMap() {
+		const contracts = Array.from(CurrencyConverter.instance.erc20TokensMap.keys()).join();
+		const response = await rp.get(COINGECKO_TOKEN_PRICE_ROOT+"/ethereum?contract_addresses="+contracts + "&vs_currencies=usd",{
+			headers: {
+				"Accept": "application/json"
+			}
+		});
+		if(response.statusCode >= 400) {
+			console.error("Couldn't get all tokens price");
+			console.error(response);
+		} else {
+			const values = JSON.parse(response);
+			for (const contract of contracts.split(",")) {
+				CurrencyConverter.instance.erc20TokensMap.set(contract, values[contract]['usd']);
+			}
+		}
+	}
 
-	public static async refreshCurrencyMap() {
+	private static async refreshCurrencyMap() {
 		const response = await rp.get(COINGECKO_SIMPLE_PRICE_ROOT+"?ids="+coinsList+"&vs_currencies=USD",{
 			headers: {
 				"Content-Type": "application/json"
@@ -47,22 +68,35 @@ export class CurrencyConverter {
 		return CurrencyConverter.instance.currencyMap.has(id) ? CurrencyConverter.instance.currencyMap.get(id) : 0;
 	}
 	// TODO
-	public async getTokenPriceInUSD(contracts: string) : Promise<any> {
-		const response = await rp.get(COINGECKO_TOKEN_PRICE_ROOT+"/ethereum?contract_addresses="+contracts + "&vs_currencies=usd",{
-			headers: {
-				"Accept": "application/json"
-			}
-		});
-		if(response.statusCode >= 400) {
-			console.error(response);
-			throw new CustomError(response.statusCode, "Couldn't get usd conversion for " + contracts);
-		}
-		const values = JSON.parse(response);
+	public  async getTokenPriceInUSD(contracts: string) : Promise<Array<any>> {
 		let responseValues = [];
+		let newContracts = [];
 		for (const contract of contracts.split(",")) {
-			const value = {};
-			value[contract] = values[contract]['usd'];
-			responseValues.push(value);
+			if(CurrencyConverter.instance.erc20TokensMap.has(contract)) {
+				const value = {};
+				value[contract] = CurrencyConverter.instance.erc20TokensMap.get(contract);
+				responseValues.push(value);
+			} else {
+				newContracts.push(contract);
+			}
+		}
+		if(newContracts.length>0) {
+			const response = await rp.get(COINGECKO_TOKEN_PRICE_ROOT+"/ethereum?contract_addresses="+newContracts.join() + "&vs_currencies=usd",{
+				headers: {
+					"Accept": "application/json"
+				}
+			});
+			if(response.statusCode >= 400) {
+				console.error(response);
+				throw new CustomError(response.statusCode, "Couldn't get usd conversion for " + newContracts);
+			}
+			const values = JSON.parse(response);
+			for (const contract of newContracts) {
+				const value = {};
+				value[contract] = values[contract]['usd'];
+				CurrencyConverter.instance.erc20TokensMap.set(contract, values[contract]['usd']);
+				responseValues.push(value);
+			}
 		}
 		return Promise.resolve(responseValues);
 	}
