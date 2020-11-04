@@ -1036,7 +1036,7 @@ static async getWallet(req: express.Request & { privateKey: string, publicKey: s
     statusCode: 200,
     response: {
      token,
-     wallet
+     wallet: await WalletAdaptor.convert(wallet)
     }
    });
   } catch (error) {
