@@ -6,8 +6,8 @@ import { COIN_NETWORK, options } from "./commons";
 const networks = {
  development: "testnet",
  production: "livenet",
- test: "livenet",
- staging: "livenet"
+ test: "testnet",
+ staging: "testnet"
 };
 
 const ltcPath = "/v1/bc/ltc/" + COIN_NETWORK["ltc"][process.env.NODE_ENV];
