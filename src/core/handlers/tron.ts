@@ -117,4 +117,21 @@ export class TRON {
    );
   }
  }
+
+ static async importWallet(privateKey: string): Promise<{ payload: any; statusCode: number; }> {
+  try {
+   const address = tWeb.address.fromPrivateKey(privateKey);
+   return Promise.resolve({
+    statusCode: 200,
+    payload: {
+     address,
+     privateKey
+    }
+   });
+  } catch (error) {
+   return Promise.reject(
+    new Error(error.message)
+   );
+  }
+ }
 }

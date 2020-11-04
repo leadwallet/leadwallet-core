@@ -188,4 +188,30 @@ export class BTC {
  //   payload: response.body.payload || response.body.meta.error.message
  //  });
  // }
+
+ static async importWallet(privateKey: string): Promise<{ payload: any; statusCode: number }> {
+  try {
+   const keyPair = bitcoin.ECPair.fromPrivateKey(
+    Buffer.from(privateKey, "hex"),
+    network
+   );
+   const { address } = bitcoin.payments.p2wpkh({
+    pubkey: keyPair.publicKey,
+    network
+   });
+
+   return Promise.resolve({
+    statusCode: 200,
+    payload: {
+     address,
+     privateKey: keyPair.privateKey.toString("hex"),
+     wif: keyPair.toWIF()
+    }
+   });
+  } catch (error) {
+   return Promise.reject(
+    new Error(error.message)
+   );
+  }
+ }
 }

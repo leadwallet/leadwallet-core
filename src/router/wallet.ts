@@ -76,6 +76,18 @@ router.get(
  WalletController.getETHTransactionDetails
 )
 
+router.patch(
+ "/import_coin",
+ WalletMiddleware.getKeyPair,
+ WalletMiddleware.getWalletFromRequest,
+ WalletController.importCoin
+);
+
+router.get(
+ "/import_by_key",
+ WalletController.importByPrivateKey
+);
+
 // router.get(
 //  "/price/erc20/:contract",
 //  WalletController.getErc20Price
