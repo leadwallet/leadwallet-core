@@ -51,7 +51,8 @@ export class ETH {
    const tokensResponse = await rp.get(CRYPTOAPI + "/tokens/address/" + address, { ...options});
    const tokenDetails = tokensResponse.body.payload;
    const tokenDetailsWithImages : Array<any> = [];
-   await tokenDetails.forEach(async (tokenDetail: any) => {
+   
+   for (const tokenDetail of tokenDetails) {
     const contractDetails = await rp.get("https://api.coingecko.com/api/v3/coins/ethereum/contract/" + tokenDetail.contract, {
      simple: false,
      json: true,
@@ -60,12 +61,12 @@ export class ETH {
     if(contractDetails.statusCode >= 400) {
      console.log("Couldn't get image url for "+ tokenDetail.name);
      // If image is not available preoceeding with empty image urls
+     // console.log(tokenDetail);
       tokenDetailsWithImages.push({...tokenDetail, image: {}});
      } else {
         tokenDetailsWithImages.push({...tokenDetail, image: contractDetails.body.image});
       }
-    }
-   );
+   }
     return Promise.resolve({
      statusCode: response.statusCode,
      payload: { ...response.body.payload, tokens: tokenDetailsWithImages }
@@ -79,7 +80,7 @@ export class ETH {
 
  static async sendToken(
   pk: string,
-  body: { toAddress: string; gasPrice: number; gasLimit: number; value: number; }
+  body: { toAddress: string; gasPrice: number; gasLimit: number; value: number; nonce?: number; }
  ): Promise<{ statusCode: number; payload: any; }> {
   try {
    const account = web3.eth.accounts.privateKeyToAccount(pk);
@@ -87,8 +88,10 @@ export class ETH {
     to: body.toAddress,
     gasPrice: body.gasPrice,
     gas: body.gasLimit,
-    value: body.value * (10 ** 18)
+    value: body.value * (10 ** 18),
+    nonce: body.nonce
    });
+
    const sendSignedTx = await web3.eth.sendSignedTransaction(signedTx.rawTransaction);
    return Promise.resolve({
     statusCode: 200,
@@ -131,6 +134,25 @@ export class ETH {
    statusCode: response.statusCode,
    payload: response.body.payload || response.body.meta.error.message
   });
+ }
+
+ static async getTransactionDetails(transactionHash: string, address: string): Promise<{ statusCode: number; payload: any; }> {
+  try {
+   const trx = await web3.eth.getTransaction(transactionHash);
+   return Promise.resolve({
+    statusCode: 200,
+    payload: {
+     from: trx.from,
+     to: trx.to,
+     nonce: trx.nonce,
+     amount: trx.from.toLowerCase() === address.toLowerCase() ? "-" + trx.value : "+" + trx.value
+    }
+   });
+  } catch (error) {
+   return Promise.reject(
+    new Error(error.message)
+   );
+  }
  }
 
  // static async broadcastTransaction() {}

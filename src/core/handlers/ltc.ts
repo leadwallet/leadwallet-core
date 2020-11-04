@@ -1,4 +1,5 @@
 import rp from "request-promise";
+import litecore from "litecore-lib";
 import { Environment } from "../../env";
 import { COIN_NETWORK, options } from "./commons";
 

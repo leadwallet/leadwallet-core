@@ -69,6 +69,13 @@ router.post(
  WalletController.transferERC20Token
 );
 
+router.get(
+ "/getEthTx/:txHash",
+ WalletMiddleware.getKeyPair,
+ WalletMiddleware.getWalletFromRequest,
+ WalletController.getETHTransactionDetails
+)
+
 // router.get(
 //  "/price/erc20/:contract",
 //  WalletController.getErc20Price

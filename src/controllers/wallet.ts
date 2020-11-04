@@ -222,6 +222,8 @@ static async getWallet(req: express.Request & { privateKey: string, publicKey: s
    wallet.dash.balance = parseFloat(dashDetailsResponse.payload.balance);
    // wallet.one.balance = hmyDetailsResponse.payload.balance;
 
+   console.log(ethDetailsResponse.payload.tokens);
+
    // Update wallet in db
    const newWallet = await DBWallet.updateWallet(wallet.privateKey, wallet);
 
@@ -296,11 +298,14 @@ static async getWallet(req: express.Request & { privateKey: string, publicKey: s
    );
    wallet.btc.balance = parseFloat(btcDetailsResponse.payload.balance);
    wallet.eth.balance = parseFloat(ethDetailsResponse.payload.balance);
+   // wallet.eth.tokens = ethDetailsResponse.payload.tokens;
    wallet.doge.balance = parseFloat(dogeDetailsResponse.payload.balance);
    wallet.ltc.balance = parseFloat(ltcDetailsResponse.payload.balance);
    wallet.trx.balance = tronDetailsResponse.payload.balance;
    wallet.dash.balance = parseFloat(dashDetailsResponse.payload.balance);
    // wallet.one.balance = hmyDetailsResponse.payload.balance;
+
+   // console.log("tokens",  ethDetailsResponse.payload.tokens);
 
    // Update wallet in db
    const newWallet = await DBWallet.updateWallet(wallet.privateKey, wallet);
@@ -753,7 +758,7 @@ static async getWallet(req: express.Request & { privateKey: string, publicKey: s
         date: new Date(item.raw_data.timestamp),
         amount: item.raw_data.contract[0].value,
         fee: item.net_fee / (10 ** 6),
-        status: item.ret[0].contractRet === "SUCCESS" ? "Confirmed" : "Failed",
+        status: item.ret[0].contractRet === "SUCCESS" ? "Confirmed" : "Pending",
         view_in_explorer: getExplorerLink(ticker, item.txID)
        }));
        res.status(200).json({
@@ -918,6 +923,22 @@ static async getWallet(req: express.Request & { privateKey: string, publicKey: s
   } catch (error) {
    res.status(error.code || 500).json({
     statusCode: error.code || 500,
+    response: error.message
+   });
+  }
+ }
+
+ static async getETHTransactionDetails(req: express.Request & { wallet: Wallet; }, res: express.Response) {
+  try {
+   const { wallet, params } = req;
+   const trx = await ETH.getTransactionDetails(params.txHash, wallet.eth.address);
+   res.status(200).json({
+    statusCode: 200,
+    response: { ...trx.payload }
+   });
+  } catch (error) {
+   res.status(500).json({
+    statusCode: 500,
     response: error.message
    });
   }
