@@ -727,6 +727,7 @@ static async getWallet(req: express.Request & { privateKey: string, publicKey: s
               nonce: (await ETH.getTransactionDetails(item.hash, address)).payload.nonce,
               view_in_explorer: getExplorerLink(ticker, item.hash)
             }));
+            apiResponse = await Promise.all(apiResponse);
         }
 
         res.status(200).json({
