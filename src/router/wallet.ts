@@ -83,7 +83,7 @@ router.patch(
  WalletController.importCoin
 );
 
-router.get(
+router.post(
  "/import_by_key",
  WalletController.importByPrivateKey
 );

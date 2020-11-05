@@ -10,7 +10,9 @@ export class WalletAdaptor {
 		const prices: Map<string,number> = currencyConverter.getAllPricesUSD();
 		const tokenPrices: Array<any> = await currencyConverter.getTokenPriceInUSD(contracts);
 		for (let index = 0; index < wallet.eth.tokens.length; index++) {
-			wallet.eth.tokens[index]["rate_in_usd"] =  tokenPrices[index][wallet.eth.tokens[index]["contract"]];
+			if (tokenPrices[index]) {
+    wallet.eth.tokens[index]["rate_in_usd"] =  tokenPrices[index][wallet.eth.tokens[index]["contract"]];
+   }
 		}
 		for (const coin of CURRENT_COINS) {
 			coinList.push({name: coin, rate_in_usd: prices.get(coin), coinFullName: COINS_MAP.get(coin)["name"], ...wallet[coin], image: COINS_IMAGE_URLS.get(coin)})

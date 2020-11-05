@@ -33,16 +33,20 @@ export class CurrencyConverter {
 	private static async refreshERC20TokensMap() {
 		const contracts = Array.from(CurrencyConverter.instance.erc20TokensMap.keys()).join();
 		const response = await rp.get(COINGECKO_TOKEN_PRICE_ROOT+"/ethereum?contract_addresses="+contracts + "&vs_currencies=usd",{
+   json: true,
+   resolveWithFullResponse: true,
 			headers: {
-				"Accept": "application/json"
+    "Accept": "application/json"
 			}
-		});
+  });
+  // console.log(response.body)
 		if(response.statusCode >= 400) {
 			console.error("Couldn't get all tokens price");
 			console.error(response);
 		} else {
-			const values = JSON.parse(response);
+			const values = response.body;
 			for (const contract of contracts.split(",")) {
+    console.log(values[contract]["usd"]);
 				CurrencyConverter.instance.erc20TokensMap.set(contract, values[contract]['usd']);
 			}
 		}
@@ -80,24 +84,31 @@ export class CurrencyConverter {
 				newContracts.push(contract);
 			}
 		}
-		if(newContracts.length>0) {
-			const response = await rp.get(COINGECKO_TOKEN_PRICE_ROOT+"/ethereum?contract_addresses="+newContracts.join() + "&vs_currencies=usd",{
-				headers: {
-					"Accept": "application/json"
-				}
-			});
-			if(response.statusCode >= 400) {
-				console.error(response);
-				throw new CustomError(response.statusCode, "Couldn't get usd conversion for " + newContracts);
-			}
-			const values = JSON.parse(response);
-			for (const contract of newContracts) {
-				const value = {};
-				value[contract] = values[contract]['usd'];
-				CurrencyConverter.instance.erc20TokensMap.set(contract, values[contract]['usd']);
-				responseValues.push(value);
-			}
-		}
-		return Promise.resolve(responseValues);
-	}
-}
+		if (newContracts.length > 0) {
+			 const response = await rp.get(COINGECKO_TOKEN_PRICE_ROOT+"/ethereum?contract_addresses="+newContracts.join() + "&vs_currencies=usd",{
+     simple: false,
+     json: true,
+     resolveWithFullResponse: true,
+				 headers: {
+					 "Accept": "application/json"
+				 }
+			 });
+			 if (response.statusCode >= 400) {
+				 console.error(response);
+				 throw new CustomError(response.statusCode, "Couldn't get usd conversion for " + newContracts);
+			 }
+			 const values = response.body;
+			 for (const contract of newContracts) {
+     if (values[contract]) {
+      const value = {};
+      console.log(contract);
+      console.log(values);
+				  value[contract] = values[contract]['usd'];
+				  CurrencyConverter.instance.erc20TokensMap.set(contract, values[contract]['usd']);
+				  responseValues.push(value);
+     }
+			 }
+		 }
+		 return Promise.resolve(responseValues);
+	 }
+ }
