@@ -515,6 +515,8 @@ static async getWallet(req: express.Request & { privateKey: string, publicKey: s
        // Send LTC
        const ltcSentResponse = await LTC.sendToken(req.body.inputs, req.body.outputs, req.body.fee);
 
+       console.log(ltcSentResponse);
+
        // Throw error if status code is within 4XX and 5XX
        if (ltcSentResponse.statusCode >= 400)
         throw new CustomError(ltcSentResponse.statusCode, ltcSentResponse.payload || errorCodes[ltcSentResponse.statusCode]);
@@ -699,6 +701,7 @@ static async getWallet(req: express.Request & { privateKey: string, publicKey: s
     
         let apiResponse = [];
         if (ticker !== "eth") {
+         const response2 = await TransactionService.getPendingTransactions(ticker, address);
           apiResponse = response.payload.map((item: any) => ({
               hash: item.txid,
               amount: Object.keys(item.received).includes(address.toLowerCase()) ? "+" + item.amount : "-" + item.amount,
@@ -709,6 +712,15 @@ static async getWallet(req: express.Request & { privateKey: string, publicKey: s
               date: item.datetime,
               view_in_explorer: getExplorerLink(ticker, item.txid)
             }));
+           apiResponse = apiResponse.concat(response2.payload.map((item: any) => ({
+            hash: item.hash,
+            amount: item.txins[0].addresses.includes(address.toLowerCase()) ? "-" + item.txins[0].amount : "+" + item.txouts[0].amount,
+            status: "Pending",
+            from: item.txins[0].addresses.join(", "),
+            to: item.txouts[0].addresses.join(", "),
+            date: item.datetime,
+            view_in_explorer: getExplorerLink(ticker, item.txid)
+           })));
         } else {
             // console.log(response.payload);
             apiResponse = response.payload.map( async (item: any) => ({
