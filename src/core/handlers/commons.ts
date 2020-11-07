@@ -2,7 +2,7 @@ import { Environment } from "../../env";
 import syncReq from "sync-request";
 const COINGECKO_COINS_ROOT = "https://api.coingecko.com/api/v3/coins";
 export const options = {
-    simple: true,
+    simple: false,
     json: true,
     resolveWithFullResponse: true,
     headers: {

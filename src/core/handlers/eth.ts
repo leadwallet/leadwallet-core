@@ -48,7 +48,15 @@ export class ETH {
  static async getAddressDetails(address: string): Promise<{ statusCode: number; payload: any; }> {
   try {
    const response = await rp.get(CRYPTOAPI + "/address/" + address, { ...options });
+   
+   if (response.statusCode >= 400)
+    throw new Error(response.body.meta.error.message);
+   
    const tokensResponse = await rp.get(CRYPTOAPI + "/tokens/address/" + address, { ...options});
+
+   if (tokensResponse.statusCode >= 400)
+    throw new Error(response.body.meta.error.message);
+
    const tokenDetails = tokensResponse.body.payload;
    const tokenDetailsWithImages : Array<any> = [];
    

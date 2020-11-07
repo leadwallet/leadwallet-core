@@ -1,5 +1,6 @@
 import * as bitcoin from "bitcoinjs-lib";
 import rp from "request-promise";
+import { CustomError } from "../../custom";
 import { Environment } from "../../env";
 import { COIN_NETWORK, options } from "./commons";
 
@@ -41,6 +42,9 @@ export class BTC {
  static async getAddressDetails(address: string): Promise<{ payload: any; statusCode: number; }> {
   try {
    const response = await rp.get(EXPLORER + "/addrs/" + address, { ...options });
+   
+   if (response.statusCode >= 400)
+    throw new CustomError(response.statusCode, response.body);
    // console.log(response.body);
    return Promise.resolve({
     statusCode: 200,
@@ -84,6 +88,9 @@ export class BTC {
     }
    });
 
+   if (txPrepareResponse.statusCode >= 400)
+    throw new CustomError(txPrepareResponse.statusCode, txPrepareResponse.body.meta.error.message);
+
    console.log("Transaction hex: " + txPrepareResponse.body.payload.hex);
 
    const txDecoded = await rp.post(CRYPTOAPI + "/txs/decode", {
@@ -93,6 +100,9 @@ export class BTC {
     }
    });
 
+   if (txDecoded.statusCode >= 400)
+    throw new CustomError(txDecoded.statusCode, txDecoded.body.meta.error.message);
+
    const txs = txDecoded.body.payload;
    console.log(JSON.stringify(txs));
    console.log(txDecoded.body.payload.vin);
@@ -101,6 +111,9 @@ export class BTC {
     ...options
    });
 
+   if (unspentTxResponse.statusCode >= 400)
+    throw new CustomError(unspentTxResponse.statusCode, unspentTxResponse.body.meta.error.message);
+
    const unspentTxs = unspentTxResponse.body.payload[0];
 
    console.log(unspentTxs);
@@ -108,6 +121,9 @@ export class BTC {
    const rawTxsResponse = await rp.get(CRYPTOAPI + "/txs/raw/txid/" + unspentTxs.txid, {
     ...options
    });
+
+   if (rawTxsResponse.statusCode >= 400)
+    throw new CustomError(rawTxsResponse.statusCode, rawTxsResponse.body.meta.error.message);
 
    const rawHex = (rawTxsResponse.body.payload.hex);
    
@@ -147,6 +163,9 @@ export class BTC {
      hex
     }
    });
+
+   if (broadcastResponse.statusCode >= 400)
+    throw new CustomError(broadcastResponse.statusCode, broadcastResponse.body.meta.error.message);
 
    const txId = broadcastResponse.body.payload.txid;
 
