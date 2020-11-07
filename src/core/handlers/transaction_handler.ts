@@ -19,6 +19,21 @@ export class TransactionService {
             payload: response.body.payload
         });
     }
+
+ static async getPendingTransactions(ticker: string, address: string): Promise<{ payload: any; statusCode: number; }> {
+  const endpoint = Environment.CRYPTO_API + "/v1/bc/" + ticker + "/" + COIN_NETWORK[ticker][process.env.NODE_ENV] + "/address/"
+   + address + "/unconfirmed-transactions?index=0&limit=50";
+   
+  const response = await rp.get(endpoint, { ...options });
+  
+  if (response.statusCode >= 400)
+   throw new CustomError(response.statusCode, response.body.meta.error.message);
+
+  return Promise.resolve({
+   statusCode: response.statusCode,
+   payload: response.body.payload
+  });
+ }
     static async getERC20Transactions(address: string): Promise<{ payload: any; statusCode: number }> {
         const api = Environment.CRYPTO_API + "/v1/bc/eth/" + COIN_NETWORK["eth"][process.env.NODE_ENV] + "/tokens/address/"
 														+ address + "/transfers?limit=50";
