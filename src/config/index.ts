@@ -9,7 +9,7 @@ export default (app: express.Application): express.Application => {
   extended: false
  }));
  app.use(cors("*"));
- app.use(timeout(120000));
+ app.use(timeout(15000));
  app.use(logger("dev"));
  app.use("/api/v1", router);
  return app;

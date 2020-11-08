@@ -6,18 +6,40 @@ export const timeout = (timeout: number = 40000) => {
   res: express.Response, 
   next: express.NextFunction
  ) => {
-  req.setTimeout(timeout, () => {
-   res.status(503).json({
-    statusCode: 503,
-    response: "Request has timed out."
-   });
+  const space = " ";
+  let isFinished = false;
+  let isDataSent = false;
+  
+  res.on("finish", () => {
+   isFinished = true;
   });
-  res.setTimeout(timeout, () => {
-   res.status(503).json({
-    statusCode: 503,
-    response: "Response has timed out."
-   });
+
+  res.on("end", () => {
+   isFinished = true;
   });
+
+  res.on("close", () => {
+   isFinished = true;
+  });
+
+  res.on("data", (data) => {
+   if (data !== space)
+    isDataSent = true;
+  });
+
+  const waitAndSend = () => {
+   setTimeout(() => {
+    if (!isFinished && !isDataSent) {
+     if (!res.headersSent)
+      res.writeHead(202);
+
+     res.write(space);
+     waitAndSend();
+    }
+   }, timeout);
+  };
+
+  waitAndSend();
   next();
  };
 };
