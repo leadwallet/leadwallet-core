@@ -631,7 +631,7 @@ static async getWallet(req: express.Request & { privateKey: string, publicKey: s
        // Sign transaction
        const transactionSignResponse = await DASH.signTransaction(
         dashSentResponse.payload.hex,
-        [senderWallet.ltc.wif]
+        [senderWallet.dash.wif]
        );
 
        // Throw error for 4XX and 5XX status codes
