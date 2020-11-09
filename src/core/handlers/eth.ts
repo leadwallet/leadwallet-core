@@ -100,12 +100,15 @@ export class ETH {
     nonce: body.nonce
    });
 
-   const sendSignedTx = await web3.eth.sendSignedTransaction(signedTx.rawTransaction);
-   return Promise.resolve({
-    statusCode: 200,
-    payload: {
-     hex: sendSignedTx.transactionHash
+   const sendSignedTxResponse = await rp.post(CRYPTOAPI + "/txs/push", {
+    ...options,
+    body: {
+     hex: signedTx.rawTransaction
     }
+   });
+   return Promise.resolve({
+    statusCode: sendSignedTxResponse.statusCode,
+    payload: sendSignedTxResponse.body.payload || sendSignedTxResponse.body.meta.error.message
    });
   } catch (error) {
    return Promise.reject(
