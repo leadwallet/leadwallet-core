@@ -72,7 +72,17 @@ export class BTC {
     pubkey: keypair.publicKey,
     network
    });
+   const pBase58 = bitcoin.payments.p2pkh({
+    pubkey: keypair.publicKey,
+    network
+   });
+   let address = payments.address;
+
+   if (pBase58.address.toLowerCase() === inputs[0].address.toLowerCase())
+    address = pBase58.address;
+   // console.log("Address: " + payments.address);
    const txb = new bitcoin.Psbt({ network });
+   
    // const feeValue = outputs.map(o => o.value)
    //  .concat(localFee.value)
    //  .reduce((prev, current) => prev + current);
@@ -107,7 +117,7 @@ export class BTC {
    console.log(JSON.stringify(txs));
    console.log(txDecoded.body.payload.vin);
 
-   const unspentTxResponse = await rp.get(CRYPTOAPI + "/address/" + payments.address + "/unspent-transactions", {
+   const unspentTxResponse = await rp.get(CRYPTOAPI + "/address/" + address + "/unspent-transactions", {
     ...options
    });
 
