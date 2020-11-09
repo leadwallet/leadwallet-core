@@ -72,6 +72,7 @@ export class BTC {
     pubkey: keypair.publicKey,
     network
    });
+   console.log("Address: " + payments.address);
    const txb = new bitcoin.Psbt({ network });
    // const feeValue = outputs.map(o => o.value)
    //  .concat(localFee.value)
