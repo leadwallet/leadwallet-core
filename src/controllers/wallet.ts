@@ -379,7 +379,7 @@ static async getWallet(req: express.Request & { privateKey: string, publicKey: s
     const btcSentResponse = await BTC.sendToken(
      req.body.inputs,
      req.body.outputs,
-     { address: senderWallet.btc.address, value: req.body.fee },
+     { address: senderWallet.btc.address, value: parseFloat(Number(req.body.fee).toFixed(8)) },
      senderWallet.btc.wif
     );
 
@@ -452,7 +452,7 @@ static async getWallet(req: express.Request & { privateKey: string, publicKey: s
         const dogeSentResponse = await DOGE.sendToken(
          req.body.inputs,
          req.body.outputs,
-         req.body.fee
+         { value: parseFloat(Number(req.body.fee.value).toFixed(8)) }
         );
 
         // Throw error if status code is within 4XX and 5XX ranges
@@ -513,7 +513,7 @@ static async getWallet(req: express.Request & { privateKey: string, publicKey: s
        //    wallets = [...wallets, w];
        
        // Send LTC
-       const ltcSentResponse = await LTC.sendToken(req.body.inputs, req.body.outputs, req.body.fee);
+       const ltcSentResponse = await LTC.sendToken(req.body.inputs, req.body.outputs, { value: parseFloat(Number(req.body.fee.value).toFixed(8)) });
 
        console.log(ltcSentResponse);
 
@@ -622,7 +622,7 @@ static async getWallet(req: express.Request & { privateKey: string, publicKey: s
        //    wallets = [...wallets, w];
        
        // Send LTC
-       const dashSentResponse = await DASH.sendToken(req.body.inputs, req.body.outputs, req.body.fee);
+       const dashSentResponse = await DASH.sendToken(req.body.inputs, req.body.outputs, { value: parseFloat(Number(req.body.fee.value).toFixed(8)) });
 
        // Throw error if status code is within 4XX and 5XX
        if (dashSentResponse.statusCode >= 400)
