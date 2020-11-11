@@ -921,7 +921,7 @@ static async getWallet(req: express.Request & { privateKey: string, publicKey: s
 
    const response = {
     message: "Successfully transferred token.",
-    txHex: transferTokenResponse.payload.hex,
+    txHash: transferTokenResponse.payload.hex,
     view_in_explorer: getExplorerLink("eth", transferTokenResponse.payload.hex)
    };
 
