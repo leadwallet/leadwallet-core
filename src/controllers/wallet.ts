@@ -843,6 +843,7 @@ static async getWallet(req: express.Request & { privateKey: string, publicKey: s
 			res.status(500)
     .send(error.message);
  }
+}
  
  static async getERC20Tokens(req: express.Request & { wallet: Wallet; }, res: express.Response): Promise<any> {
   try {
