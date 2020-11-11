@@ -44,10 +44,8 @@ export class WalletMiddleware {
    next();
   } catch (error) {
    // console.log(error);
-   res.status(error.code || 500).json({
-    statusCode: error.code || 500,
-    response: error.message
-   });
+   res.status(error.code || 500)
+    .send(error.message);
   }
  }
 
@@ -70,10 +68,8 @@ export class WalletMiddleware {
     // Delegate control to the next function
     next();
   } catch (error) {
-   res.status(error.code || 500).json({
-    statusCode: error.code || 500,
-    response: error.message
-   });
+   res.status(error.code || 500)
+    .send(error.message);
   }
  }
 
@@ -109,10 +105,8 @@ export class WalletMiddleware {
    // Delegate control to the next controller function
    next();
   } catch (error) {
-   res.status(error.code || 500).json({
-    statusCode: error.code || 500,
-    response: error.message
-   });
+   res.status(error.code || 500)
+    .send(error.message);
   }
  }
 }
