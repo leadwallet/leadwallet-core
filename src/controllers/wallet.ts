@@ -692,7 +692,7 @@ static async getWallet(req: express.Request & { privateKey: string, publicKey: s
          const response2 = await TransactionService.getPendingTransactions(ticker, address);
           apiResponse = response.payload.map((item: any) => ({
               hash: item.txid,
-              amount: Object.keys(item.received).includes(address.toLowerCase()) ? "+" + item.amount : "-" + item.amount,
+              amount: Object.keys(item.received).map((a) => a.toLowerCase()).includes(address.toLowerCase()) ? "+" + item.amount : "-" + item.amount,
               fee: item.fee,
               status: item.confirmations > 0 ? "Confirmed" : "Pending",
               from: Object.keys(item.sent).map((key) => key).join(", "),
@@ -702,7 +702,7 @@ static async getWallet(req: express.Request & { privateKey: string, publicKey: s
             }));
            apiResponse = apiResponse.concat(response2.payload.map((item: any) => ({
             hash: item.hash,
-            amount: item.txins[0].addresses.includes(address.toLowerCase()) ? "-" + item.txins[0].amount : "+" + item.txouts[0].amount,
+            amount: item.txins[0].addresses.map((a: string) => a.toLowerCase()).includes(address.toLowerCase()) ? "-" + item.txins[0].amount : "+" + item.txouts[0].amount,
             status: "Pending",
             from: item.txins[0].addresses.join(", "),
             to: item.txouts[0].addresses.join(", "),
@@ -713,7 +713,7 @@ static async getWallet(req: express.Request & { privateKey: string, publicKey: s
             // console.log(response.payload);
             apiResponse = response.payload.map( async (item: any) => ({
               hash: item.hash,
-              amount: item.sent === address.toLowerCase() ? "-" + item.amount : "+" + item.amount,
+              amount: item.sent.toLowerCase() === address.toLowerCase() ? "-" + item.amount : "+" + item.amount,
               fee: item.fee,
               status: item.confirmations > 0 ? "Confirmed" : "Pending",
               from: item.sent,
@@ -736,7 +736,7 @@ static async getWallet(req: express.Request & { privateKey: string, publicKey: s
           from: txn.from,
           to: txn.to,
           date: txn.datetime,
-          amount: txn.value,
+          amount: txn.from.toLowerCase() === address.toLowerCase() ? "-" + txn.value : "+" + txn.value,
           name: txn.name,
           symbol: txn.symbol,
           type: txn.type,
