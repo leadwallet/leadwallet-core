@@ -150,10 +150,8 @@ export class WalletController {
 				response
 			});
  } catch(error) {
-		res.status(500).json({
-			statusCode: 500,
-			response: error.message
-		});
+		res.status(error.code || 500)
+   .send(error.message);
 	}
 }
 
@@ -171,10 +169,8 @@ static async getWallet(req: express.Request & { privateKey: string, publicKey: s
    response: await WalletAdaptor.convert(wallet)
   });
  } catch (error) {
-   res.status(500).json({
-    statusCode: 500,
-    response: error.message
-   });
+  res.status(error.code || 500)
+   .send(error.message);
   }
  }
 
@@ -228,10 +224,8 @@ static async getWallet(req: express.Request & { privateKey: string, publicKey: s
    });
   } catch (error) {
    console.error(error)
-   res.status(error.code || 500).json({
-    statusCode: error.code || 500,
-    response: error.message
-   });
+   res.status(error.code || 500)
+    .send(error.message);
   }
 	}
 
@@ -310,10 +304,8 @@ static async getWallet(req: express.Request & { privateKey: string, publicKey: s
     response: await WalletAdaptor.convert(newWallet)
    });
   } catch (error) {
-   res.status(error.code || 500).json({
-    statusCode: error.code || 500,
-    response: error.message
-   });
+   res.status(error.code || 500)
+    .send(error.message);
   }
  }
 
@@ -333,10 +325,8 @@ static async getWallet(req: express.Request & { privateKey: string, publicKey: s
     }
    });
   } catch (error) {
-   res.status(500).json({
-    statusCode: 500,
-    response: error.message
-   });
+   res.status(500)
+    .send(error.message);
   }
  }
 
@@ -686,10 +676,8 @@ static async getWallet(req: express.Request & { privateKey: string, publicKey: s
     response
    });
   } catch (error) {
-   res.status(error.code || 500).json({
-    statusCode: error.code || 500,
-    response: error.message
-   });
+   res.status(error.code || 500)
+    .send(error.message);
   }
  }
 
@@ -776,10 +764,8 @@ static async getWallet(req: express.Request & { privateKey: string, publicKey: s
        });
 			}
 		} catch (error) {
-			res.status(error.code || 500).json({
-    statusCode: error.code || 500,
-    response: error.message
-   });
+			res.status(error.code || 500)
+    .send(error.message);
 		}
 	}
 	static async refreshPrices(req: express.Request, res: express.Response): Promise<any> {
@@ -795,10 +781,8 @@ static async getWallet(req: express.Request & { privateKey: string, publicKey: s
 				response: respObj
 			});
 		} catch (error) {
-			res.status(error.code || 500).json({
-			 statusCode: error.code || 500,
-			 response: error.message
-			});
+			res.status(error.code || 500)
+    .send(error.message);
 		}
 	}
 
@@ -820,10 +804,8 @@ static async getWallet(req: express.Request & { privateKey: string, publicKey: s
         });
       }
 		} catch (error) {
-			res.status(error.code || 500).json({
-				statusCode: error.code || 500,
-				response: error.message
-			});
+			res.status(error.code || 500)
+    .send(error.message);
 		}
  }
  
@@ -858,11 +840,8 @@ static async getWallet(req: express.Request & { privateKey: string, publicKey: s
 				txFee
 			});
 		} catch (error) {
-			res.status(error.code || 500).json({
-				statusCode: error.code || 500,
-				response: error.message
-			});
-		}
+			res.status(500)
+    .send(error.message);
  }
  
  static async getERC20Tokens(req: express.Request & { wallet: Wallet; }, res: express.Response): Promise<any> {
@@ -896,10 +875,8 @@ static async getWallet(req: express.Request & { privateKey: string, publicKey: s
     response
    });
   } catch (error) {
-   res.status(error.code || 500).json({
-    statusCode: error.code || 500,
-    response: error.message
-   });
+   res.status(error.code || 500)
+    .send(error.message);
   }
  }
 
@@ -930,26 +907,22 @@ static async getWallet(req: express.Request & { privateKey: string, publicKey: s
     response
    });
   } catch (error) {
-   res.status(error.code || 500).json({
-    statusCode: error.code || 500,
-    response: error.message
-   });
+   res.status(error.code || 500)
+    .send(error.message);
   }
  }
 
  static async getETHTransactionDetails(req: express.Request & { wallet: Wallet; }, res: express.Response) {
   try {
    const { wallet, params } = req;
-   const trx = await ETH.getTransactionDetails(params.txHash, wallet.eth.address);
+   const txn = await ETH.getTransactionDetails(params.txHash, wallet.eth.address);
    res.status(200).json({
     statusCode: 200,
-    response: { ...trx.payload }
+    response: { ...txn.payload }
    });
   } catch (error) {
-   res.status(500).json({
-    statusCode: 500,
-    response: error.message
-   });
+   res.status(error.code || 500)
+    .send(error.message);
   }
  }
 
@@ -1022,10 +995,8 @@ static async getWallet(req: express.Request & { privateKey: string, publicKey: s
     }
    });
   } catch (error) {
-   res.status(error.code || 500).json({
-    statusCode: error.code || 500,
-    response: error.message
-   });
+   res.status(error.code || 500)
+    .send(error.message);
   }
  }
 
@@ -1049,10 +1020,8 @@ static async getWallet(req: express.Request & { privateKey: string, publicKey: s
     }
    });
   } catch (error) {
-   res.status(error.code || 500).json({
-    statusCode: error.code || 500,
-    response: error.message
-   });
+   res.status(error.code || 500)
+    .send(error.message);
   }
  }
 }
