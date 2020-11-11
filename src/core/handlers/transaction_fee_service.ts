@@ -94,7 +94,8 @@ export class TransactionFeeService {
 			"slow_fee": parseFloat(feeResponse.body.payload.slow_fee_per_byte)*sizeInBytes,
 			"standard_fee": parseFloat(feeResponse.body.payload.standard_fee_per_byte)*sizeInBytes,
 			"fast_fee": parseFloat(feeResponse.body.payload.fast_fee_per_byte)*sizeInBytes,
-			"unit": ticker
+   "unit": ticker,
+   size: sizeResponse.body.payload.tx_size_bytes
 		});
 	}
 
