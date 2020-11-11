@@ -702,7 +702,7 @@ static async getWallet(req: express.Request & { privateKey: string, publicKey: s
             }));
            apiResponse = apiResponse.concat(response2.payload.map((item: any) => ({
             hash: item.hash,
-            amount: item.txins[0].addresses.map((a: string) => a.toLowerCase()).includes(address.toLowerCase()) ? "-" + item.txins[0].amount : "+" + item.txouts[0].amount,
+            amount: item.txins[0].addresses.map((a: string) => a.toLowerCase()).includes(address.toLowerCase()) ? "-" + item.txouts[0].amount : "+" + item.txouts[0].amount,
             status: "Pending",
             from: item.txins[0].addresses.join(", "),
             to: item.txouts[0].addresses.join(", "),
