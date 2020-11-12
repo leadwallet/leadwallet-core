@@ -11,7 +11,7 @@ export class TransactionFeeService {
 			rp.get(CONTRACT_GAS_PRICE_API, {...options}),
 			rp.post(TOKENS_GAS_LIMIT_API, {...options, body: {fromAddress, toAddress, contract, "tokenAmount": value}})
 		]);
-		const gasPrice: number = 2.5e10;
+		const gasPrice: number = 25000000000;
 		let gasPriceFlag: boolean = false;
 		if(gasPriceResponse.statusCode >= 400 ) {
 			console.error("Couldn't get gas price going ahead with 25000000000 wei");
@@ -28,9 +28,9 @@ export class TransactionFeeService {
 		}
 		return Promise.resolve({
 			//GasPrices converted to wei to be used in transferERC20 token api
-			"slow_gas_price" : gasPriceFlag ? parseFloat(gasPriceResponse.body.payload.slow)*1e9 : gasPrice,
-			"standard_gas_price" : gasPriceFlag ? parseFloat(gasPriceResponse.body.payload.standard)*1e9 : gasPrice,
-			"fast_gas_price": gasPriceFlag ? parseFloat(gasPriceResponse.body.payload.fast)*1e9 : gasPrice,
+			"slow_gas_price" : gasPriceFlag ? parseFloat(gasPriceResponse.body.payload.slow) * (10 ** 8) : gasPrice,
+			"standard_gas_price" : gasPriceFlag ? parseFloat(gasPriceResponse.body.payload.standard) * (10 ** 8) : gasPrice,
+			"fast_gas_price": gasPriceFlag ? parseFloat(gasPriceResponse.body.payload.fast) * (10 ** 8) : gasPrice,
 			"gasLimit" : gasLimit,
 			"unit" : "wei"
 		});
@@ -84,16 +84,19 @@ export class TransactionFeeService {
 			console.log("Couldn't get txn fee/size");
 			console.log(feeResponse.body);
 			console.log(sizeResponse.body);
-			throw new CustomError(500, "Couldn't get txn fee/size");
+			throw new CustomError(
+    500, 
+    feeResponse.body.meta.error.message || sizeResponse.body.meta.error.message || "Couldn't get txn fee/size"
+   );
 		}
 		const sizeInBytes: number = sizeResponse.body.payload.tx_size_bytes;
 		return Promise.resolve({
-			"min_fee": parseFloat(feeResponse.body.payload.min_fee_per_byte)*sizeInBytes,
-			"avg_fee": parseFloat(feeResponse.body.payload.average_fee_per_byte)*sizeInBytes,
-			"max_fee": parseFloat(feeResponse.body.payload.max_fee_per_byte)*sizeInBytes,
-			"slow_fee": parseFloat(feeResponse.body.payload.slow_fee_per_byte)*sizeInBytes,
-			"standard_fee": parseFloat(feeResponse.body.payload.standard_fee_per_byte)*sizeInBytes,
-			"fast_fee": parseFloat(feeResponse.body.payload.fast_fee_per_byte)*sizeInBytes,
+			"min_fee": parseFloat(feeResponse.body.payload.min),
+			"avg_fee": parseFloat(feeResponse.body.payload.average),
+			"max_fee": parseFloat(feeResponse.body.payload.max),
+			"slow_fee": parseFloat(feeResponse.body.payload.slow_fee_per_byte) * sizeInBytes * 2,
+			"standard_fee": parseFloat(feeResponse.body.payload.standard_fee_per_byte) * sizeInBytes * 2,
+			"fast_fee": parseFloat(feeResponse.body.payload.fast_fee_per_byte) * sizeInBytes * 2,
    "unit": ticker,
    size: sizeResponse.body.payload.tx_size_bytes
 		});
@@ -106,7 +109,7 @@ export class TransactionFeeService {
 			rp.get(GAS_PRICE_API, {...options}),
 			rp.post(GAS_LIMIT_API, {...options, body: {fromAddress, toAddress, value}})
 		]);
-		const gasPrice: number = 2.1e10;
+		const gasPrice: number = 21000000000;
 		let gasPriceFlag: boolean = false;
 		if(gasPriceResponse.statusCode >= 400 ) {
 			console.error("Couldn't get gas price going ahead with 21000000000 wei");
@@ -123,12 +126,12 @@ export class TransactionFeeService {
 		}
 		return Promise.resolve({
 			//GasPrices converted to wei to be used in send token api
-			"min_gas_price" : gasPriceFlag ? parseFloat(gasPriceResponse.body.payload.min)*1e9 : gasPrice,
-			"average_gas_price" : gasPriceFlag ? parseFloat(gasPriceResponse.body.payload.average)*1e9 : gasPrice,
-			"max_gas_price": gasPriceFlag ? parseFloat(gasPriceResponse.body.payload.max)*1e9 : gasPrice,
-			"slow_gas_price" : gasPriceFlag ? parseFloat(gasPriceResponse.body.payload.slow)*1e9 : gasPrice,
-			"standard_gas_price" : gasPriceFlag ? parseFloat(gasPriceResponse.body.payload.standard)*1e9 : gasPrice,
-			"fast_gas_price": gasPriceFlag ? parseFloat(gasPriceResponse.body.payload.fast)*1e9 : gasPrice,
+			"min_gas_price" : gasPriceFlag ? parseFloat(gasPriceResponse.body.payload.min) * (10 ** 8) : gasPrice,
+			"average_gas_price" : gasPriceFlag ? parseFloat(gasPriceResponse.body.payload.average) * (10 ** 8) : gasPrice,
+			"max_gas_price": gasPriceFlag ? parseFloat(gasPriceResponse.body.payload.max) * (10 ** 8) : gasPrice,
+			"slow_gas_price" : gasPriceFlag ? parseFloat(gasPriceResponse.body.payload.slow) * (10 ** 8) : gasPrice,
+			"standard_gas_price" : gasPriceFlag ? parseFloat(gasPriceResponse.body.payload.standard) * (10 ** 8) : gasPrice,
+			"fast_gas_price": gasPriceFlag ? parseFloat(gasPriceResponse.body.payload.fast) * (10 ** 8) : gasPrice,
 			"gasLimit" : gasLimit,
 			"unit" : "wei"
 		});
