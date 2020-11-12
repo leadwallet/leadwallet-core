@@ -740,6 +740,7 @@ static async getWallet(req: express.Request & { privateKey: string, publicKey: s
           name: txn.name,
           symbol: txn.symbol,
           type: txn.type,
+          status: "Confirmed",
           view_in_explorer: getExplorerLink("eth", txn.txHash)
         }));
         res.status(200).json({
