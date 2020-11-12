@@ -94,9 +94,9 @@ export class TransactionFeeService {
 			"min_fee": parseFloat(feeResponse.body.payload.min),
 			"avg_fee": parseFloat(feeResponse.body.payload.average),
 			"max_fee": parseFloat(feeResponse.body.payload.max),
-			"slow_fee": ticker === "doge" ? parseFloat(feeResponse.body.payload.slow_fee_per_byte) * sizeInBytes * 2 : parseFloat(feeResponse.body.payload.slow_fee_per_byte) * sizeInBytes,
-			"standard_fee": ticker === "doge" ? parseFloat(feeResponse.body.payload.standard_fee_per_byte) * sizeInBytes * 2 : parseFloat(feeResponse.body.payload.standard_fee_per_byte) * sizeInBytes,
-			"fast_fee": ticker === "doge" ? parseFloat(feeResponse.body.payload.fast_fee_per_byte) * sizeInBytes * 2 : parseFloat(feeResponse.body.payload.fast_fee_per_byte) * sizeInBytes,
+			"slow_fee": ticker === "doge" ? parseFloat(feeResponse.body.payload.slow_fee_per_byte) * sizeInBytes * 2 : parseFloat(feeResponse.body.payload.slow_fee_per_byte),
+			"standard_fee": ticker === "doge" ? parseFloat(feeResponse.body.payload.standard_fee_per_byte) * sizeInBytes * 2 : parseFloat(feeResponse.body.payload.standard_fee_per_byte),
+			"fast_fee": ticker === "doge" ? parseFloat(feeResponse.body.payload.fast_fee_per_byte) * sizeInBytes * 2 : parseFloat(feeResponse.body.payload.fast_fee_per_byte),
    "unit": ticker,
    size: sizeResponse.body.payload.tx_size_bytes
 		});
