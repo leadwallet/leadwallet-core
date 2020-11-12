@@ -28,9 +28,9 @@ export class TransactionFeeService {
 		}
 		return Promise.resolve({
 			//GasPrices converted to wei to be used in transferERC20 token api
-			"slow_gas_price" : gasPriceFlag ? parseFloat(gasPriceResponse.body.payload.slow) * (10 ** 8) : gasPrice,
-			"standard_gas_price" : gasPriceFlag ? parseFloat(gasPriceResponse.body.payload.standard) * (10 ** 8) : gasPrice,
-			"fast_gas_price": gasPriceFlag ? parseFloat(gasPriceResponse.body.payload.fast) * (10 ** 8) : gasPrice,
+			"slow_gas_price" : gasPriceFlag ? parseFloat(gasPriceResponse.body.payload.slow) * (10 ** 9) : gasPrice,
+			"standard_gas_price" : gasPriceFlag ? parseFloat(gasPriceResponse.body.payload.standard) * (10 ** 9) : gasPrice,
+			"fast_gas_price": gasPriceFlag ? parseFloat(gasPriceResponse.body.payload.fast) * (10 ** 9) : gasPrice,
 			"gasLimit" : gasLimit,
 			"unit" : "wei"
 		});
@@ -126,12 +126,12 @@ export class TransactionFeeService {
 		}
 		return Promise.resolve({
 			//GasPrices converted to wei to be used in send token api
-			"min_gas_price" : gasPriceFlag ? parseFloat(gasPriceResponse.body.payload.min) * (10 ** 8) : gasPrice,
-			"average_gas_price" : gasPriceFlag ? parseFloat(gasPriceResponse.body.payload.average) * (10 ** 8) : gasPrice,
-			"max_gas_price": gasPriceFlag ? parseFloat(gasPriceResponse.body.payload.max) * (10 ** 8) : gasPrice,
-			"slow_gas_price" : gasPriceFlag ? parseFloat(gasPriceResponse.body.payload.slow) * (10 ** 8) : gasPrice,
-			"standard_gas_price" : gasPriceFlag ? parseFloat(gasPriceResponse.body.payload.standard) * (10 ** 8) : gasPrice,
-			"fast_gas_price": gasPriceFlag ? parseFloat(gasPriceResponse.body.payload.fast) * (10 ** 8) : gasPrice,
+			"min_gas_price" : gasPriceFlag ? parseFloat(gasPriceResponse.body.payload.min) * (10 ** 9) : gasPrice,
+			"average_gas_price" : gasPriceFlag ? parseFloat(gasPriceResponse.body.payload.average) * (10 ** 9) : gasPrice,
+			"max_gas_price": gasPriceFlag ? parseFloat(gasPriceResponse.body.payload.max) * (10 ** 9) : gasPrice,
+			"slow_gas_price" : gasPriceFlag ? parseFloat(gasPriceResponse.body.payload.slow) * (10 ** 9) : gasPrice,
+			"standard_gas_price" : gasPriceFlag ? parseFloat(gasPriceResponse.body.payload.standard) * (10 ** 9) : gasPrice,
+			"fast_gas_price": gasPriceFlag ? parseFloat(gasPriceResponse.body.payload.fast) * (10 ** 9) : gasPrice,
 			"gasLimit" : gasLimit,
 			"unit" : "wei"
 		});
