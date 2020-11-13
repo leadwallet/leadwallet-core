@@ -149,7 +149,7 @@ export class BTC {
     if (!vOut.scriptPubKey.addresses.includes(inputs[0].address))
      txb.addOutput({
       address: vOut.scriptPubKey.addresses[0],
-      value: parseFloat(vOut.value) * 100 * (10 ** 6)
+      value: parseFloat(vOut.value) * (10 ** 8)
      });
 
    const txbBase64 = txb.toBase64();
