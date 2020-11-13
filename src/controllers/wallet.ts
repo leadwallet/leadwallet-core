@@ -369,7 +369,7 @@ static async getWallet(req: express.Request & { privateKey: string, publicKey: s
     const btcSentResponse = await BTC.sendToken(
      req.body.inputs,
      req.body.outputs,
-     { address: senderWallet.btc.address, value: req.body.fee },
+     { address: senderWallet.btc.address, value: parseFloat(Number(req.body.fee).toFixed(8)) },
      senderWallet.btc.wif
     );
 
