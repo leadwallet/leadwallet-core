@@ -1,5 +1,6 @@
 import * as bitcoin from "bitcoinjs-lib";
 import rp from "request-promise";
+import sb from "satoshi-bitcoin";
 import { CustomError } from "../../custom";
 import { Environment } from "../../env";
 import { COIN_NETWORK, options } from "./commons";
@@ -145,22 +146,22 @@ export class BTC {
 
    // const vOut = txs.vout[0];
 
-   for (const vOut of txs.vout)
-    if (!vOut.scriptPubKey.addresses.includes(inputs[0].address))
-     txb.addOutput({
-      address: vOut.scriptPubKey.addresses[0],
-      value: parseFloat(vOut.value) * (10 ** 8)
-     });
+   txb.addOutput({
+    address: txs.vout[0].scriptPubKey.addresses[0],
+    value: sb.toSatoshi(parseFloat(txs.vout[0].value))
+   });
 
-   const txbBase64 = txb.toBase64();
-   const signer = bitcoin.Psbt.fromBase64(txbBase64);
+   txb.addOutput({
+    address: txs.vout[1].scriptPubKey.addresses[0],
+    value: sb.toSatoshi(parseFloat(txs.vout[1].value))
+   });
 
-   const s = txb.combine(signer);
-   const s2 = s.signInput(0, keypair);
-   s2.validateSignaturesOfInput(0);
-   const s3 = s2.finalizeAllInputs();
+   const signed = txb.signInput(0, keypair);
+   
+   signed.validateSignaturesOfInput(0)
+   const final = signed.finalizeAllInputs();
 
-   const txn = s3.extractTransaction();
+   const txn = final.extractTransaction();
    const hex = txn.toHex();
 
    console.log("tx inputs: " + JSON.stringify(txn.ins.map(i => i.hash.toString("hex"))));
