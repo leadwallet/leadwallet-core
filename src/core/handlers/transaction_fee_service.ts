@@ -86,7 +86,7 @@ export class TransactionFeeService {
 			console.log(sizeResponse.body);
 			throw new CustomError(
     500, 
-    feeResponse.body.meta.error.message || sizeResponse.body.meta.error.message || "Couldn't get txn fee/size"
+    feeResponse.body.meta?.error.message || sizeResponse.body.meta?.error.message || "Couldn't get txn fee/size"
    );
 		}
 		const sizeInBytes: number = sizeResponse.body.payload.tx_size_bytes;
