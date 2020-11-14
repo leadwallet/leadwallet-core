@@ -93,14 +93,8 @@ export class BTC {
    const txPrepareResponse = await rp.post(CRYPTOAPI + "/txs/create", {
     ...options,
     body: {
-     inputs: inputs.map(i => ({
-      ...i,
-      value: parseFloat(Number(i.value).toFixed(8))
-     })),
-     outputs: outputs.map(o => ({
-      ...o,
-      value: parseFloat(Number(o.value).toFixed(8))
-     })),
+     inputs,
+     outputs,
      fee
     }
    });
