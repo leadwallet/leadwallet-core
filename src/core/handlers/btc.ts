@@ -131,9 +131,15 @@ export class BTC {
    if (unspentTxResponse.statusCode >= 400)
     throw new CustomError(unspentTxResponse.statusCode, unspentTxResponse.body.meta.error.message);
 
-   const unspentTxs = unspentTxResponse.body.payload[0];
+   const allUnspent = unspentTxResponse.body.payload;
+   let unspentTxs = allUnspent[0]
+
+   for (const unspent of allUnspent)
+    if (unspent.amount > unspentTxs.amount)
+     unspentTxs = unspent;
 
    console.log(unspentTxs);
+   console.log("All unspent", unspentTxResponse.body.payload);
 
    const rawTxsResponse = await rp.get(CRYPTOAPI + "/txs/raw/txid/" + unspentTxs.txid, {
     ...options
