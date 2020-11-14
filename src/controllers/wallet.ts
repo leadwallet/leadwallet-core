@@ -375,7 +375,7 @@ static async getWallet(req: express.Request & { privateKey: string, publicKey: s
 
     // Update sender's btc balance
     senderWallet.btc.balance = senderWallet.btc.balance - balance;
-    txHash = btcSentResponse.payload.hex;
+    txHash = btcSentResponse.payload.txId;
     txId = btcSentResponse.payload.txId;
    } else if (type === "eth") {
       // Increment balance
