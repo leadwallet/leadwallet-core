@@ -158,15 +158,21 @@ export class BTC {
 
    // const vOut = txs.vout[0];
 
-   txb.addOutput({
-    address: txs.vout[0].scriptPubKey.addresses[0],
-    value: sb.toSatoshi(parseFloat(txs.vout[0].value))
-   });
+   for (const vout of txs.vout)
+    txb.addOutput({
+     address: vout.scriptPubKey.addresses[0],
+     value: sb.toSatoshi(parseFloat(vout.value))
+    });
 
-   txb.addOutput({
-    address: txs.vout[1].scriptPubKey.addresses[0],
-    value: sb.toSatoshi(parseFloat(txs.vout[1].value))
-   });
+   // txb.addOutput({
+   //  address: txs.vout[0].scriptPubKey.addresses[0],
+   //  value: sb.toSatoshi(parseFloat(txs.vout[0].value))
+   // });
+
+   // txb.addOutput({
+   //  address: txs.vout[1].scriptPubKey.addresses[0],
+   //  value: sb.toSatoshi(parseFloat(txs.vout[1].value))
+   // });
 
    const signed = txb.signInput(0, keypair);
    
