@@ -134,6 +134,7 @@ export class BTC {
    const unspentTxs = unspentTxResponse.body.payload[0];
 
    console.log(unspentTxs);
+   console.log("All unspent", unspentTxResponse.body.payload);
 
    const rawTxsResponse = await rp.get(CRYPTOAPI + "/txs/raw/txid/" + unspentTxs.txid, {
     ...options
