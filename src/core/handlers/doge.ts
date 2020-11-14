@@ -30,7 +30,15 @@ export class DOGE {
   const response = await rp.post(DOGEROOT + "/txs/create", {
    ...options,
    body: {
-    inputs, outputs, fee
+    inputs: inputs.map(i => ({
+     ...i,
+     value: parseFloat(Number(i.value).toFixed(8))
+    })), 
+    outputs: outputs.map(o => ({
+     ...o,
+     value: parseFloat(Number(o.value).toFixed(8))
+    })), 
+    fee
    }
   });
   return Promise.resolve({

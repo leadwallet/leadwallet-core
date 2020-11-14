@@ -49,7 +49,17 @@ export class LTC {
  ): Promise<{ payload: any; statusCode: number }> {
   const response = await rp.post(LTCROOT + "/txs/create", {
    ...options,
-   body: { inputs, outputs, fee }
+   body: { 
+    inputs: inputs.map(i => ({
+     ...i,
+     value: parseFloat(Number(i.value).toFixed(8))
+    })), 
+    outputs: outputs.map(o => ({
+     ...o,
+     value: parseFloat(Number(o.value).toFixed(8))
+    })), 
+    fee 
+   }
   });
   return Promise.resolve({
    statusCode: response.statusCode,
