@@ -99,8 +99,8 @@ export class TRON {
       contract: item.raw_data.contract.map(
        (c: any) => ({
          value: tWeb.address.toHex(address) === c.parameter.value.to_address ? "+" + c.parameter.value.amount / (10 ** 6) : "-" + c.parameter.value.amount / (10 ** 6),
-         from: c.parameter.value.owner_address,
-         to: c.parameter.value.to_address
+         from: tWeb.address.fromHex(c.parameter.value.owner_address),
+         to: tWeb.address.fromHex(c.parameter.value.to_address)
        })
       )
      }
