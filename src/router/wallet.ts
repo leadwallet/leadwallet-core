@@ -88,6 +88,10 @@ router.post(
  WalletController.importByPrivateKey
 );
 
+router.get(
+ "/supported_erc20_tokens",
+ WalletController.getSupportedERC20Tokens
+)
 // router.get(
 //  "/price/erc20/:contract",
 //  WalletController.getErc20Price
