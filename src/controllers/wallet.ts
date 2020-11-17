@@ -6,7 +6,7 @@ import { Tokenizers } from "../core/utils";
 import { CustomError } from "../custom";
 import { BTC, ETH, DOGE, LTC, TRON, DASH } from "../core/handlers";
 import { TransactionService } from "../core/handlers/transaction_handler";
-import { CRYPTO_API_COINS, CURRENT_ERC20_TOKENS, getExplorerLink } from "../core/handlers/commons";
+import { CRYPTO_API_COINS, CURRENT_ERC20_TOKENS, getExplorerLink, SYMBOL_TO_CONTRACT_ADDRESS_MAP } from "../core/handlers/commons";
 import { WalletAdaptor } from "../core/utils/wallet_adaptor";
 import { CurrencyConverter } from "../core/utils/currency_converter";
 import { TransactionFeeService } from "../core/handlers/transaction_fee_service";
@@ -1029,9 +1029,15 @@ static async getWallet(req: express.Request & { privateKey: string, publicKey: s
 
  static async getSupportedERC20Tokens(req: express.Request, res: express.Response): Promise<any> {
    try {
+    let responseArray: Array<any> = [];
+    for(const symbol of CURRENT_ERC20_TOKENS) {
+      if(SYMBOL_TO_CONTRACT_ADDRESS_MAP.has(symbol)) {
+        responseArray.push({"symbol": symbol, "contractAddress": SYMBOL_TO_CONTRACT_ADDRESS_MAP.get(symbol)});
+      }
+    }
     res.status(200).json({
       statusCode: 200,
-      response: CURRENT_ERC20_TOKENS
+      response: responseArray
     });
    } catch (error) {
     res.status(error.code || 500)
