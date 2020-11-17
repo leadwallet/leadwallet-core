@@ -1,5 +1,6 @@
 import { Environment } from "../../env";
 import syncReq from "sync-request";
+import { ALL_ERC20_TOKENS } from "../resources/erc20tokens";
 const COINGECKO_COINS_ROOT = "https://api.coingecko.com/api/v3/coins";
 export const options = {
     simple: false,
@@ -139,8 +140,15 @@ function createSymbolToIdMapping() {
 	}
 	return [symbolIdMap,idSymbolMap];
 }
-
+function createSymbolToContractAddressMapping() {
+	let symbolToContractAddressMap = new Map<string,string>();
+	for (const obj of ALL_ERC20_TOKENS) {
+		symbolToContractAddressMap.set(obj.symbol,obj.address);
+	}
+	return symbolToContractAddressMap;
+}
 export const [SYMBOL_ID_MAPPING, ID_SYMBOL_MAPPING] = createSymbolToIdMapping();
+export const SYMBOL_TO_CONTRACT_ADDRESS_MAP = createSymbolToContractAddressMapping();
 
 export function getExplorerLink(type: string, txHash: string) : string {
     return type == "trx"
