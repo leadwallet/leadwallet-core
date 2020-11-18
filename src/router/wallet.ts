@@ -43,16 +43,16 @@ router.get(
 	WalletController.getTransactions
 );
 router.get(
-    "/price/:ticker",
-    WalletController.refreshPrice
+ "/price/:ticker",
+ WalletController.refreshPrice
 );
 router.get(
-    "/prices",
-    WalletController.refreshPrices
+ "/prices",
+ WalletController.refreshPrices
 );
 router.post(
-    "/transaction/fee/:ticker",
-    WalletController.getEstimatedTransactionFee
+ "/transaction/fee/:ticker",
+ WalletController.getEstimatedTransactionFee
 );
 
 router.get(

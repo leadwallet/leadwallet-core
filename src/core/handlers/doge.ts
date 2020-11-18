@@ -41,6 +41,7 @@ export class DOGE {
     fee
    }
   });
+  console.log(response.body);
   return Promise.resolve({
    statusCode: response.statusCode,
    payload: response.body.payload || response.body.meta.error.message

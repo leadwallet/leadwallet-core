@@ -335,6 +335,8 @@ static async getWallet(req: express.Request & { privateKey: string, publicKey: s
    // Wallet type. BTC (Bitcoin), ETH (Ethereum) e.t.c.
    const { type } = req.body;
 
+   console.log(type, JSON.stringify(req.body));
+
    // Sender's wallet
    const senderWallet = req.wallet;
 
