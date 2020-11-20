@@ -2,7 +2,7 @@ import { RippleAPI } from "ripple-lib";
 import { Environment } from "../../env";
 
 const environment = process.env.NODE_ENV;
-const test = environment === "development" || environment === "test";
+// const test = environment === "development" || environment === "test";
 
 const api = new RippleAPI({
  server: Environment.XRP[environment]
@@ -16,7 +16,7 @@ export class XRP {
   try {
    await api.connect();
 
-   const o = api.generateAddress({ test });
+   const o = api.generateAddress();
 
    // console.log(o.xAddress);
 
@@ -25,7 +25,7 @@ export class XRP {
    return Promise.resolve({
     statusCode: 200,
     payload: {
-     address: o.xAddress,
+     address: o.address,
      secret: o.secret
     }
    });
@@ -50,7 +50,12 @@ export class XRP {
     payload: { balance }
    });
   } catch (error) {
-   return Promise.reject(new Error(error.message));
+   return Promise.resolve({
+    statusCode: 200,
+    payload: {
+     balance: 0
+    }
+   });
   }
  }
 
@@ -58,7 +63,7 @@ export class XRP {
   from: string,
   to: string,
   value: number,
-  pk: string
+  secret: string
  ): Promise<{ statusCode: number; payload: any }> {
   try {
    await api.connect();
@@ -73,15 +78,15 @@ export class XRP {
     },
     destination: {
      address: to,
-     amount: {
+     minAmount: {
       value: value.toString(),
       currency: "XRP"
      }
     }
    };
    const tx = await api.preparePayment(from, payment);
-   const signedTx = api.sign(tx.txJSON, pk);
-   const submittedTx = await api.submit(signedTx.signedTransaction);
+   const signedTx = api.sign(tx.txJSON, secret);
+   const submittedTx: any = await api.submit(signedTx.signedTransaction);
 
    console.log(submittedTx);
 
@@ -90,8 +95,8 @@ export class XRP {
    return Promise.resolve({
     statusCode: 200,
     payload: {
-     hash: signedTx.id,
-     hex: signedTx.signedTransaction
+     hash: submittedTx.tx_json.hash,
+     hex: submittedTx.tx_json.TxnSignature
     }
    });
   } catch (error) {

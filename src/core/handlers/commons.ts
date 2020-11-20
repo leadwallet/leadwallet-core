@@ -659,6 +659,12 @@ export const COIN_NETWORK = {
   production: "mainnet",
   test: "ropsten",
   staging: "ropsten"
+ },
+ xrp: {
+  development: "testnet",
+  production: "mainnet",
+  test: "testnet",
+  staging: "testnet"
  }
 };
 

@@ -100,7 +100,8 @@ export class WalletController {
      parseFloat(dogeAddressDetailsResponse.payload.balance) +
      parseFloat(ltcAddressDetailsResponse.payload.balance) +
      tronAddressDetailsResponse.payload.balance +
-     parseFloat(dashAddressDetailsResponse.payload.balance),
+     parseFloat(dashAddressDetailsResponse.payload.balance) +
+     xrpAddressDetailsResponse.payload.balance,
     // hmyAddressCreationResponse.payload.balance
     hash: Tokenizers.hash(keyPair.publicKey + keyPair.privateKey),
     btc: {
@@ -231,11 +232,12 @@ export class WalletController {
    }
    wallet.balance =
     parseFloat(btcDetailsResponse.payload.balance) +
-    parseFloat(ethDetailsResponse.payload.balance) +
-    parseFloat(dogeDetailsResponse.payload.balance) +
-    parseFloat(ltcDetailsResponse.payload.balance) +
-    tronDetailsResponse.payload.balance +
-    parseFloat(dashDetailsResponse.payload.balance);
+     parseFloat(ethDetailsResponse.payload.balance) +
+     parseFloat(dogeDetailsResponse.payload.balance) +
+     parseFloat(ltcDetailsResponse.payload.balance) +
+     tronDetailsResponse.payload.balance +
+     parseFloat(dashDetailsResponse.payload.balance) +
+     xrpDetailsResponse?.payload.balance || 0;
    // hmyDetailsResponse.payload.balance
    wallet.btc.balance = parseFloat(btcDetailsResponse.payload.balance);
    wallet.eth.balance = parseFloat(ethDetailsResponse.payload.balance);
@@ -391,7 +393,7 @@ export class WalletController {
    // Wallet type. BTC (Bitcoin), ETH (Ethereum) e.t.c.
    const { type } = req.body;
 
-   console.log(type, JSON.stringify(req.body));
+   // console.log(type, JSON.stringify(req.body));
 
    // Sender's wallet
    const senderWallet = req.wallet;
@@ -771,6 +773,24 @@ export class WalletController {
     // Update sender wallet's LTC balance
     senderWallet.dash.balance = senderWallet.dash.balance - balance;
     txHash = broadcastTransactionResponse.payload.txid;
+   } else if (type === "xrp") {
+    balance = req.body.value;
+
+    if (senderWallet.balance < balance)
+     throw new CustomError(400, "Insufficent wallet balance.");
+
+    if (senderWallet.xrp.balance < balance)
+     throw new CustomError(400, "Insufficient XRP balance");
+
+    const xrpSentResponse = await XRP.sendToken(
+     senderWallet.xrp.address,
+     req.body.to,
+     req.body.value,
+     senderWallet.xrp.secret
+    );
+
+    txHash = xrpSentResponse.payload.hash;
+    // txId = xrpSentResponse.payload.hash;
    }
 
    // Update sender's wallet balance by deducting from it
@@ -798,6 +818,7 @@ export class WalletController {
     response
    });
   } catch (error) {
+   // console.log(error);
    res.status(error.code || 500).send(error.message);
   }
  }
@@ -912,6 +933,15 @@ export class WalletController {
      response: apiResponse
     });
    } else if (ticker.toLowerCase() === "xrp") {
+    const response = await XRP.getTransactions(address);
+    const apiResponse = response.payload.map((x: any) => ({
+     ...x,
+     view_in_explorer: getExplorerLink(ticker, x.hash)
+    }));
+    res.status(200).json({
+     statusCode: 200,
+     response: apiResponse
+    });
    }
   } catch (error) {
    res.status(error.code || 500).send(error.message);
