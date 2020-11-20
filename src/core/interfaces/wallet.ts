@@ -35,12 +35,17 @@ export interface Wallet {
   address: string;
   balance: number;
   pk?: string;
- },
+ };
  dash?: {
   address: string;
   wif: string;
   balance: number;
- }
+ };
+ xrp?: {
+  address: string;
+  secret: string;
+  balance: number;
+ };
  // one?: {
  //  address: string;
  //  balance: number;

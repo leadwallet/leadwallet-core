@@ -17,8 +17,8 @@ router.get("/", (req, res) => {
 
 router.post("/create", WalletController.createWalletFaster);
 router.get(
- "/retrieve", 
- WalletMiddleware.getKeyPair, 
+ "/retrieve",
+ WalletMiddleware.getKeyPair,
  WalletController.getWallet
 );
 router.post(
@@ -38,18 +38,9 @@ router.get(
  WalletMiddleware.getWalletFromRequest,
  WalletController.updateWalletFaster
 );
-router.get(
-	"/transactions/:ticker/:address",
-	WalletController.getTransactions
-);
-router.get(
- "/price/:ticker",
- WalletController.refreshPrice
-);
-router.get(
- "/prices",
- WalletController.refreshPrices
-);
+router.get("/transactions/:ticker/:address", WalletController.getTransactions);
+router.get("/price/:ticker", WalletController.refreshPrice);
+router.get("/prices", WalletController.refreshPrices);
 router.post(
  "/transaction/fee/:ticker",
  WalletController.getEstimatedTransactionFee
@@ -74,7 +65,7 @@ router.get(
  WalletMiddleware.getKeyPair,
  WalletMiddleware.getWalletFromRequest,
  WalletController.getETHTransactionDetails
-)
+);
 
 router.patch(
  "/import_coin",
@@ -83,15 +74,9 @@ router.patch(
  WalletController.importCoin
 );
 
-router.post(
- "/import_by_key",
- WalletController.importByPrivateKey
-);
+router.post("/import_by_key", WalletController.importByPrivateKey);
 
-router.get(
- "/supported_erc20_tokens",
- WalletController.getSupportedERC20Tokens
-)
+router.get("/supported_erc20_tokens", WalletController.getSupportedERC20Tokens);
 // router.get(
 //  "/price/erc20/:contract",
 //  WalletController.getErc20Price

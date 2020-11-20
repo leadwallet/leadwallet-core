@@ -6,20 +6,22 @@ import { Environment } from "../../env";
 import { ec as EC } from "elliptic";
 // import { TransactionStatus } from "../enums";
 
-const ec = new EC('secp256k1');
+const ec = new EC("secp256k1");
 
 export class Tokenizers {
  static hash(input: string): string {
   return hasher.SHA256(input).toString();
  }
  static getPublicKey(k: string): string {
-		return ec.keyFromPrivate(k).getPublic().encode("hex", true);
-	}
- static async generateKeyPairs(recoveryPhrase: string): Promise<{ publicKey: string; privateKey: string }> {
-		const pk = Tokenizers.hash(recoveryPhrase);
-		return Promise.resolve({
-			privateKey: pk,
-			publicKey: this.getPublicKey(pk),
+  return ec.keyFromPrivate(k).getPublic().encode("hex", true);
+ }
+ static async generateKeyPairs(
+  recoveryPhrase: string
+ ): Promise<{ publicKey: string; privateKey: string }> {
+  const pk = Tokenizers.hash(recoveryPhrase);
+  return Promise.resolve({
+   privateKey: pk,
+   publicKey: this.getPublicKey(pk)
   });
  }
 
@@ -47,7 +49,7 @@ export class Tokenizers {
  }
 
  static decryptWallet(encryptedWallet: string, privateKey: string): Wallet {
-  return (jwt.verify(encryptedWallet, privateKey) as Wallet);
+  return jwt.verify(encryptedWallet, privateKey) as Wallet;
  }
 
  static encryptPrivateKey(privateKey: string, publicKey: string): string {
@@ -55,15 +57,22 @@ export class Tokenizers {
  }
 
  static decryptPrivateKey(encryptedKey: string): string {
-  return (jwt.decode(encryptedKey) as string);
+  return jwt.decode(encryptedKey) as string;
  }
 
- static generateToken(payload: { privateKey: string; publicKey: string; defiAccessKey: string; }): string {
+ static generateToken(payload: {
+  privateKey: string;
+  publicKey: string;
+  defiAccessKey: string;
+ }): string {
   return jwt.sign(payload, Environment.JWT_SECRET);
  }
 
- static decodeToken(token: string): { privateKey: string; publicKey: string; } {
-  return (jwt.verify(token, Environment.JWT_SECRET) as { privateKey: string; publicKey: string; });
+ static decodeToken(token: string): { privateKey: string; publicKey: string } {
+  return jwt.verify(token, Environment.JWT_SECRET) as {
+   privateKey: string;
+   publicKey: string;
+  };
  }
 
  // static encryptChain(blocks: Blocks): string {

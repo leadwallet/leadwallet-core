@@ -17,10 +17,13 @@ const API = {
 const EXPLORER = API[process.env.NODE_ENV];
 
 export class TRON {
- static async generateAddress(): Promise<{ payload: any; statusCode: number; }> {
+ static async generateAddress(): Promise<{
+  payload: any;
+  statusCode: number;
+ }> {
   try {
    const account = await tWeb.createAccount();
-  // console.log(account);
+   // console.log(account);
    return Promise.resolve({
     payload: {
      ...account.address,
@@ -36,16 +39,18 @@ export class TRON {
   }
  }
 
- static async getAddressDetails(address: string): Promise<{ payload: any; statusCode: number; }> {
+ static async getAddressDetails(
+  address: string
+ ): Promise<{ payload: any; statusCode: number }> {
   try {
    const balance = await tWeb.trx.getBalance(address);
-  // console.log(balance);
+   // console.log(balance);
    return Promise.resolve({
-    payload: { balance: balance / (10 ** 6) },
+    payload: { balance: balance / 10 ** 6 },
     statusCode: 200
    });
   } catch (error) {
-   console.error(error)
+   console.error(error);
    return Promise.resolve({
     payload: error,
     statusCode: 500
@@ -53,9 +58,17 @@ export class TRON {
   }
  }
 
- static async sendToken(from: string, to: string, amount: number): Promise<{ payload: any; statusCode: number; }> {
+ static async sendToken(
+  from: string,
+  to: string,
+  amount: number
+ ): Promise<{ payload: any; statusCode: number }> {
   try {
-   const payload = await tWeb.transactionBuilder.sendTrx(to, amount * (10 ** 6), from);
+   const payload = await tWeb.transactionBuilder.sendTrx(
+    to,
+    amount * 10 ** 6,
+    from
+   );
    // console.log(JSON.stringify(payload, null, 2));
    return Promise.resolve({
     payload,
@@ -70,7 +83,10 @@ export class TRON {
   }
  }
 
- static async signTransaction(transaction: any, pk: string): Promise<{ payload: any; statusCode: number; }> {
+ static async signTransaction(
+  transaction: any,
+  pk: string
+ ): Promise<{ payload: any; statusCode: number }> {
   try {
    const signedTransaction = await tWeb.trx.sign(transaction, pk);
    const receipt = await tWeb.trx.sendRawTransaction(signedTransaction);
@@ -88,37 +104,41 @@ export class TRON {
   }
  }
 
- static async getTransactions(address: string): Promise<{ payload: any; statusCode: number; }> {
+ static async getTransactions(
+  address: string
+ ): Promise<{ payload: any; statusCode: number }> {
   try {
-   const trxResponse = await rp.get(EXPLORER + "/accounts/" + address + "/transactions", { ...options });
-   const trxs: Array<any> = trxResponse.body.data.map(
-    (item: any) => ({
-     ...item,
-     raw_data: {
-      ...item.raw_data,
-      contract: item.raw_data.contract.map(
-       (c: any) => ({
-         value: tWeb.address.toHex(address) === c.parameter.value.to_address ? "+" + c.parameter.value.amount / (10 ** 6) : "-" + c.parameter.value.amount / (10 ** 6),
-         from: tWeb.address.fromHex(c.parameter.value.owner_address),
-         to: tWeb.address.fromHex(c.parameter.value.to_address)
-       })
-      )
-     }
-    })
+   const trxResponse = await rp.get(
+    EXPLORER + "/accounts/" + address + "/transactions",
+    { ...options }
    );
+   const trxs: Array<any> = trxResponse.body.data.map((item: any) => ({
+    ...item,
+    raw_data: {
+     ...item.raw_data,
+     contract: item.raw_data.contract.map((c: any) => ({
+      value:
+       tWeb.address.toHex(address) === c.parameter.value.to_address
+        ? "+" + c.parameter.value.amount / 10 ** 6
+        : "-" + c.parameter.value.amount / 10 ** 6,
+      from: tWeb.address.fromHex(c.parameter.value.owner_address),
+      to: tWeb.address.fromHex(c.parameter.value.to_address)
+     }))
+    }
+   }));
 
    return Promise.resolve({
     statusCode: 200,
     payload: trxs
    });
   } catch (error) {
-   return Promise.reject(
-    new Error(error.message)
-   );
+   return Promise.reject(new Error(error.message));
   }
  }
 
- static async importWallet(privateKey: string): Promise<{ payload: any; statusCode: number; }> {
+ static async importWallet(
+  privateKey: string
+ ): Promise<{ payload: any; statusCode: number }> {
   try {
    const address = tWeb.address.fromPrivateKey(privateKey);
    return Promise.resolve({
@@ -129,9 +149,7 @@ export class TRON {
     }
    });
   } catch (error) {
-   return Promise.reject(
-    new Error(error.message)
-   );
+   return Promise.reject(new Error(error.message));
   }
  }
 }

@@ -28,14 +28,16 @@ export class LTC {
     }
    });
   } catch (error) {
-   return Promise.reject(
-    new Error(error.message)
-   );
+   return Promise.reject(new Error(error.message));
   }
  }
 
- static async getAddressDetails(address: string): Promise<{ payload: any; statusCode: number}> {
-  const response = await rp.get(LTCROOT + "/address/" + address, { ...options });
+ static async getAddressDetails(
+  address: string
+ ): Promise<{ payload: any; statusCode: number }> {
+  const response = await rp.get(LTCROOT + "/address/" + address, {
+   ...options
+  });
   return Promise.resolve({
    statusCode: response.statusCode,
    payload: response.body.payload || response.body.meta.error.message
@@ -43,22 +45,22 @@ export class LTC {
  }
 
  static async sendToken(
-  inputs: { address: string; value: number; }[],
-  outputs: { address: string; value: number; }[],
-  fee: { value: number; }
+  inputs: { address: string; value: number }[],
+  outputs: { address: string; value: number }[],
+  fee: { value: number }
  ): Promise<{ payload: any; statusCode: number }> {
   const response = await rp.post(LTCROOT + "/txs/create", {
    ...options,
-   body: { 
+   body: {
     inputs: inputs.map(i => ({
      ...i,
      value: parseFloat(Number(i.value).toFixed(8))
-    })), 
+    })),
     outputs: outputs.map(o => ({
      ...o,
      value: parseFloat(Number(o.value).toFixed(8))
-    })), 
-    fee 
+    })),
+    fee
    }
   });
   return Promise.resolve({
@@ -67,7 +69,10 @@ export class LTC {
   });
  }
 
- static async signTransaction(hex: string, wifs: Array<string>): Promise<{ payload: any; statusCode: number; }> {
+ static async signTransaction(
+  hex: string,
+  wifs: Array<string>
+ ): Promise<{ payload: any; statusCode: number }> {
   const response = await rp.post(LTCROOT + "/txs/sign", {
    ...options,
    body: { hex, wifs }
@@ -78,7 +83,9 @@ export class LTC {
   });
  }
 
- static async broadcastTransaction(hex: string): Promise<{ payload: any; statusCode: number; }> {
+ static async broadcastTransaction(
+  hex: string
+ ): Promise<{ payload: any; statusCode: number }> {
   const response = await rp.post(LTCROOT + "/txs/send", {
    ...options,
    body: { hex }
@@ -89,7 +96,9 @@ export class LTC {
   });
  }
 
- static async importWallet(wif: string): Promise<{ payload: any; statusCode: number; }> {
+ static async importWallet(
+  wif: string
+ ): Promise<{ payload: any; statusCode: number }> {
   try {
    const pk = litecore.PrivateKey.fromWIF(wif);
    const address = pk.toAddress(n).toString();
@@ -101,9 +110,7 @@ export class LTC {
     }
    });
   } catch (error) {
-   return Promise.reject(
-    new Error(error.message)
-   );
+   return Promise.reject(new Error(error.message));
   }
  }
 }
