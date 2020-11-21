@@ -46,6 +46,16 @@ export interface Wallet {
   secret: string;
   balance: number;
  };
+ bnb?: {
+  address: string;
+  pk?: string;
+  balance: number;
+ };
+ dot?: {
+  address: string;
+  seed: string;
+  balance: number;
+ };
  // one?: {
  //  address: string;
  //  balance: number;

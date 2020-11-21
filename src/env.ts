@@ -64,4 +64,10 @@ export class Environment {
   test: process.env.XRP_TEST_API,
   staging: process.env.XRP_TEST_API
  };
+ static BNB = {
+  development: process.env.BNB_TEST_API,
+  production: process.env.BNB_MAIN_API,
+  test: process.env.BNB_TEST_API,
+  staging: process.env.BNB_TEST_API
+ };
 }

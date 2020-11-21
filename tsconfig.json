@@ -5,6 +5,7 @@
   "outDir": "./build",
   "esModuleInterop": true,
   "lib": ["es2015", "dom"],
-  "target": "es5"
+  "target": "es5",
+  "skipLibCheck": true
  }
 }
