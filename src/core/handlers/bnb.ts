@@ -91,4 +91,45 @@ export class BNB {
    return Promise.reject(new Error(error.message));
   }
  }
+
+ static async getTransactions(
+  address: string
+ ): Promise<{ statusCode: number; payload: any }> {
+  try {
+   const c = await client.initChain();
+   const trx = await c.getTransactions(address);
+
+   if (!Array.isArray(trx)) {
+    if (trx.status >= 400)
+     throw new CustomError(trx.status, "Could not fetch transactions");
+   } else throw new CustomError(400, "Could not fetch transactions");
+
+   if (!Array.isArray(trx)) console.log(JSON.stringify(trx.result));
+
+   return Promise.resolve({
+    statusCode: 200,
+    payload: trx.result
+   });
+  } catch (error) {
+   return Promise.reject(new Error(error.message));
+  }
+ }
+
+ static async importWallet(
+  pk: string
+ ): Promise<{ statusCode: number; payload: any }> {
+  try {
+   const c = await client.initChain();
+   const account = c.recoverAccountFromPrivateKey(pk);
+   return Promise.resolve({
+    statusCode: 200,
+    payload: {
+     address: account.address,
+     privateKey: account.privateKey
+    }
+   });
+  } catch (error) {
+   return Promise.reject(new Error(error.message));
+  }
+ }
 }
