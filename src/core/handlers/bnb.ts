@@ -1,22 +1,28 @@
-import { BncClient, Transaction } from "@binance-chain/javascript-sdk";
-import {
- SendMsg,
- SignInputOutput,
- StdSignMsg
-} from "@binance-chain/javascript-sdk/lib/types";
-import { CustomError } from "../../custom";
+import Web3 from "web3";
+import rp from "request-promise";
 import { Environment } from "../../env";
 
 const environment = process.env.NODE_ENV;
-const client = new BncClient(Environment.BNB[environment]);
+const web3 = new Web3(Environment.BSC[environment]);
+
+const testnet_scan = "https://api-testnet.bscscan.com";
+const mainnet_scan = "https://api.bscscan.com";
+
+const SCAN = {
+ development: testnet_scan,
+ production: mainnet_scan,
+ test: testnet_scan,
+ staging: testnet_scan
+};
+
+const SCAN_API = SCAN[environment];
 
 export class BNB {
  static async generateAddress(
   mnemonic: string
  ): Promise<{ statusCode: number; payload: any }> {
   try {
-   const c = await client.initChain();
-   const account = c.createAccountWithKeystore(mnemonic);
+   const account = web3.eth.accounts.create(mnemonic);
    return Promise.resolve({
     statusCode: 200,
     payload: {
@@ -33,13 +39,12 @@ export class BNB {
   address: string
  ): Promise<{ statusCode: number; payload: any }> {
   try {
-   const c = await client.initChain();
-   const i = await c.getBalance(address);
-   console.log(JSON.stringify(i));
+   const balance = await web3.eth.getBalance(address);
+   // console.log(JSON.stringify(balance));
    return Promise.resolve({
     statusCode: 200,
     payload: {
-     balance: parseFloat(i[0]?.free || "0")
+     balance: parseFloat(balance) / 10 ** 18
     }
    });
   } catch (error) {
@@ -48,43 +53,29 @@ export class BNB {
  }
 
  static async sendToken(
-  address: string,
   to: string,
+  gasPrice: number,
+  gas: number,
   value: number,
-  memo: string,
-  pk: string
+  pk: string,
+  nonce?: number
  ): Promise<{ statusCode: number; payload: any }> {
   try {
-   const c = await client.initChain();
-   const account = await c.getAccount(address);
-
-   if (!account || (account && account.status >= 400))
-    throw new CustomError(account?.status || 500, "Could not retrieve account");
-
-   const outputs: SignInputOutput[] = [
-    { address: to, coins: [{ denom: "BNB", amount: value }] },
-    { address, coins: [{ denom: "BNB", amount: value }] }
-   ];
-   const baseMsg = new SendMsg(address, outputs);
-   const data: StdSignMsg = {
-    chainId: c.chainId,
-    accountNumber: account.result?.account_number,
-    sequence: account.result?.sequence,
-    source: 1,
-    memo,
-    baseMsg
-   };
-   const tx = new Transaction(data);
-   const txBytes = tx.sign(pk).serialize();
-   const res = await c.sendRawTransaction(txBytes);
-
-   if (res.status >= 400)
-    throw new CustomError(res.status, "Could not send raw transaction");
-
+   const account = web3.eth.accounts.privateKeyToAccount(pk);
+   const signedTx = await account.signTransaction({
+    to,
+    gasPrice,
+    gas,
+    value: value * 10 ** 18,
+    nonce
+   });
+   const broadcastTx = await web3.eth.sendSignedTransaction(
+    signedTx.rawTransaction
+   );
    return Promise.resolve({
-    statusCode: res.status,
+    statusCode: 200,
     payload: {
-     hash: res.result[0]?.hash
+     hash: broadcastTx.transactionHash
     }
    });
   } catch (error) {
@@ -96,40 +87,54 @@ export class BNB {
   address: string
  ): Promise<{ statusCode: number; payload: any }> {
   try {
-   const c = await client.initChain();
-   const trx = await c.getTransactions(address);
-
-   if (!Array.isArray(trx)) {
-    if (trx.status >= 400)
-     throw new CustomError(trx.status, "Could not fetch transactions");
-   } else throw new CustomError(400, "Could not fetch transactions");
-
-   if (!Array.isArray(trx)) console.log(JSON.stringify(trx.result));
-
-   return Promise.resolve({
-    statusCode: 200,
-    payload: trx.result
-   });
-  } catch (error) {
-   return Promise.reject(new Error(error.message));
-  }
- }
-
- static async importWallet(
-  pk: string
- ): Promise<{ statusCode: number; payload: any }> {
-  try {
-   const c = await client.initChain();
-   const account = c.recoverAccountFromPrivateKey(pk);
-   return Promise.resolve({
-    statusCode: 200,
-    payload: {
-     address: account.address,
-     privateKey: account.privateKey
+   const res = await rp.get(
+    SCAN_API +
+     "/api?module=account&action=txlist&address=" +
+     address +
+     "&startblock=0&endblock=99999999&page=1&offset=100&sort=asc",
+    {
+     simple: false,
+     resolveWithFullResponse: true,
+     json: true
     }
+   );
+   // console.log(JSON.stringify(res.body));
+   const payload = res.body.result.map((x: any) => ({
+    date: new Date(parseInt(x.timeStamp)),
+    hash: x.hash,
+    nonce: parseInt(x.nonce),
+    from: x.from,
+    to: x.to,
+    amount:
+     x.from.toLowerCase() === address.toLowerCase()
+      ? "-" + parseFloat(x.value) / 10 ** 18
+      : "+" + parseFloat(x.value) / 10 ** 18,
+    status: parseInt(x.confirmations) > 0 ? "Confirmed" : "Pending"
+   }));
+   return Promise.resolve({
+    statusCode: 200,
+    payload
    });
   } catch (error) {
    return Promise.reject(new Error(error.message));
   }
  }
+
+ // static async importWallet(
+ //  pk: string
+ // ): Promise<{ statusCode: number; payload: any }> {
+ //  try {
+ //   const c = await client.initChain();
+ //   const account = c.recoverAccountFromPrivateKey(pk);
+ //   return Promise.resolve({
+ //    statusCode: 200,
+ //    payload: {
+ //     address: account.address,
+ //     privateKey: account.privateKey
+ //    }
+ //   });
+ //  } catch (error) {
+ //   return Promise.reject(new Error(error.message));
+ //  }
+ // }
 }

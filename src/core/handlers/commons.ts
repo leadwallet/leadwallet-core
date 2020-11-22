@@ -667,6 +667,12 @@ export const COIN_NETWORK = {
   production: "mainnet",
   test: "testnet",
   staging: "testnet"
+ },
+ bnb: {
+  development: "testnet",
+  production: "mainnet",
+  test: "testnet",
+  staging: "mainnet"
  }
 };
 

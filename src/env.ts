@@ -70,4 +70,10 @@ export class Environment {
   test: process.env.BNB_TEST_API,
   staging: process.env.BNB_TEST_API
  };
+ static BSC = {
+  development: process.env.BSC_TEST_API,
+  production: process.env.BSC_MAIN_API,
+  test: process.env.BSC_TEST_API,
+  staging: process.env.BSC_TEST_API
+ };
 }

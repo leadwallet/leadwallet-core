@@ -53,8 +53,9 @@ export interface Wallet {
  };
  dot?: {
   address: string;
-  seed: string;
+  key: any;
   balance: number;
+  password?: string;
  };
  // one?: {
  //  address: string;

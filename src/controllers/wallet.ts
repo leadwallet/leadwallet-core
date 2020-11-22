@@ -25,7 +25,6 @@ import {
 import { WalletAdaptor } from "../core/utils/wallet_adaptor";
 import { CurrencyConverter } from "../core/utils/currency_converter";
 import { TransactionFeeService } from "../core/handlers/transaction_fee_service";
-import { address } from "bitcoinjs-lib";
 
 const { DBWallet } = db;
 const errorCodes = {
@@ -68,7 +67,7 @@ export class WalletController {
     TRON.generateAddress(),
     XRP.generateAddress(),
     BNB.generateAddress(keyPair.privateKey),
-    DOT.generateAddress(keyPair.publicKey)
+    DOT.generateAddress(keyPair.publicKey, phrase)
    ];
 
    const [
@@ -91,7 +90,8 @@ export class WalletController {
     DASH.getAddressDetails(dashAddressCreationResponse.payload.address),
     TRON.getAddressDetails(tronAddressCreationResponse.payload.base58),
     XRP.getAddressDetails(xrpAddressCreationResponse.payload.address),
-    BNB.getAddressDetails(bnbAddressCreationResponse.payload.address)
+    BNB.getAddressDetails(bnbAddressCreationResponse.payload.address),
+    DOT.getAddressDetails(dotAddressCreationResponse.payload.address)
    ];
 
    const [
@@ -102,7 +102,8 @@ export class WalletController {
     dashAddressDetailsResponse,
     tronAddressDetailsResponse,
     xrpAddressDetailsResponse,
-    bnbAddressDetailsResponse
+    bnbAddressDetailsResponse,
+    dotAddressDetailsResponse
    ] = await Promise.all(allDetailsPromises);
 
    console.log("Got all address details");
@@ -118,7 +119,9 @@ export class WalletController {
      parseFloat(ltcAddressDetailsResponse.payload.balance) +
      tronAddressDetailsResponse.payload.balance +
      parseFloat(dashAddressDetailsResponse.payload.balance) +
-     xrpAddressDetailsResponse.payload.balance,
+     xrpAddressDetailsResponse.payload.balance +
+     parseFloat(bnbAddressDetailsResponse.payload.balance) +
+     dotAddressDetailsResponse.payload.balance,
     // hmyAddressCreationResponse.payload.balance
     hash: Tokenizers.hash(keyPair.publicKey + keyPair.privateKey),
     btc: {
@@ -165,8 +168,9 @@ export class WalletController {
     },
     dot: {
      address: dotAddressCreationResponse.payload.address,
-     seed: dotAddressCreationResponse.payload.seed,
-     balance: 0
+     key: dotAddressCreationResponse.payload.key,
+     balance: dotAddressDetailsResponse.payload.balance,
+     password: dotAddressCreationResponse.payload.password
     }
     // one: {
     //  address: hmyAddressCreationResponse.payload.address,
@@ -235,7 +239,8 @@ export class WalletController {
     TRON.getAddressDetails(wallet.trx.address),
     DASH.getAddressDetails(wallet.dash.address),
     wallet.xrp ? XRP.getAddressDetails(wallet.xrp.address) : null,
-    wallet.bnb ? BNB.getAddressDetails(wallet.bnb.address) : null
+    wallet.bnb ? BNB.getAddressDetails(wallet.bnb.address) : null,
+    wallet.dot ? DOT.getAddressDetails(wallet.dot.address) : null
    ];
    // Update wallet
    const [
@@ -246,7 +251,8 @@ export class WalletController {
     tronDetailsResponse,
     dashDetailsResponse,
     xrpDetailsResponse,
-    bnbDetailsResponse
+    bnbDetailsResponse,
+    dotDetailsResponse
    ] = await Promise.all(allAddressDetails);
    if (
     btcDetailsResponse.statusCode >= 400 ||
@@ -268,6 +274,7 @@ export class WalletController {
      parseFloat(dashDetailsResponse.payload.balance) +
      xrpDetailsResponse?.payload.balance ||
     0 + bnbDetailsResponse?.payload.balance ||
+    0 + dotDetailsResponse?.payload.balance ||
     0;
    // hmyDetailsResponse.payload.balance
    wallet.btc.balance = parseFloat(btcDetailsResponse.payload.balance);
@@ -279,6 +286,7 @@ export class WalletController {
    wallet.dash.balance = parseFloat(dashDetailsResponse.payload.balance);
    wallet.xrp.balance = xrpDetailsResponse?.payload.balance;
    wallet.bnb.balance = bnbDetailsResponse?.payload.balance;
+   wallet.dot.balance = dotDetailsResponse?.payload.balance;
    // wallet.one.balance = hmyDetailsResponse.payload.balance;
 
    // Update wallet in db
@@ -833,11 +841,12 @@ export class WalletController {
      throw new CustomError(400, "Insufficient BNB balance");
 
     const bnbSentResponse = await BNB.sendToken(
-     senderWallet.bnb.address,
      req.body.to,
+     req.body.gasPrice,
+     req.body.gasLimit,
      req.body.value,
-     senderWallet.publicKey,
-     senderWallet.bnb.pk
+     senderWallet.bnb.pk,
+     req.body.nonce
     );
 
     txHash = bnbSentResponse.payload.hash;
@@ -993,6 +1002,12 @@ export class WalletController {
     res.status(200).json({
      statusCode: 200,
      response: apiResponse
+    });
+   } else if (ticker.toLowerCase() === "bnb") {
+    const response = await BNB.getTransactions(address);
+    res.status(200).json({
+     statusCode: 200,
+     response: response.payload
     });
    }
   } catch (error) {

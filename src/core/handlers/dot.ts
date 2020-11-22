@@ -11,28 +11,28 @@ const formats = {
 };
 
 const ss58Format = formats[environment];
-const provider = new WsProvider("");
+const provider = new WsProvider("wss://rpc.polkadot.io");
 const promise = () => ApiPromise.create({ provider });
 
 export class DOT {
  static async generateAddress(
-  name: string
+  name: string,
+  seed: string
  ): Promise<{ statusCode: number; payload: any }> {
   try {
    const keyring = new Keyring({ type: "sr25519", ss58Format });
    const randomString = cryptoRandom({ length: 20 });
-   const possibleSeeds = {
-    development: "//Alice",
-    production: randomString,
-    test: "//Alice",
-    staging: "//Alice"
-   };
-   const pair = keyring.createFromUri(possibleSeeds[environment], { name });
+   const firstPath = environment === "production" ? seed : "";
+   const pair = keyring.createFromUri(firstPath + "//" + randomString, {
+    name
+   });
+   const key = pair.toJson(randomString);
    return Promise.resolve({
     statusCode: 200,
     payload: {
      address: pair.address,
-     seed: possibleSeeds[environment]
+     key,
+     password: randomString
     }
    });
   } catch (error) {
@@ -47,6 +47,7 @@ export class DOT {
    const api = await promise();
    const account = await api.query.system.account(address);
    const { data: balance } = account;
+   // console.log("dots: " + balance.free.toNumber());
    return Promise.resolve({
     statusCode: 200,
     payload: {
