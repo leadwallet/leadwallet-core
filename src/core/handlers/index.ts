@@ -5,7 +5,7 @@ export * from "./ltc";
 // export * from "./polka";
 export * from "./tron";
 export * from "./dash";
-export * from "./xrp";
+// export * from "./xrp";
 export * from "./bnb";
 export * from "./dot";
 // export * from "./hmy";

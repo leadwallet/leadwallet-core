@@ -11,7 +11,7 @@ import {
  LTC,
  TRON,
  DASH,
- XRP,
+ // XRP,
  BNB,
  DOT
 } from "../core/handlers";
@@ -65,7 +65,7 @@ export class WalletController {
     LTC.createAddress(),
     DASH.createAddress(),
     TRON.generateAddress(),
-    XRP.generateAddress(),
+    // XRP.generateAddress(),
     BNB.generateAddress(keyPair.privateKey),
     DOT.generateAddress(keyPair.publicKey, phrase)
    ];
@@ -77,7 +77,7 @@ export class WalletController {
     ltcAddressCreationResponse,
     dashAddressCreationResponse,
     tronAddressCreationResponse,
-    xrpAddressCreationResponse,
+    // xrpAddressCreationResponse,
     bnbAddressCreationResponse,
     dotAddressCreationResponse
    ] = await Promise.all(allPromises);
@@ -89,7 +89,7 @@ export class WalletController {
     LTC.getAddressDetails(ltcAddressCreationResponse.payload.address),
     DASH.getAddressDetails(dashAddressCreationResponse.payload.address),
     TRON.getAddressDetails(tronAddressCreationResponse.payload.base58),
-    XRP.getAddressDetails(xrpAddressCreationResponse.payload.address),
+    // XRP.getAddressDetails(xrpAddressCreationResponse.payload.address),
     BNB.getAddressDetails(bnbAddressCreationResponse.payload.address),
     DOT.getAddressDetails(dotAddressCreationResponse.payload.address)
    ];
@@ -101,7 +101,7 @@ export class WalletController {
     ltcAddressDetailsResponse,
     dashAddressDetailsResponse,
     tronAddressDetailsResponse,
-    xrpAddressDetailsResponse,
+    // xrpAddressDetailsResponse,
     bnbAddressDetailsResponse,
     dotAddressDetailsResponse
    ] = await Promise.all(allDetailsPromises);
@@ -119,7 +119,7 @@ export class WalletController {
      parseFloat(ltcAddressDetailsResponse.payload.balance) +
      tronAddressDetailsResponse.payload.balance +
      parseFloat(dashAddressDetailsResponse.payload.balance) +
-     xrpAddressDetailsResponse.payload.balance +
+     // xrpAddressDetailsResponse.payload.balance +
      parseFloat(bnbAddressDetailsResponse.payload.balance) +
      dotAddressDetailsResponse.payload.balance,
     // hmyAddressCreationResponse.payload.balance
@@ -156,11 +156,11 @@ export class WalletController {
      wif: dashAddressCreationResponse.payload.wif,
      balance: parseFloat(dashAddressDetailsResponse.payload.balance)
     },
-    xrp: {
-     address: xrpAddressCreationResponse.payload.address,
-     secret: xrpAddressCreationResponse.payload.secret,
-     balance: xrpAddressDetailsResponse.payload.balance
-    },
+    // xrp: {
+    //  address: xrpAddressCreationResponse.payload.address,
+    //  secret: xrpAddressCreationResponse.payload.secret,
+    //  balance: xrpAddressDetailsResponse.payload.balance
+    // },
     bnb: {
      address: bnbAddressCreationResponse.payload.address,
      pk: bnbAddressCreationResponse.payload.privateKey,
@@ -238,7 +238,7 @@ export class WalletController {
     LTC.getAddressDetails(wallet.ltc.address),
     TRON.getAddressDetails(wallet.trx.address),
     DASH.getAddressDetails(wallet.dash.address),
-    wallet.xrp ? XRP.getAddressDetails(wallet.xrp.address) : null,
+    // wallet.xrp ? XRP.getAddressDetails(wallet.xrp.address) : null,
     wallet.bnb ? BNB.getAddressDetails(wallet.bnb.address) : null,
     wallet.dot ? DOT.getAddressDetails(wallet.dot.address) : null
    ];
@@ -250,7 +250,7 @@ export class WalletController {
     ltcDetailsResponse,
     tronDetailsResponse,
     dashDetailsResponse,
-    xrpDetailsResponse,
+    // xrpDetailsResponse,
     bnbDetailsResponse,
     dotDetailsResponse
    ] = await Promise.all(allAddressDetails);
@@ -272,8 +272,7 @@ export class WalletController {
      parseFloat(ltcDetailsResponse.payload.balance) +
      tronDetailsResponse.payload.balance +
      parseFloat(dashDetailsResponse.payload.balance) +
-     xrpDetailsResponse?.payload.balance ||
-    0 + bnbDetailsResponse?.payload.balance ||
+     bnbDetailsResponse?.payload.balance ||
     0 + dotDetailsResponse?.payload.balance ||
     0;
    // hmyDetailsResponse.payload.balance
@@ -284,7 +283,7 @@ export class WalletController {
    wallet.ltc.balance = parseFloat(ltcDetailsResponse.payload.balance);
    wallet.trx.balance = tronDetailsResponse.payload.balance;
    wallet.dash.balance = parseFloat(dashDetailsResponse.payload.balance);
-   wallet.xrp.balance = xrpDetailsResponse?.payload.balance;
+   // wallet.xrp.balance = xrpDetailsResponse?.payload.balance;
    wallet.bnb.balance = bnbDetailsResponse?.payload.balance;
    wallet.dot.balance = dotDetailsResponse?.payload.balance;
    // wallet.one.balance = hmyDetailsResponse.payload.balance;
@@ -813,24 +812,6 @@ export class WalletController {
     // Update sender wallet's LTC balance
     senderWallet.dash.balance = senderWallet.dash.balance - balance;
     txHash = broadcastTransactionResponse.payload.txid;
-   } else if (type === "xrp") {
-    balance = req.body.value;
-
-    if (senderWallet.balance < balance)
-     throw new CustomError(400, "Insufficent wallet balance.");
-
-    if (senderWallet.xrp.balance < balance)
-     throw new CustomError(400, "Insufficient XRP balance");
-
-    const xrpSentResponse = await XRP.sendToken(
-     senderWallet.xrp.address,
-     req.body.to,
-     req.body.value,
-     senderWallet.xrp.secret
-    );
-
-    txHash = xrpSentResponse.payload.hash;
-    // txId = xrpSentResponse.payload.hash;
    } else if (type === "bnb") {
     balance = req.body.value;
 
@@ -988,16 +969,6 @@ export class WalletController {
      fee: item.net_fee / 10 ** 6,
      status: item.ret[0].contractRet === "SUCCESS" ? "Confirmed" : "Pending",
      view_in_explorer: getExplorerLink(ticker, item.txID)
-    }));
-    res.status(200).json({
-     statusCode: 200,
-     response: apiResponse
-    });
-   } else if (ticker.toLowerCase() === "xrp") {
-    const response = await XRP.getTransactions(address);
-    const apiResponse = response.payload.map((x: any) => ({
-     ...x,
-     view_in_explorer: getExplorerLink(ticker, x.hash)
     }));
     res.status(200).json({
      statusCode: 200,

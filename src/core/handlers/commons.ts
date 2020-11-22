@@ -620,7 +620,6 @@ export const CURRENT_COINS: Array<string> = [
  "dash",
  "doge",
  "trx",
- "xrp",
  "dot",
  "bnb"
 ];
@@ -662,12 +661,12 @@ export const COIN_NETWORK = {
   test: "ropsten",
   staging: "ropsten"
  },
- xrp: {
-  development: "testnet",
-  production: "mainnet",
-  test: "testnet",
-  staging: "testnet"
- },
+ // xrp: {
+ //  development: "testnet",
+ //  production: "mainnet",
+ //  test: "testnet",
+ //  staging: "testnet"
+ // },
  bnb: {
   development: "testnet",
   production: "mainnet",

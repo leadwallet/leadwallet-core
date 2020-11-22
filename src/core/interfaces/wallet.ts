@@ -41,11 +41,11 @@ export interface Wallet {
   wif: string;
   balance: number;
  };
- xrp?: {
-  address: string;
-  secret: string;
-  balance: number;
- };
+ // xrp?: {
+ //  address: string;
+ //  secret: string;
+ //  balance: number;
+ // };
  bnb?: {
   address: string;
   pk?: string;
