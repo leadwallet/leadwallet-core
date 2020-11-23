@@ -13,7 +13,8 @@ import {
  DASH,
  // XRP,
  BNB,
- DOT
+ DOT,
+ XTZ
 } from "../core/handlers";
 import { TransactionService } from "../core/handlers/transaction_handler";
 import {
@@ -67,7 +68,8 @@ export class WalletController {
     TRON.generateAddress(),
     // XRP.generateAddress(),
     BNB.generateAddress(keyPair.privateKey),
-    DOT.generateAddress(keyPair.publicKey, phrase)
+    DOT.generateAddress(keyPair.publicKey, phrase),
+    XTZ.generateAddress(keyPair.privateKey)
    ];
 
    const [
@@ -79,7 +81,8 @@ export class WalletController {
     tronAddressCreationResponse,
     // xrpAddressCreationResponse,
     bnbAddressCreationResponse,
-    dotAddressCreationResponse
+    dotAddressCreationResponse,
+    xtzAddressCreationResponse
    ] = await Promise.all(allPromises);
 
    const allDetailsPromises = [
@@ -91,7 +94,8 @@ export class WalletController {
     TRON.getAddressDetails(tronAddressCreationResponse.payload.base58),
     // XRP.getAddressDetails(xrpAddressCreationResponse.payload.address),
     BNB.getAddressDetails(bnbAddressCreationResponse.payload.address),
-    DOT.getAddressDetails(dotAddressCreationResponse.payload.address)
+    DOT.getAddressDetails(dotAddressCreationResponse.payload.address),
+    XTZ.getAddressDetails(xtzAddressCreationResponse.payload.address)
    ];
 
    const [
@@ -103,7 +107,8 @@ export class WalletController {
     tronAddressDetailsResponse,
     // xrpAddressDetailsResponse,
     bnbAddressDetailsResponse,
-    dotAddressDetailsResponse
+    dotAddressDetailsResponse,
+    xtzAddressDetailsResponse
    ] = await Promise.all(allDetailsPromises);
 
    console.log("Got all address details");
@@ -121,7 +126,8 @@ export class WalletController {
      parseFloat(dashAddressDetailsResponse.payload.balance) +
      // xrpAddressDetailsResponse.payload.balance +
      parseFloat(bnbAddressDetailsResponse.payload.balance) +
-     dotAddressDetailsResponse.payload.balance,
+     dotAddressDetailsResponse.payload.balance +
+     xtzAddressDetailsResponse.payload.balance,
     // hmyAddressCreationResponse.payload.balance
     hash: Tokenizers.hash(keyPair.publicKey + keyPair.privateKey),
     btc: {
@@ -171,6 +177,11 @@ export class WalletController {
      key: dotAddressCreationResponse.payload.key,
      balance: dotAddressDetailsResponse.payload.balance,
      password: dotAddressCreationResponse.payload.password
+    },
+    xtz: {
+     address: xtzAddressCreationResponse.payload.address,
+     privateKey: xtzAddressCreationResponse.payload.privateKey,
+     balance: xtzAddressDetailsResponse.payload.balance
     }
     // one: {
     //  address: hmyAddressCreationResponse.payload.address,

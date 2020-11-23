@@ -621,7 +621,8 @@ export const CURRENT_COINS: Array<string> = [
  "doge",
  "trx",
  "dot",
- "bnb"
+ "bnb",
+ "xtz"
 ];
 export const CRYPTO_API_COINS: Array<string> = [
  "btc",

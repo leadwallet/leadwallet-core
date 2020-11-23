@@ -8,4 +8,5 @@ export * from "./dash";
 // export * from "./xrp";
 export * from "./bnb";
 export * from "./dot";
+export * from "./xtz";
 // export * from "./hmy";

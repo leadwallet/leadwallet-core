@@ -60,5 +60,10 @@ export interface Wallet {
  // one?: {
  //  address: string;
  //  balance: number;
- // }
+ // };
+ xtz?: {
+  address: string;
+  privateKey: string;
+  balance: number;
+ };
 }

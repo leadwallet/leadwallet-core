@@ -76,4 +76,11 @@ export class Environment {
   test: process.env.BSC_TEST_API,
   staging: process.env.BSC_TEST_API
  };
+ static XTZ = {
+  development: process.env.XTZ_TEST_API,
+  production: process.env.XTZ_MAIN_API,
+  test: process.env.XTZ_TEST_API,
+  staging: process.env.XTZ_TEST_API
+ };
+ static CONSEIL_API_KEY = process.env.CONSEIL_API_KEY;
 }
