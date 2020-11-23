@@ -82,11 +82,11 @@ export class XTZ {
    const result = await ConseilDataClient.executeEntityQuery(
     {
      url: server,
-     network: "delphinet",
+     network: "",
      apiKey
     },
     "tezos",
-    "delphinet",
+    "",
     "accounts",
     query6
    );

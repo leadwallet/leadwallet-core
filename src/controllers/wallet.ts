@@ -251,7 +251,8 @@ export class WalletController {
     DASH.getAddressDetails(wallet.dash.address),
     // wallet.xrp ? XRP.getAddressDetails(wallet.xrp.address) : null,
     wallet.bnb ? BNB.getAddressDetails(wallet.bnb.address) : null,
-    wallet.dot ? DOT.getAddressDetails(wallet.dot.address) : null
+    wallet.dot ? DOT.getAddressDetails(wallet.dot.address) : null,
+    wallet.xtz ? XTZ.getAddressDetails(wallet.xtz.address) : null
    ];
    // Update wallet
    const [
@@ -263,7 +264,8 @@ export class WalletController {
     dashDetailsResponse,
     // xrpDetailsResponse,
     bnbDetailsResponse,
-    dotDetailsResponse
+    dotDetailsResponse,
+    xtzDetailsResponse
    ] = await Promise.all(allAddressDetails);
    if (
     btcDetailsResponse.statusCode >= 400 ||
@@ -285,6 +287,7 @@ export class WalletController {
      parseFloat(dashDetailsResponse.payload.balance) +
      bnbDetailsResponse?.payload.balance ||
     0 + dotDetailsResponse?.payload.balance ||
+    0 + xtzDetailsResponse?.payload.balance ||
     0;
    // hmyDetailsResponse.payload.balance
    wallet.btc.balance = parseFloat(btcDetailsResponse.payload.balance);
@@ -297,6 +300,7 @@ export class WalletController {
    // wallet.xrp.balance = xrpDetailsResponse?.payload.balance;
    wallet.bnb.balance = bnbDetailsResponse?.payload.balance;
    wallet.dot.balance = dotDetailsResponse?.payload.balance;
+   wallet.xtz.balance = xtzDetailsResponse?.payload.balance;
    // wallet.one.balance = hmyDetailsResponse.payload.balance;
 
    // Update wallet in db
