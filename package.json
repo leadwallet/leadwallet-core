@@ -32,6 +32,7 @@
     "rimraf": "^3.0.2",
     "ripple-lib": "^1.8.2",
     "satoshi-bitcoin": "^1.0.4",
+    "stellar-sdk": "^7.0.0",
     "sync-request": "^6.1.0",
     "ton-client-node-js": "^0.26.1",
     "tronweb": "^3.0.0",
