@@ -83,4 +83,10 @@ export class Environment {
   staging: process.env.XTZ_TEST_API
  };
  static CONSEIL_API_KEY = process.env.CONSEIL_API_KEY;
+ static XLM = {
+  development: process.env.XLM_TEST_API,
+  production: process.env.XLM_MAIN_API,
+  test: process.env.XLM_TEST_API,
+  staging: process.env.XLM_TEST_API
+ };
 }

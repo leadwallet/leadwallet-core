@@ -120,6 +120,23 @@ export class BNB {
   }
  }
 
+ static async importWallet(
+  pk: string
+ ): Promise<{ statusCode: number; payload: any }> {
+  try {
+   const account = web3.eth.accounts.privateKeyToAccount(pk);
+   return Promise.resolve({
+    statusCode: 200,
+    payload: {
+     address: account.address,
+     privateKey: account.privateKey
+    }
+   });
+  } catch (error) {
+   return Promise.reject(new Error(error.message));
+  }
+ }
+
  // static async importWallet(
  //  pk: string
  // ): Promise<{ statusCode: number; payload: any }> {

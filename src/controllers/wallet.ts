@@ -14,7 +14,8 @@ import {
  // XRP,
  BNB,
  DOT,
- XTZ
+ XTZ,
+ XLM
 } from "../core/handlers";
 import { TransactionService } from "../core/handlers/transaction_handler";
 import {
@@ -69,7 +70,8 @@ export class WalletController {
     // XRP.generateAddress(),
     BNB.generateAddress(keyPair.privateKey),
     DOT.generateAddress(keyPair.publicKey, phrase),
-    XTZ.generateAddress(keyPair.privateKey)
+    XTZ.generateAddress(keyPair.privateKey),
+    XLM.generateAddress()
    ];
 
    const [
@@ -82,7 +84,8 @@ export class WalletController {
     // xrpAddressCreationResponse,
     bnbAddressCreationResponse,
     dotAddressCreationResponse,
-    xtzAddressCreationResponse
+    xtzAddressCreationResponse,
+    xlmAddressCreationResponse
    ] = await Promise.all(allPromises);
 
    const allDetailsPromises = [
@@ -95,7 +98,8 @@ export class WalletController {
     // XRP.getAddressDetails(xrpAddressCreationResponse.payload.address),
     BNB.getAddressDetails(bnbAddressCreationResponse.payload.address),
     DOT.getAddressDetails(dotAddressCreationResponse.payload.address),
-    XTZ.getAddressDetails(xtzAddressCreationResponse.payload.address)
+    XTZ.getAddressDetails(xtzAddressCreationResponse.payload.address),
+    XLM.getAddressDetails(xlmAddressCreationResponse.payload.address)
    ];
 
    const [
@@ -108,7 +112,8 @@ export class WalletController {
     // xrpAddressDetailsResponse,
     bnbAddressDetailsResponse,
     dotAddressDetailsResponse,
-    xtzAddressDetailsResponse
+    xtzAddressDetailsResponse,
+    xlmAddressDetailsResponse
    ] = await Promise.all(allDetailsPromises);
 
    console.log("Got all address details");
@@ -127,7 +132,8 @@ export class WalletController {
      // xrpAddressDetailsResponse.payload.balance +
      parseFloat(bnbAddressDetailsResponse.payload.balance) +
      dotAddressDetailsResponse.payload.balance +
-     xtzAddressDetailsResponse.payload.balance,
+     xtzAddressDetailsResponse.payload.balance +
+     xlmAddressDetailsResponse.payload.balance,
     // hmyAddressCreationResponse.payload.balance
     hash: Tokenizers.hash(keyPair.publicKey + keyPair.privateKey),
     btc: {
@@ -180,8 +186,13 @@ export class WalletController {
     },
     xtz: {
      address: xtzAddressCreationResponse.payload.address,
-     privateKey: xtzAddressCreationResponse.payload.privateKey,
+     pk: xtzAddressCreationResponse.payload.privateKey,
      balance: xtzAddressDetailsResponse.payload.balance
+    },
+    xlm: {
+     address: xlmAddressCreationResponse.payload.address,
+     pk: xlmAddressCreationResponse.payload.privateKey,
+     balance: xlmAddressDetailsResponse.payload.balance
     }
     // one: {
     //  address: hmyAddressCreationResponse.payload.address,
@@ -243,16 +254,17 @@ export class WalletController {
 
    // Get all address details
    const allAddressDetails = [
-    BTC.getAddressDetails(wallet.btc.address),
-    ETH.getAddressDetails(wallet.eth.address),
-    DOGE.getAddressDetails(wallet.doge.address),
-    LTC.getAddressDetails(wallet.ltc.address),
-    TRON.getAddressDetails(wallet.trx.address),
-    DASH.getAddressDetails(wallet.dash.address),
+    wallet.btc ? BTC.getAddressDetails(wallet.btc.address) : null,
+    wallet.eth ? ETH.getAddressDetails(wallet.eth.address) : null,
+    wallet.doge ? DOGE.getAddressDetails(wallet.doge.address) : null,
+    wallet.ltc ? LTC.getAddressDetails(wallet.ltc.address) : null,
+    wallet.trx ? TRON.getAddressDetails(wallet.trx.address) : null,
+    wallet.dash ? DASH.getAddressDetails(wallet.dash.address) : null,
     // wallet.xrp ? XRP.getAddressDetails(wallet.xrp.address) : null,
     wallet.bnb ? BNB.getAddressDetails(wallet.bnb.address) : null,
     wallet.dot ? DOT.getAddressDetails(wallet.dot.address) : null,
-    wallet.xtz ? XTZ.getAddressDetails(wallet.xtz.address) : null
+    wallet.xtz ? XTZ.getAddressDetails(wallet.xtz.address) : null,
+    wallet.xlm ? XLM.getAddressDetails(wallet.xlm.address) : null
    ];
    // Update wallet
    const [
@@ -265,7 +277,8 @@ export class WalletController {
     // xrpDetailsResponse,
     bnbDetailsResponse,
     dotDetailsResponse,
-    xtzDetailsResponse
+    xtzDetailsResponse,
+    xlmDetailsResponse
    ] = await Promise.all(allAddressDetails);
    if (
     btcDetailsResponse.statusCode >= 400 ||
@@ -280,27 +293,28 @@ export class WalletController {
    }
    wallet.balance =
     parseFloat(btcDetailsResponse.payload.balance) +
-     parseFloat(ethDetailsResponse.payload.balance) +
-     parseFloat(dogeDetailsResponse.payload.balance) +
-     parseFloat(ltcDetailsResponse.payload.balance) +
-     tronDetailsResponse.payload.balance +
-     parseFloat(dashDetailsResponse.payload.balance) +
-     bnbDetailsResponse?.payload.balance ||
-    0 + dotDetailsResponse?.payload.balance ||
-    0 + xtzDetailsResponse?.payload.balance ||
-    0;
+    parseFloat(ethDetailsResponse.payload.balance) +
+    parseFloat(dogeDetailsResponse.payload.balance) +
+    parseFloat(ltcDetailsResponse.payload.balance) +
+    tronDetailsResponse.payload.balance +
+    parseFloat(dashDetailsResponse.payload.balance) +
+    (bnbDetailsResponse?.payload.balance || 0) +
+    (dotDetailsResponse?.payload.balance || 0) +
+    (xtzDetailsResponse?.payload.balance || 0) +
+    (xlmDetailsResponse?.payload.balance || 0);
    // hmyDetailsResponse.payload.balance
-   wallet.btc.balance = parseFloat(btcDetailsResponse.payload.balance);
-   wallet.eth.balance = parseFloat(ethDetailsResponse.payload.balance);
-   wallet.eth.tokens = ethDetailsResponse.payload.tokens;
-   wallet.doge.balance = parseFloat(dogeDetailsResponse.payload.balance);
-   wallet.ltc.balance = parseFloat(ltcDetailsResponse.payload.balance);
-   wallet.trx.balance = tronDetailsResponse.payload.balance;
-   wallet.dash.balance = parseFloat(dashDetailsResponse.payload.balance);
+   wallet.btc.balance = parseFloat(btcDetailsResponse?.payload.balance);
+   wallet.eth.balance = parseFloat(ethDetailsResponse?.payload.balance);
+   wallet.eth.tokens = ethDetailsResponse?.payload.tokens;
+   wallet.doge.balance = parseFloat(dogeDetailsResponse?.payload.balance);
+   wallet.ltc.balance = parseFloat(ltcDetailsResponse?.payload.balance);
+   wallet.trx.balance = tronDetailsResponse?.payload.balance;
+   wallet.dash.balance = parseFloat(dashDetailsResponse?.payload.balance);
    // wallet.xrp.balance = xrpDetailsResponse?.payload.balance;
    wallet.bnb.balance = bnbDetailsResponse?.payload.balance;
    wallet.dot.balance = dotDetailsResponse?.payload.balance;
    wallet.xtz.balance = xtzDetailsResponse?.payload.balance;
+   wallet.xlm.balance = xlmDetailsResponse?.payload.balance;
    // wallet.one.balance = hmyDetailsResponse.payload.balance;
 
    // Update wallet in db
@@ -846,6 +860,21 @@ export class WalletController {
     );
 
     txHash = bnbSentResponse.payload.hash;
+   } else if (type === "xlm") {
+    balance = req.body.value;
+
+    if (senderWallet.balance < balance)
+     throw new CustomError(400, "Insufficient wallet balance");
+
+    if (senderWallet.xlm.balance < balance)
+     throw new CustomError(400, "Insufficient XLM balance");
+
+    const xlmSentResponse = await XLM.sendToken(
+     senderWallet.xlm.pk,
+     req.body.to,
+     req.body.value
+    );
+    txHash = xlmSentResponse.payload.hash;
    } else {
     throw new CustomError(400, type + " not available yet.");
    }

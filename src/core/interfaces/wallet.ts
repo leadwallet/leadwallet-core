@@ -63,7 +63,12 @@ export interface Wallet {
  // };
  xtz?: {
   address: string;
-  privateKey: string;
+  pk: string;
+  balance: number;
+ };
+ xlm?: {
+  address: string;
+  pk: string;
   balance: number;
  };
 }

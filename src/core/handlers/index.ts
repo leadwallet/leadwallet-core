@@ -9,4 +9,5 @@ export * from "./dash";
 export * from "./bnb";
 export * from "./dot";
 export * from "./xtz";
+export * from "./xlm";
 // export * from "./hmy";
