@@ -623,7 +623,8 @@ export const CURRENT_COINS: Array<string> = [
  "dot",
  "bnb",
  "xtz",
- "xlm"
+ "xlm",
+ "celo"
 ];
 export const CRYPTO_API_COINS: Array<string> = [
  "btc",
@@ -677,7 +678,11 @@ export const COIN_NETWORK = {
  },
  xlm: {
   development: "testnet",
-  production: "mainnet"
+  production: "mainnet",
+  test: "testnet"
+ },
+ celo: {
+  development: "testnet"
  }
 };
 

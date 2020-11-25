@@ -15,7 +15,8 @@ import {
  BNB,
  DOT,
  XTZ,
- XLM
+ XLM,
+ CELO
 } from "../core/handlers";
 import { TransactionService } from "../core/handlers/transaction_handler";
 import {
@@ -71,7 +72,8 @@ export class WalletController {
     BNB.generateAddress(keyPair.privateKey),
     DOT.generateAddress(keyPair.publicKey, phrase),
     XTZ.generateAddress(keyPair.privateKey),
-    XLM.generateAddress()
+    XLM.generateAddress(),
+    CELO.createAddress(keyPair.privateKey)
    ];
 
    const [
@@ -85,7 +87,8 @@ export class WalletController {
     bnbAddressCreationResponse,
     dotAddressCreationResponse,
     xtzAddressCreationResponse,
-    xlmAddressCreationResponse
+    xlmAddressCreationResponse,
+    celoAddressCreationResponse
    ] = await Promise.all(allPromises);
 
    const allDetailsPromises = [
@@ -99,7 +102,8 @@ export class WalletController {
     BNB.getAddressDetails(bnbAddressCreationResponse.payload.address),
     DOT.getAddressDetails(dotAddressCreationResponse.payload.address),
     XTZ.getAddressDetails(xtzAddressCreationResponse.payload.address),
-    XLM.getAddressDetails(xlmAddressCreationResponse.payload.address)
+    XLM.getAddressDetails(xlmAddressCreationResponse.payload.address),
+    CELO.getAddressDetails(celoAddressCreationResponse.payload.address)
    ];
 
    const [
@@ -113,7 +117,8 @@ export class WalletController {
     bnbAddressDetailsResponse,
     dotAddressDetailsResponse,
     xtzAddressDetailsResponse,
-    xlmAddressDetailsResponse
+    xlmAddressDetailsResponse,
+    celoAddressDetailsResponse
    ] = await Promise.all(allDetailsPromises);
 
    console.log("Got all address details");
@@ -193,6 +198,11 @@ export class WalletController {
      address: xlmAddressCreationResponse.payload.address,
      pk: xlmAddressCreationResponse.payload.privateKey,
      balance: xlmAddressDetailsResponse.payload.balance
+    },
+    celo: {
+     address: celoAddressCreationResponse.payload.address,
+     pk: celoAddressCreationResponse.payload.privateKey,
+     balance: celoAddressDetailsResponse.payload.balance
     }
     // one: {
     //  address: hmyAddressCreationResponse.payload.address,
@@ -264,7 +274,8 @@ export class WalletController {
     wallet.bnb ? BNB.getAddressDetails(wallet.bnb.address) : null,
     wallet.dot ? DOT.getAddressDetails(wallet.dot.address) : null,
     wallet.xtz ? XTZ.getAddressDetails(wallet.xtz.address) : null,
-    wallet.xlm ? XLM.getAddressDetails(wallet.xlm.address) : null
+    wallet.xlm ? XLM.getAddressDetails(wallet.xlm.address) : null,
+    wallet.celo ? CELO.getAddressDetails(wallet.celo.address) : null
    ];
    // Update wallet
    const [
@@ -278,7 +289,8 @@ export class WalletController {
     bnbDetailsResponse,
     dotDetailsResponse,
     xtzDetailsResponse,
-    xlmDetailsResponse
+    xlmDetailsResponse,
+    celoDetailsResponse
    ] = await Promise.all(allAddressDetails);
    if (
     btcDetailsResponse.statusCode >= 400 ||
@@ -301,7 +313,8 @@ export class WalletController {
     (bnbDetailsResponse?.payload.balance || 0) +
     (dotDetailsResponse?.payload.balance || 0) +
     (xtzDetailsResponse?.payload.balance || 0) +
-    (xlmDetailsResponse?.payload.balance || 0);
+    (xlmDetailsResponse?.payload.balance || 0) +
+    (celoDetailsResponse?.payload.balance || 0);
    // hmyDetailsResponse.payload.balance
    wallet.btc.balance = parseFloat(btcDetailsResponse?.payload.balance);
    wallet.eth.balance = parseFloat(ethDetailsResponse?.payload.balance);
@@ -315,6 +328,7 @@ export class WalletController {
    wallet.dot.balance = dotDetailsResponse?.payload.balance;
    wallet.xtz.balance = xtzDetailsResponse?.payload.balance;
    wallet.xlm.balance = xlmDetailsResponse?.payload.balance;
+   wallet.celo.balance = celoDetailsResponse?.payload.balance;
    // wallet.one.balance = hmyDetailsResponse.payload.balance;
 
    // Update wallet in db
@@ -875,6 +889,21 @@ export class WalletController {
      req.body.value
     );
     txHash = xlmSentResponse.payload.hash;
+   } else if (type === "celo") {
+    balance = req.body.value;
+
+    if (senderWallet.balance < balance)
+     throw new CustomError(400, "Insufficient wallet balance");
+
+    if (senderWallet.celo.balance < balance)
+     throw new CustomError(400, "Insufficient CELO balance");
+
+    const celoSentResponse = await CELO.sendToken(
+     senderWallet.celo.pk,
+     req.body.to,
+     req.body.value
+    );
+    txHash = celoSentResponse.payload.hash;
    } else {
     throw new CustomError(400, type + " not available yet.");
    }
@@ -1020,6 +1049,12 @@ export class WalletController {
     });
    } else if (ticker.toLowerCase() === "bnb") {
     const response = await BNB.getTransactions(address);
+    res.status(200).json({
+     statusCode: 200,
+     response: response.payload
+    });
+   } else if (ticker.toLowerCase() === "xlm") {
+    const response = await XLM.getTransactions(address);
     res.status(200).json({
      statusCode: 200,
      response: response.payload

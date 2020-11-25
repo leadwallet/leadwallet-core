@@ -113,9 +113,9 @@ export class XLM {
      status: tx.succeeds ? "Confirmed" : "Pending",
      to: effect.account,
      amount:
-      effect.type === "account_credited"
-       ? "+" + effect.amount
-       : "-" + effect.amount
+      tx.source_account.toLowerCase() === address.toLowerCase()
+       ? "-" + effect.amount
+       : "+" + effect.amount
     };
    });
    const resolvedTxsMapped = await Promise.all(txsPromisesArray);

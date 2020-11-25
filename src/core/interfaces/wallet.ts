@@ -71,4 +71,9 @@ export interface Wallet {
   pk: string;
   balance: number;
  };
+ celo?: {
+  address: string;
+  pk: string;
+  balance: number;
+ };
 }
