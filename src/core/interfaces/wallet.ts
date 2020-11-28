@@ -76,4 +76,9 @@ export interface Wallet {
   pk: string;
   balance: number;
  };
+ near?: {
+  address: string;
+  pk: string;
+  balance: number;
+ };
 }

@@ -16,7 +16,8 @@ import {
  DOT,
  XTZ,
  XLM,
- CELO
+ CELO,
+ NEAR
 } from "../core/handlers";
 import { TransactionService } from "../core/handlers/transaction_handler";
 import {
@@ -73,7 +74,8 @@ export class WalletController {
     DOT.generateAddress(keyPair.publicKey, phrase),
     XTZ.generateAddress(keyPair.privateKey),
     XLM.generateAddress(),
-    CELO.createAddress(keyPair.privateKey)
+    CELO.createAddress(keyPair.privateKey),
+    NEAR.createAddress()
    ];
 
    const [
@@ -88,7 +90,8 @@ export class WalletController {
     dotAddressCreationResponse,
     xtzAddressCreationResponse,
     xlmAddressCreationResponse,
-    celoAddressCreationResponse
+    celoAddressCreationResponse,
+    nearAddressCreationResponse
    ] = await Promise.all(allPromises);
 
    const allDetailsPromises = [
@@ -103,7 +106,8 @@ export class WalletController {
     DOT.getAddressDetails(dotAddressCreationResponse.payload.address),
     XTZ.getAddressDetails(xtzAddressCreationResponse.payload.address),
     XLM.getAddressDetails(xlmAddressCreationResponse.payload.address),
-    CELO.getAddressDetails(celoAddressCreationResponse.payload.address)
+    CELO.getAddressDetails(celoAddressCreationResponse.payload.address),
+    NEAR.getAddressDetails(nearAddressCreationResponse.payload.address)
    ];
 
    const [
@@ -118,7 +122,8 @@ export class WalletController {
     dotAddressDetailsResponse,
     xtzAddressDetailsResponse,
     xlmAddressDetailsResponse,
-    celoAddressDetailsResponse
+    celoAddressDetailsResponse,
+    nearAddressDetailsResponse
    ] = await Promise.all(allDetailsPromises);
 
    console.log("Got all address details");
@@ -138,7 +143,8 @@ export class WalletController {
      parseFloat(bnbAddressDetailsResponse.payload.balance) +
      dotAddressDetailsResponse.payload.balance +
      xtzAddressDetailsResponse.payload.balance +
-     xlmAddressDetailsResponse.payload.balance,
+     xlmAddressDetailsResponse.payload.balance +
+     nearAddressDetailsResponse.payload.balance,
     // hmyAddressCreationResponse.payload.balance
     hash: Tokenizers.hash(keyPair.publicKey + keyPair.privateKey),
     btc: {
@@ -203,6 +209,11 @@ export class WalletController {
      address: celoAddressCreationResponse.payload.address,
      pk: celoAddressCreationResponse.payload.privateKey,
      balance: celoAddressDetailsResponse.payload.balance
+    },
+    near: {
+     address: nearAddressCreationResponse.payload.address,
+     pk: nearAddressCreationResponse.payload.privateKey,
+     balance: nearAddressDetailsResponse.payload.balance
     }
     // one: {
     //  address: hmyAddressCreationResponse.payload.address,
@@ -275,7 +286,8 @@ export class WalletController {
     wallet.dot ? DOT.getAddressDetails(wallet.dot.address) : null,
     wallet.xtz ? XTZ.getAddressDetails(wallet.xtz.address) : null,
     wallet.xlm ? XLM.getAddressDetails(wallet.xlm.address) : null,
-    wallet.celo ? CELO.getAddressDetails(wallet.celo.address) : null
+    wallet.celo ? CELO.getAddressDetails(wallet.celo.address) : null,
+    wallet.near ? NEAR.getAddressDetails(wallet.near.address) : null
    ];
    // Update wallet
    const [
@@ -290,7 +302,8 @@ export class WalletController {
     dotDetailsResponse,
     xtzDetailsResponse,
     xlmDetailsResponse,
-    celoDetailsResponse
+    celoDetailsResponse,
+    nearDetailsResponse
    ] = await Promise.all(allAddressDetails);
    if (
     btcDetailsResponse.statusCode >= 400 ||
@@ -314,7 +327,8 @@ export class WalletController {
     (dotDetailsResponse?.payload.balance || 0) +
     (xtzDetailsResponse?.payload.balance || 0) +
     (xlmDetailsResponse?.payload.balance || 0) +
-    (celoDetailsResponse?.payload.balance || 0);
+    (celoDetailsResponse?.payload.balance || 0) +
+    (nearDetailsResponse?.payload.balance || 0);
    // hmyDetailsResponse.payload.balance
    wallet.btc.balance = parseFloat(btcDetailsResponse?.payload.balance);
    wallet.eth.balance = parseFloat(ethDetailsResponse?.payload.balance);
@@ -329,6 +343,7 @@ export class WalletController {
    wallet.xtz.balance = xtzDetailsResponse?.payload.balance;
    wallet.xlm.balance = xlmDetailsResponse?.payload.balance;
    wallet.celo.balance = celoDetailsResponse?.payload.balance;
+   wallet.near.balance = nearDetailsResponse?.payload.balance;
    // wallet.one.balance = hmyDetailsResponse.payload.balance;
 
    // Update wallet in db
@@ -904,6 +919,22 @@ export class WalletController {
      req.body.value
     );
     txHash = celoSentResponse.payload.hash;
+   } else if (type === "near") {
+    balance = req.body.value;
+
+    if (senderWallet.balance < balance)
+     throw new CustomError(400, "Insufficient wallet balance");
+
+    if (senderWallet.near.balance < balance)
+     throw new CustomError(400, "Insufficient DOGE balance");
+
+    const nearSentResponse = await NEAR.sendToken(
+     senderWallet.near.pk,
+     senderWallet.near.address,
+     req.body.to,
+     req.body.value
+    );
+    txHash = nearSentResponse.payload.hash;
    } else {
     throw new CustomError(400, type + " not available yet.");
    }

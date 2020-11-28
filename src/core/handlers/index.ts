@@ -11,4 +11,5 @@ export * from "./dot";
 export * from "./xtz";
 export * from "./xlm";
 export * from "./celo";
+export * from "./near";
 // export * from "./hmy";
