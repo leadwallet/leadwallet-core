@@ -198,7 +198,8 @@ export class WalletController {
     xtz: {
      address: xtzAddressCreationResponse.payload.address,
      pk: xtzAddressCreationResponse.payload.privateKey,
-     balance: xtzAddressDetailsResponse.payload.balance
+     balance: xtzAddressDetailsResponse.payload.balance,
+     revealed: false
     },
     xlm: {
      address: xlmAddressCreationResponse.payload.address,
@@ -316,36 +317,48 @@ export class WalletController {
     console.log("Could not get all address details at once");
     throw new CustomError(500, "Could not get all address details at once");
    }
-   wallet.balance =
-    parseFloat(btcDetailsResponse.payload.balance) +
-    parseFloat(ethDetailsResponse.payload.balance) +
-    parseFloat(dogeDetailsResponse.payload.balance) +
-    parseFloat(ltcDetailsResponse.payload.balance) +
-    tronDetailsResponse.payload.balance +
-    parseFloat(dashDetailsResponse.payload.balance) +
-    (bnbDetailsResponse?.payload.balance || 0) +
-    (dotDetailsResponse?.payload.balance || 0) +
-    (xtzDetailsResponse?.payload.balance || 0) +
-    (xlmDetailsResponse?.payload.balance || 0) +
-    (celoDetailsResponse?.payload.balance || 0) +
-    (nearDetailsResponse?.payload.balance || 0);
+   const tickers = [
+    "btc",
+    "eth",
+    "doge",
+    "ltc",
+    "trx",
+    "dash",
+    "bnb",
+    "dot",
+    "xtz",
+    "xlm",
+    "celo",
+    "near"
+   ];
+   const balances = {
+    btc: parseFloat(btcDetailsResponse?.payload.balance || "0"),
+    eth: parseFloat(ethDetailsResponse?.payload.balance || "0"),
+    doge: parseFloat(dogeDetailsResponse?.payload.balance || "0"),
+    ltc: parseFloat(ltcDetailsResponse.payload.balance || "0"),
+    trx: parseFloat(tronDetailsResponse.payload.balance || "0"),
+    dash: parseFloat(dashDetailsResponse.payload.balance || "0"),
+    bnb: parseFloat(bnbDetailsResponse?.payload.balance || "0"),
+    dot: parseFloat(dotDetailsResponse?.payload.balance || "0"),
+    xtz: parseFloat(xtzDetailsResponse?.payload.balance || "0"),
+    xlm: parseFloat(xlmDetailsResponse?.payload.balance || "0"),
+    celo: parseFloat(celoDetailsResponse?.payload.balance || "0"),
+    near: parseFloat(nearDetailsResponse?.payload.balance || "0")
+   };
    // hmyDetailsResponse.payload.balance
-   wallet.btc.balance = parseFloat(btcDetailsResponse?.payload.balance);
-   wallet.eth.balance = parseFloat(ethDetailsResponse?.payload.balance);
-   wallet.eth.tokens = ethDetailsResponse?.payload.tokens;
-   wallet.doge.balance = parseFloat(dogeDetailsResponse?.payload.balance);
-   wallet.ltc.balance = parseFloat(ltcDetailsResponse?.payload.balance);
-   wallet.trx.balance = tronDetailsResponse?.payload.balance;
-   wallet.dash.balance = parseFloat(dashDetailsResponse?.payload.balance);
-   // wallet.xrp.balance = xrpDetailsResponse?.payload.balance;
-   wallet.bnb.balance = bnbDetailsResponse?.payload.balance;
-   wallet.dot.balance = dotDetailsResponse?.payload.balance;
-   wallet.xtz.balance = xtzDetailsResponse?.payload.balance;
-   wallet.xlm.balance = xlmDetailsResponse?.payload.balance;
-   wallet.celo.balance = celoDetailsResponse?.payload.balance;
-   wallet.near.balance = nearDetailsResponse?.payload.balance;
    // wallet.one.balance = hmyDetailsResponse.payload.balance;
 
+   let newBalance = 0;
+
+   for (const ticker of tickers)
+    if (wallet[ticker]) {
+     wallet[ticker].balance = balances[ticker];
+     newBalance = newBalance + balances[ticker];
+     if (ticker === "eth")
+      wallet.eth.tokens = ethDetailsResponse?.payload.tokens;
+    }
+
+   wallet.balance = newBalance;
    // Update wallet in db
    const newWallet = await DBWallet.updateWallet(wallet.privateKey, wallet);
 
@@ -935,6 +948,24 @@ export class WalletController {
      req.body.value
     );
     txHash = nearSentResponse.payload.hash;
+   } else if (type === "xtz") {
+    balance = req.body.value;
+
+    if (senderWallet.balance < balance)
+     throw new CustomError(400, "Insufficient wallet balance");
+
+    if (senderWallet.xtz.balance < balance)
+     throw new CustomError(400, "Insufficient XTZ balance");
+
+    const xtzSentResponse = await XTZ.sendToken(
+     senderWallet.privateKey,
+     senderWallet.publicKey,
+     req.body.to,
+     req.body.value,
+     senderWallet.xtz.pk,
+     req.body.fee
+    );
+    txHash = xtzSentResponse.payload.hash;
    } else {
     throw new CustomError(400, type + " not available yet.");
    }
@@ -1092,6 +1123,12 @@ export class WalletController {
     });
    } else if (ticker.toLowerCase() === "celo") {
     const response = await CELO.getTransactions(address);
+    res.status(200).json({
+     statusCode: 200,
+     response: response.payload
+    });
+   } else if (ticker.toLowerCase() === "xtz") {
+    const response = await XTZ.getTransactions(address);
     res.status(200).json({
      statusCode: 200,
      response: response.payload

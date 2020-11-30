@@ -687,6 +687,9 @@ export const COIN_NETWORK = {
  },
  near: {
   development: "testnet"
+ },
+ xtz: {
+  development: "testnet"
  }
 };
 

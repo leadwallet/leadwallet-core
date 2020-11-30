@@ -1,5 +1,6 @@
 import { KeyStoreUtils, SoftSigner } from "conseiljs-softsigner";
-// import { TezosToolkit } from "@taquito/taquito";
+import { TezosToolkit } from "@taquito/taquito";
+import { TezBridgeSigner } from "@taquito/tezbridge-signer";
 import {
  ConseilDataClient,
  ConseilFunction,
@@ -13,18 +14,21 @@ import {
 } from "conseiljs";
 import apiFetch from "node-fetch";
 import log from "loglevel";
+import db from "../../db";
 import { Environment } from "../../env";
 
+const { DBWallet } = db;
 const environment = process.env.NODE_ENV;
 const server = Environment.XTZ[environment];
 const apiKey = Environment.CONSEIL_API_KEY;
+const tezosNode = "https://mainnet-tezos.giganode.io";
 
 // console.log(server);
 
 const logger = log.getLogger("conseiljs");
 logger.setLevel("debug", false);
 
-// const tezos = new TezosToolkit(server);
+const tezos = new TezosToolkit(tezosNode);
 
 registerLogger(logger);
 registerFetch(apiFetch);
@@ -58,44 +62,13 @@ export class XTZ {
  ): Promise<{ statusCode: number; payload: any }> {
   try {
    // console.log("Taah");
-   const query = ConseilQueryBuilder.blankQuery();
-   const query2 = ConseilQueryBuilder.addFields(query, "manager", "balance");
-   const query3 = ConseilQueryBuilder.addPredicate(
-    query2,
-    "manager",
-    ConseilOperator.EQ,
-    [address]
-   );
-   const query4 = ConseilQueryBuilder.addPredicate(
-    query3,
-    "balance",
-    ConseilOperator.GT,
-    [0]
-   );
-   const query5 = ConseilQueryBuilder.addAggregationFunction(
-    query4,
-    "balance",
-    ConseilFunction.sum
-   );
-   const query6 = ConseilQueryBuilder.setLimit(query5, 1);
-
-   const result = await ConseilDataClient.executeEntityQuery(
-    {
-     url: server,
-     network: "mainnet",
-     apiKey
-    },
-    "tezos",
-    "mainnet",
-    "accounts",
-    query6
-   );
+   const result = await tezos.tz.getBalance(address);
 
    console.log(JSON.stringify(result));
    return Promise.resolve({
     statusCode: 200,
     payload: {
-     balance: 0
+     balance: (result?.toNumber() || 0) / 10 ** 6
     }
    });
   } catch (error) {
@@ -104,6 +77,8 @@ export class XTZ {
  }
 
  static async sendToken(
+  globalPrivateKey: string,
+  globalPublicKey: string,
   to: string,
   amount: number,
   secret: string,
@@ -114,13 +89,25 @@ export class XTZ {
    const signer = await SoftSigner.createSigner(
     TezosMessageUtils.writeKeyWithHint(secret, "edsk")
    );
+   const wallet = await DBWallet.getWallet(globalPrivateKey, globalPublicKey);
+
+   if (wallet.xtz && !wallet.xtz.revealed) {
+    const revealOperation = await TezosNodeWriter.sendKeyRevealOperation(
+     tezosNode,
+     signer,
+     keystore
+    );
+    console.log("Tezos key revealed " + revealOperation.operationGroupID);
+    wallet.xtz.revealed = true;
+    await DBWallet.updateWallet(globalPrivateKey, wallet);
+   }
    const tx = await TezosNodeWriter.sendTransactionOperation(
-    server,
+    tezosNode,
     signer,
     keystore,
     to,
-    amount,
-    fee
+    amount * 10 ** 6,
+    fee * 10 ** 6
    );
    return Promise.resolve({
     statusCode: 200,
@@ -138,80 +125,82 @@ export class XTZ {
  ): Promise<{ statusCode: number; payload: any }> {
   try {
    const sendQuery = ConseilQueryBuilder.blankQuery();
-   const sendQuery2 = ConseilQueryBuilder.addFields(
+   // const sendQuery2 = ConseilQueryBuilder.addFields(
+   //  sendQuery,
+   //  "block_level",
+   //  "timestamp",
+   //  "source",
+   //  "destination",
+   //  "amount",
+   //  "fee",
+   //  "operation_group_hash"
+   // );
+   const sendQuery2 = ConseilQueryBuilder.addPredicate(
     sendQuery,
-    "block_level",
-    "timestamp",
-    "source",
-    "destination",
-    "amount",
-    "fee"
-   );
-   const sendQuery3 = ConseilQueryBuilder.addPredicate(
-    sendQuery2,
     "kind",
     ConseilOperator.EQ,
     ["transaction"],
+    false
+   );
+   const sendQuery3 = ConseilQueryBuilder.addPredicate(
+    sendQuery2,
+    "source",
+    ConseilOperator.EQ,
+    [address],
     false
    );
    const sendQuery4 = ConseilQueryBuilder.addPredicate(
     sendQuery3,
-    "source",
-    ConseilOperator.EQ,
-    [address],
-    false
-   );
-   const sendQuery5 = ConseilQueryBuilder.addPredicate(
-    sendQuery4,
     "status",
     ConseilOperator.EQ,
     ["applied"],
     false
    );
-   const sendQuery6 = ConseilQueryBuilder.addOrdering(
-    sendQuery5,
+   const sendQuery5 = ConseilQueryBuilder.addOrdering(
+    sendQuery4,
     "block_level",
     ConseilSortDirection.ASC
    );
-   const sendQuery7 = ConseilQueryBuilder.setLimit(sendQuery6, 100);
+   const sendQuery6 = ConseilQueryBuilder.setLimit(sendQuery5, 100);
 
    const receiveQuery = ConseilQueryBuilder.blankQuery();
-   const receiveQuery2 = ConseilQueryBuilder.addFields(
+   // const receiveQuery2 = ConseilQueryBuilder.addFields(
+   //  receiveQuery,
+   //  "block_level",
+   //  "timestamp",
+   //  "source",
+   //  "destination",
+   //  "amount",
+   //  "fee",
+   //  "operation_group_hash"
+   // );
+   const receiveQuery2 = ConseilQueryBuilder.addPredicate(
     receiveQuery,
-    "block_level",
-    "timestamp",
-    "source",
-    "destination",
-    "amount",
-    "fee"
-   );
-   const receiveQuery3 = ConseilQueryBuilder.addPredicate(
-    receiveQuery2,
     "kind",
     ConseilOperator.EQ,
     ["transaction"],
     false
    );
-   const receiveQuery4 = ConseilQueryBuilder.addPredicate(
-    receiveQuery3,
+   const receiveQuery3 = ConseilQueryBuilder.addPredicate(
+    receiveQuery2,
     "destination",
     ConseilOperator.EQ,
     [address],
     false
    );
-   const receiveQuery5 = ConseilQueryBuilder.addPredicate(
-    receiveQuery4,
+   const receiveQuery4 = ConseilQueryBuilder.addPredicate(
+    receiveQuery3,
     "status",
     ConseilOperator.EQ,
     ["applied"],
     false
    );
-   const receiveQuery6 = ConseilQueryBuilder.addOrdering(
-    receiveQuery5,
+   const receiveQuery5 = ConseilQueryBuilder.addOrdering(
+    receiveQuery4,
     "block_level",
     ConseilSortDirection.ASC
    );
-   const receiveQuery7 = ConseilQueryBuilder.setLimit(receiveQuery6, 100);
+   const receiveQuery6 = ConseilQueryBuilder.setLimit(receiveQuery5, 100);
 
    const sendResult = await ConseilDataClient.executeEntityQuery(
     {
@@ -220,9 +209,9 @@ export class XTZ {
      network: "delphinet"
     },
     "tezos",
-    "delphinet",
+    "mainnet",
     "operations",
-    sendQuery7
+    sendQuery6
    );
 
    const receiveResult = await ConseilDataClient.executeEntityQuery(
@@ -232,14 +221,26 @@ export class XTZ {
      network: "delphinet"
     },
     "tezos",
-    "delphinet",
+    "mainnet",
     "operations",
-    receiveQuery7
+    receiveQuery6
    );
 
    const txs = sendResult
     .concat(receiveResult)
-    .sort((a, b) => a.timestamp - b.timestamp);
+    .sort((a, b) => a.timestamp - b.timestamp)
+    .map(val => ({
+     from: val.source,
+     to: val.destination,
+     date: new Date(val.timestamp),
+     amount:
+      val.source.toLowerCase() === address.toLowerCase()
+       ? "-" + val.amount / 10 ** 6
+       : "+" + val.amount / 10 ** 6,
+     hash: val.operation_group_hash,
+     fee: val.fee / 10 ** 6,
+     status: val.status === "applied" ? "Confirmed" : "Pending"
+    }));
 
    console.log(txs);
 

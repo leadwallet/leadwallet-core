@@ -65,6 +65,7 @@ export interface Wallet {
   address: string;
   pk: string;
   balance: number;
+  revealed?: boolean;
  };
  xlm?: {
   address: string;
