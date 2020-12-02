@@ -60,7 +60,7 @@ export class NEAR {
     }
    });
   } catch (error) {
-   console.log(error);
+   // console.log(error);
    return Promise.reject(new Error(error.message));
   }
  }
@@ -72,7 +72,7 @@ export class NEAR {
    const near = await api();
    const account = await near.account(address);
    const accountBalance = await account.getAccountBalance();
-   const balance = parseFloat(accountBalance.available);
+   const balance = parseFloat(accountBalance.available) * 10 ** -24;
    return Promise.resolve({
     statusCode: 200,
     payload: { balance }
@@ -101,7 +101,9 @@ export class NEAR {
     ""
    );
    const nonce = accessKey.nonce + 1;
-   const transfer = Near.transactions.transfer(new BN(value.toString()));
+   const transfer = Near.transactions.transfer(
+    new BN(Near.utils.format.parseNearAmount(value.toString()))
+   );
 
    const tx = Near.transactions.createTransaction(
     from,

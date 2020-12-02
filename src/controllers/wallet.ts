@@ -13,11 +13,12 @@ import {
  DASH,
  // XRP,
  BNB,
- DOT,
+ // DOT,
  XTZ,
  XLM,
  CELO,
- NEAR
+ NEAR,
+ ZIL
 } from "../core/handlers";
 import { TransactionService } from "../core/handlers/transaction_handler";
 import {
@@ -62,6 +63,8 @@ export class WalletController {
    // Generate keypair
    const keyPair = await Tokenizers.generateKeyPairs(phrase);
 
+   // console.log(phrase.trim(), "===========");
+
    const allPromises = [
     BTC.createAddress(),
     ETH.createAddress(keyPair.privateKey),
@@ -71,11 +74,12 @@ export class WalletController {
     TRON.generateAddress(),
     // XRP.generateAddress(),
     BNB.generateAddress(keyPair.privateKey),
-    DOT.generateAddress(keyPair.publicKey, phrase),
+    // DOT.generateAddress(keyPair.publicKey, phrase.trim()),
     XTZ.generateAddress(keyPair.privateKey),
     XLM.generateAddress(),
     CELO.createAddress(keyPair.privateKey),
-    NEAR.createAddress()
+    NEAR.createAddress(),
+    ZIL.generateAddress()
    ];
 
    const [
@@ -87,11 +91,12 @@ export class WalletController {
     tronAddressCreationResponse,
     // xrpAddressCreationResponse,
     bnbAddressCreationResponse,
-    dotAddressCreationResponse,
+    // dotAddressCreationResponse,
     xtzAddressCreationResponse,
     xlmAddressCreationResponse,
     celoAddressCreationResponse,
-    nearAddressCreationResponse
+    nearAddressCreationResponse,
+    zilAddressCreationResponse
    ] = await Promise.all(allPromises);
 
    const allDetailsPromises = [
@@ -103,11 +108,12 @@ export class WalletController {
     TRON.getAddressDetails(tronAddressCreationResponse.payload.base58),
     // XRP.getAddressDetails(xrpAddressCreationResponse.payload.address),
     BNB.getAddressDetails(bnbAddressCreationResponse.payload.address),
-    DOT.getAddressDetails(dotAddressCreationResponse.payload.address),
+    // DOT.getAddressDetails(dotAddressCreationResponse.payload.address),
     XTZ.getAddressDetails(xtzAddressCreationResponse.payload.address),
     XLM.getAddressDetails(xlmAddressCreationResponse.payload.address),
     CELO.getAddressDetails(celoAddressCreationResponse.payload.address),
-    NEAR.getAddressDetails(nearAddressCreationResponse.payload.address)
+    NEAR.getAddressDetails(nearAddressCreationResponse.payload.address),
+    ZIL.getAddressDetails(zilAddressCreationResponse.payload.address)
    ];
 
    const [
@@ -119,11 +125,12 @@ export class WalletController {
     tronAddressDetailsResponse,
     // xrpAddressDetailsResponse,
     bnbAddressDetailsResponse,
-    dotAddressDetailsResponse,
+    // dotAddressDetailsResponse,
     xtzAddressDetailsResponse,
     xlmAddressDetailsResponse,
     celoAddressDetailsResponse,
-    nearAddressDetailsResponse
+    nearAddressDetailsResponse,
+    zilAddressDetailsResponse
    ] = await Promise.all(allDetailsPromises);
 
    console.log("Got all address details");
@@ -141,7 +148,7 @@ export class WalletController {
      parseFloat(dashAddressDetailsResponse.payload.balance) +
      // xrpAddressDetailsResponse.payload.balance +
      parseFloat(bnbAddressDetailsResponse.payload.balance) +
-     dotAddressDetailsResponse.payload.balance +
+     // dotAddressDetailsResponse.payload.balance +
      xtzAddressDetailsResponse.payload.balance +
      xlmAddressDetailsResponse.payload.balance +
      nearAddressDetailsResponse.payload.balance,
@@ -189,12 +196,12 @@ export class WalletController {
      pk: bnbAddressCreationResponse.payload.privateKey,
      balance: bnbAddressDetailsResponse.payload.balance
     },
-    dot: {
-     address: dotAddressCreationResponse.payload.address,
-     key: dotAddressCreationResponse.payload.key,
-     balance: dotAddressDetailsResponse.payload.balance,
-     password: dotAddressCreationResponse.payload.password
-    },
+    // dot: {
+    //  address: dotAddressCreationResponse.payload.address,
+    //  pk: dotAddressCreationResponse.payload.privateKey,
+    //  balance: dotAddressDetailsResponse.payload.balance,
+    //  password: dotAddressCreationResponse.payload.password
+    // },
     xtz: {
      address: xtzAddressCreationResponse.payload.address,
      pk: xtzAddressCreationResponse.payload.privateKey,
@@ -215,6 +222,11 @@ export class WalletController {
      address: nearAddressCreationResponse.payload.address,
      pk: nearAddressCreationResponse.payload.privateKey,
      balance: nearAddressDetailsResponse.payload.balance
+    },
+    zil: {
+     address: zilAddressCreationResponse.payload.address,
+     pk: zilAddressCreationResponse.payload.privateKey,
+     balance: zilAddressDetailsResponse.payload.balance
     }
     // one: {
     //  address: hmyAddressCreationResponse.payload.address,
@@ -284,11 +296,12 @@ export class WalletController {
     wallet.dash ? DASH.getAddressDetails(wallet.dash.address) : null,
     // wallet.xrp ? XRP.getAddressDetails(wallet.xrp.address) : null,
     wallet.bnb ? BNB.getAddressDetails(wallet.bnb.address) : null,
-    wallet.dot ? DOT.getAddressDetails(wallet.dot.address) : null,
+    // wallet.dot ? DOT.getAddressDetails(wallet.dot.address) : null,
     wallet.xtz ? XTZ.getAddressDetails(wallet.xtz.address) : null,
     wallet.xlm ? XLM.getAddressDetails(wallet.xlm.address) : null,
     wallet.celo ? CELO.getAddressDetails(wallet.celo.address) : null,
-    wallet.near ? NEAR.getAddressDetails(wallet.near.address) : null
+    wallet.near ? NEAR.getAddressDetails(wallet.near.address) : null,
+    wallet.zil ? ZIL.getAddressDetails(wallet.zil.address) : null
    ];
    // Update wallet
    const [
@@ -300,11 +313,12 @@ export class WalletController {
     dashDetailsResponse,
     // xrpDetailsResponse,
     bnbDetailsResponse,
-    dotDetailsResponse,
+    // dotDetailsResponse,
     xtzDetailsResponse,
     xlmDetailsResponse,
     celoDetailsResponse,
-    nearDetailsResponse
+    nearDetailsResponse,
+    zilDetailsResponse
    ] = await Promise.all(allAddressDetails);
    if (
     btcDetailsResponse.statusCode >= 400 ||
@@ -329,7 +343,8 @@ export class WalletController {
     "xtz",
     "xlm",
     "celo",
-    "near"
+    "near",
+    "zil"
    ];
    const balances = {
     btc: parseFloat(btcDetailsResponse?.payload.balance || "0"),
@@ -339,11 +354,12 @@ export class WalletController {
     trx: parseFloat(tronDetailsResponse.payload.balance || "0"),
     dash: parseFloat(dashDetailsResponse.payload.balance || "0"),
     bnb: parseFloat(bnbDetailsResponse?.payload.balance || "0"),
-    dot: parseFloat(dotDetailsResponse?.payload.balance || "0"),
+    // dot: parseFloat(dotDetailsResponse?.payload.balance || "0"),
     xtz: parseFloat(xtzDetailsResponse?.payload.balance || "0"),
     xlm: parseFloat(xlmDetailsResponse?.payload.balance || "0"),
     celo: parseFloat(celoDetailsResponse?.payload.balance || "0"),
-    near: parseFloat(nearDetailsResponse?.payload.balance || "0")
+    near: parseFloat(nearDetailsResponse?.payload.balance || "0"),
+    zil: parseFloat(zilDetailsResponse?.payload.balance || "0")
    };
    // hmyDetailsResponse.payload.balance
    // wallet.one.balance = hmyDetailsResponse.payload.balance;
@@ -367,7 +383,7 @@ export class WalletController {
     response: await WalletAdaptor.convert(newWallet)
    });
   } catch (error) {
-   console.error(error);
+   console.log(error);
    res.status(error.code || 500).send(error.message);
   }
  }
@@ -966,6 +982,21 @@ export class WalletController {
      req.body.fee
     );
     txHash = xtzSentResponse.payload.hash;
+   } else if (type === "zil") {
+    balance = req.body.value;
+
+    if (senderWallet.balance < balance)
+     throw new CustomError(400, "Insufficient wallet balance");
+
+    if (senderWallet.zil.balance < balance)
+     throw new CustomError(400, "Insufficeint ZIL balance");
+
+    const zilSentResponse = await ZIL.sendToken(
+     senderWallet.zil.pk,
+     req.body.to,
+     req.body.value
+    );
+    txHash = zilSentResponse.payload.hash;
    } else {
     throw new CustomError(400, type + " not available yet.");
    }
