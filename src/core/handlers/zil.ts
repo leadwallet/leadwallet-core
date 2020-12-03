@@ -8,6 +8,9 @@ import { bytes, units, Long } from "@zilliqa-js/util";
 import BN from "bn.js";
 import hasher from "crypto-js";
 import createRandomString from "crypto-random-string";
+import rp from "request-promise";
+import { Environment } from "../../env";
+import { COIN_NETWORK, options } from "./commons";
 
 const environment = process.env.NODE_ENV;
 
@@ -15,13 +18,15 @@ const testnet = "https://dev-api.zilliqa.com";
 const mainnet = "https://api.zilliqa.com";
 
 const apis = {
- development: testnet,
+ development: mainnet,
  production: mainnet,
  test: testnet,
  staging: testnet
 };
 
 const zil = new Zilliqa(apis[environment]);
+const txQuery =
+ Environment.CRYPTO_API + "/v1/bc/zil/" + COIN_NETWORK["zil"][environment];
 
 export class ZIL {
  static async generateAddress(): Promise<{ statusCode: number; payload: any }> {
@@ -99,9 +104,36 @@ export class ZIL {
   }
  }
 
- // static async getTransactions(address: string) {
- //  try {
- //   const txs = zil.blockchain.getRecentTransactions()
- //  } catch (error) {}
- // }
+ static async getTransactions(
+  address: string
+ ): Promise<{ statusCode: number; payload: any }> {
+  try {
+   const res = await rp.get(
+    txQuery + "/address/" + address + "/transactions?index=0&limit=50",
+    { ...options }
+   );
+
+   if (res.statusCode >= 400) throw new Error(res.body.meta.error.message);
+
+   const mappedTxs = res.body.payload.map((tx: any) => ({
+    from: tx.from,
+    to: tx.to,
+    nonce: tx.nonce,
+    amount:
+     tx.from.toLowerCase() === address.toLowerCase()
+      ? "-" + parseFloat(tx.value)
+      : "+" + parseFloat(tx.value),
+    hash: tx.hash,
+    date: tx.datetime,
+    status: tx.confirmations > 0 ? "Confirmed" : "Pending"
+   }));
+
+   return Promise.resolve({
+    statusCode: 200,
+    payload: mappedTxs
+   });
+  } catch (error) {
+   return Promise.reject(new Error(error.message));
+  }
+ }
 }

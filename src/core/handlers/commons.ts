@@ -693,7 +693,7 @@ export const COIN_NETWORK = {
   development: "testnet"
  },
  zil: {
-  development: "testnet"
+  development: "mainnet"
  }
 };
 

@@ -1164,6 +1164,12 @@ export class WalletController {
      statusCode: 200,
      response: response.payload
     });
+   } else if (ticker.toLowerCase() === "zil") {
+    const response = await ZIL.getTransactions(address);
+    res.status(200).json({
+     statusCode: 200,
+     response: response.payload
+    });
    }
   } catch (error) {
    res.status(error.code || 500).send(error.message);
@@ -1450,8 +1456,162 @@ export class WalletController {
  static async importByPrivateKey(req: express.Request, res: express.Response) {
   try {
    const wallet = await DBWallet.findByPrivateKey(req.body.privateKey);
+   const tickers = [
+    "btc",
+    "eth",
+    "doge",
+    "ltc",
+    "trx",
+    "dash",
+    "bnb",
+    "dot",
+    "xtz",
+    "xlm",
+    "celo",
+    "near",
+    "zil"
+   ];
 
    if (!wallet) throw new CustomError(404, "Wallet not found");
+
+   const allPromises = [
+    BTC.createAddress(),
+    ETH.createAddress(wallet.privateKey),
+    DOGE.createAddress(),
+    LTC.createAddress(),
+    DASH.createAddress(),
+    TRON.generateAddress(),
+    BNB.generateAddress(wallet.privateKey),
+    XTZ.generateAddress(wallet.privateKey),
+    XLM.generateAddress(),
+    CELO.createAddress(wallet.privateKey),
+    NEAR.createAddress(),
+    ZIL.generateAddress()
+   ];
+
+   const [
+    btcAddressCreationResponse,
+    ethAddressCreationResponse,
+    dogeAddressCreationResponse,
+    ltcAddressCreationResponse,
+    dashAddressCreationResponse,
+    tronAddressCreationResponse,
+    bnbAddressCreationResponse,
+    xtzAddressCreationResponse,
+    xlmAddressCreationResponse,
+    celoAddressCreationResponse,
+    nearAddressCreationResponse,
+    zilAddressCreationResponse
+   ] = await Promise.all(allPromises);
+
+   const allDetailsPromises = [
+    BTC.getAddressDetails(btcAddressCreationResponse.payload.address),
+    ETH.getAddressDetails(ethAddressCreationResponse.payload.address),
+    DOGE.getAddressDetails(dogeAddressCreationResponse.payload.address),
+    LTC.getAddressDetails(ltcAddressCreationResponse.payload.address),
+    DASH.getAddressDetails(dashAddressCreationResponse.payload.address),
+    TRON.getAddressDetails(tronAddressCreationResponse.payload.base58),
+    BNB.getAddressDetails(bnbAddressCreationResponse.payload.address),
+    XTZ.getAddressDetails(xtzAddressCreationResponse.payload.address),
+    XLM.getAddressDetails(xlmAddressCreationResponse.payload.address),
+    CELO.getAddressDetails(celoAddressCreationResponse.payload.address),
+    NEAR.getAddressDetails(nearAddressCreationResponse.payload.address),
+    ZIL.getAddressDetails(zilAddressCreationResponse.payload.address)
+   ];
+
+   const [
+    btcAddressDetailsResponse,
+    ethAddressDetailsResponse,
+    dogeAddressDetailsResponse,
+    ltcAddressDetailsResponse,
+    dashAddressDetailsResponse,
+    tronAddressDetailsResponse,
+    bnbAddressDetailsResponse,
+    xtzAddressDetailsResponse,
+    xlmAddressDetailsResponse,
+    celoAddressDetailsResponse,
+    nearAddressDetailsResponse,
+    zilAddressDetailsResponse
+   ] = await Promise.all(allDetailsPromises);
+
+   const coins = {
+    btc: {
+     address: btcAddressCreationResponse.payload.address,
+     wif: btcAddressCreationResponse.payload.wif,
+     balance: parseFloat(btcAddressDetailsResponse.payload.balance),
+     pk: btcAddressCreationResponse.payload.privateKey
+    },
+    eth: {
+     address: ethAddressCreationResponse.payload.address,
+     balance: parseFloat(ethAddressDetailsResponse.payload.balance),
+     tokens: ethAddressDetailsResponse.payload.tokens,
+     pk: ethAddressCreationResponse.payload.privateKey
+    },
+    doge: {
+     address: dogeAddressCreationResponse.payload.address,
+     wif: dogeAddressCreationResponse.payload.wif,
+     balance: parseFloat(dogeAddressDetailsResponse.payload.balance)
+    },
+    ltc: {
+     address: ltcAddressCreationResponse.payload.address,
+     wif: ltcAddressCreationResponse.payload.wif,
+     balance: parseFloat(ltcAddressDetailsResponse.payload.balance)
+    },
+    trx: {
+     address: tronAddressCreationResponse.payload.base58,
+     balance: tronAddressDetailsResponse.payload.balance,
+     pk: tronAddressCreationResponse.payload.privateKey
+    },
+    dash: {
+     address: dashAddressCreationResponse.payload.address,
+     wif: dashAddressCreationResponse.payload.wif,
+     balance: parseFloat(dashAddressDetailsResponse.payload.balance)
+    },
+
+    bnb: {
+     address: bnbAddressCreationResponse.payload.address,
+     pk: bnbAddressCreationResponse.payload.privateKey,
+     balance: bnbAddressDetailsResponse.payload.balance
+    },
+    xtz: {
+     address: xtzAddressCreationResponse.payload.address,
+     pk: xtzAddressCreationResponse.payload.privateKey,
+     balance: xtzAddressDetailsResponse.payload.balance,
+     revealed: false
+    },
+    xlm: {
+     address: xlmAddressCreationResponse.payload.address,
+     pk: xlmAddressCreationResponse.payload.privateKey,
+     balance: xlmAddressDetailsResponse.payload.balance
+    },
+    celo: {
+     address: celoAddressCreationResponse.payload.address,
+     pk: celoAddressCreationResponse.payload.privateKey,
+     balance: celoAddressDetailsResponse.payload.balance
+    },
+    near: {
+     address: nearAddressCreationResponse.payload.address,
+     pk: nearAddressCreationResponse.payload.privateKey,
+     balance: nearAddressDetailsResponse.payload.balance
+    },
+    zil: {
+     address: zilAddressCreationResponse.payload.address,
+     pk: zilAddressCreationResponse.payload.privateKey,
+     balance: zilAddressDetailsResponse.payload.balance
+    }
+   };
+
+   let newBalance = 0;
+
+   for (const ticker of tickers)
+    if (!wallet[ticker]) {
+     wallet[ticker] = coins[ticker];
+     newBalance = newBalance + coins[ticker].balance;
+    }
+
+   wallet.balance = wallet.balance + newBalance;
+
+   const updatedWallet = await DBWallet.updateWallet(wallet.privateKey, wallet);
 
    const token = Tokenizers.generateToken({
     privateKey: wallet.privateKey,
@@ -1462,7 +1622,7 @@ export class WalletController {
     statusCode: 200,
     response: {
      token,
-     wallet: await WalletAdaptor.convert(wallet)
+     wallet: await WalletAdaptor.convert(updatedWallet)
     }
    });
   } catch (error) {
