@@ -30,6 +30,7 @@ import {
 import { WalletAdaptor } from "../core/utils/wallet_adaptor";
 import { CurrencyConverter } from "../core/utils/currency_converter";
 import { TransactionFeeService } from "../core/handlers/transaction_fee_service";
+import { ERCToken } from "../core/interfaces/token";
 
 const { DBWallet } = db;
 const errorCodes = {
@@ -289,7 +290,9 @@ export class WalletController {
    // Get all address details
    const allAddressDetails = [
     wallet.btc ? BTC.getAddressDetails(wallet.btc.address) : null,
-    wallet.eth ? ETH.getAddressDetails(wallet.eth.address) : null,
+    wallet.eth
+     ? ETH.getAddressDetails(wallet.eth.address, wallet.eth.tokens)
+     : null,
     wallet.doge ? DOGE.getAddressDetails(wallet.doge.address) : null,
     wallet.ltc ? LTC.getAddressDetails(wallet.ltc.address) : null,
     wallet.trx ? TRON.getAddressDetails(wallet.trx.address) : null,
@@ -1804,6 +1807,30 @@ export class WalletController {
    });
   } catch (error) {
    res.status(error.code || 500).send(error.message);
+  }
+ }
+
+ static async addCustomERC20Token(
+  req: express.Request & { wallet: Wallet },
+  res: express.Response
+ ): Promise<any> {
+  try {
+   const { wallet, body } = req;
+   const newToken: ERCToken = {
+    contract: body.contract,
+    symbol: body.symbol,
+    name: body.name,
+    type: "ERC-20",
+    balance: "0"
+   };
+   wallet.eth.tokens = [...wallet.eth.tokens, newToken];
+   await DBWallet.updateWallet(wallet.privateKey, wallet);
+   res.status(200).json({
+    statusCode: 200,
+    response: "Successfully added custom token"
+   });
+  } catch (error) {
+   res.status(500).send(error.message);
   }
  }
 }

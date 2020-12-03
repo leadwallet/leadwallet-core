@@ -2,6 +2,7 @@ import rp from "request-promise";
 import Web3 from "web3";
 // import abi from "human-standard-token-abi";
 import { Environment } from "../../env";
+import { ERCToken } from "../interfaces/token";
 import { COIN_NETWORK, options } from "./commons";
 
 const environment = process.env.NODE_ENV;
@@ -47,7 +48,8 @@ export class ETH {
  }
 
  static async getAddressDetails(
-  address: string
+  address: string,
+  tokens: Array<ERCToken> = []
  ): Promise<{ statusCode: number; payload: any }> {
   try {
    const response = await rp.get(CRYPTOAPI + "/address/" + address, {
@@ -65,8 +67,12 @@ export class ETH {
    if (tokensResponse.statusCode >= 400)
     throw new Error(response.body.meta.error.message);
 
-   const tokenDetails = tokensResponse.body.payload;
+   let tokenDetails: Array<any> = tokensResponse.body.payload;
    const tokenDetailsWithImages: Array<any> = [];
+   const tokensFiltered = tokens.filter(
+    t => !tokenDetails.map(d => d.contract).includes(t.contract)
+   );
+   tokenDetails = tokenDetails.concat(tokensFiltered);
 
    for (const tokenDetail of tokenDetails) {
     const contractDetails = await rp.get(

@@ -69,7 +69,7 @@ export class CurrencyConverter {
   } else {
    const values = response.body;
    for (const contract of contracts.split(",")) {
-    console.log(values[contract]["usd"]);
+    // console.log(values[contract]["usd"]);
     CurrencyConverter.instance.erc20TokensMap.set(
      contract,
      values[contract]["usd"]
@@ -144,8 +144,8 @@ export class CurrencyConverter {
    for (const contract of newContracts) {
     if (values[contract]) {
      const value = {};
-     console.log(contract);
-     console.log(values);
+     // console.log(contract);
+     // console.log(values);
      value[contract] = values[contract]["usd"];
      CurrencyConverter.instance.erc20TokensMap.set(
       contract,

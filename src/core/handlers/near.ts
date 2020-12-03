@@ -137,4 +137,11 @@ export class NEAR {
    return Promise.reject(new Error(error.message));
   }
  }
+
+ // static async getTransactions(address: string) {
+ //  try {
+ //   const near = await api();
+ //   Near.utils.
+ //  } catch (error) {}
+ // }
 }

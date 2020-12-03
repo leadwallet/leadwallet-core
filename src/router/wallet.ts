@@ -77,6 +77,12 @@ router.patch(
 router.post("/import_by_key", WalletController.importByPrivateKey);
 
 router.get("/supported_erc20_tokens", WalletController.getSupportedERC20Tokens);
+router.post(
+ "/addERC20",
+ WalletMiddleware.getKeyPair,
+ WalletMiddleware.getWalletFromRequest,
+ WalletController.addCustomERC20Token
+);
 // router.get(
 //  "/price/erc20/:contract",
 //  WalletController.getErc20Price
