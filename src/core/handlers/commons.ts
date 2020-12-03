@@ -620,7 +620,6 @@ export const CURRENT_COINS: Array<string> = [
  "dash",
  "doge",
  "trx",
- "dot",
  "bnb",
  "xtz",
  "xlm",
