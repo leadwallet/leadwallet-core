@@ -33,6 +33,7 @@ export class BNB {
  ): Promise<{ statusCode: number; payload: any }> {
   try {
    const account = web3.eth.accounts.create(mnemonic);
+   console.log("======== " + account.address);
    return Promise.resolve({
     statusCode: 200,
     payload: {
@@ -50,6 +51,7 @@ export class BNB {
  ): Promise<{ statusCode: number; payload: any }> {
   try {
    const balance = await web3.eth.getBalance(address);
+   console.log(balance);
    // console.log(JSON.stringify(balance));
    return Promise.resolve({
     statusCode: 200,
