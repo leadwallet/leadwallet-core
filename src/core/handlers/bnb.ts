@@ -1,9 +1,19 @@
 import Web3 from "web3";
 import rp from "request-promise";
-import { Environment } from "../../env";
 
 const environment = process.env.NODE_ENV;
-const web3 = new Web3(Environment.BSC[environment]);
+
+const bsc_mainnet = "https://bsc.dataseed1.binance.org:443";
+const bsc_testnet = "https://data-seed-prebsc-1-s1.binance.org:8545";
+
+const bsc = {
+ development: bsc_testnet,
+ production: bsc_mainnet,
+ test: bsc_testnet,
+ staging: bsc_testnet
+};
+
+const web3 = new Web3(bsc[environment]);
 
 const testnet_scan = "https://api-testnet.bscscan.com";
 const mainnet_scan = "https://api.bscscan.com";

@@ -680,19 +680,32 @@ export const COIN_NETWORK = {
  xlm: {
   development: "testnet",
   production: "mainnet",
-  test: "testnet"
+  test: "testnet",
+  staging: "mainnet"
  },
  celo: {
-  development: "testnet"
+  development: "testnet",
+  production: "mainnet",
+  test: "testnet",
+  staging: "mainnet"
  },
  near: {
-  development: "testnet"
+  development: "testnet",
+  production: "mainnet",
+  test: "testnet",
+  staging: "mainnet"
  },
  xtz: {
-  development: "testnet"
+  development: "testnet",
+  production: "mainnet",
+  test: "testnet",
+  staging: "mainnet"
  },
  zil: {
-  development: "mainnet"
+  development: "mainnet",
+  production: "mainnet",
+  test: "testnet",
+  staging: "mainnet"
  }
 };
 
@@ -757,13 +770,49 @@ export const [SYMBOL_ID_MAPPING, ID_SYMBOL_MAPPING] = createSymbolToIdMapping();
 export const SYMBOL_TO_CONTRACT_ADDRESS_MAP = createSymbolToContractAddressMapping();
 
 export function getExplorerLink(type: string, txHash: string): string {
- return type == "trx"
-  ? Environment.TRON_EXPLORER[process.env.NODE_ENV] + "/" + txHash
-  : Environment.BLOCK_EXPLORER +
-     "/" +
-     type +
-     "/" +
-     COIN_NETWORK[type][process.env.NODE_ENV] +
-     "/tx/" +
-     txHash;
+ const explorer1 = `https://blockexplorer.one/${type}/${
+  COIN_NETWORK[type][process.env.NODE_ENV]
+ }/tx/${txHash}`;
+ const specialCoins = {
+  trx: {
+   development: "https://shasta.tronscan.org/#/transaction/" + txHash,
+   production: "https://tronscan.org/#/transaction/" + txHash,
+   test: "https://shasta.tronscan.org/#/transaction/" + txHash,
+   staging: "https://shasta.tronscan.org/#/transaction/" + txHash
+  },
+  celo: {
+   development: `https://alfajores-blockscout.celo-testnet.org/tx/${txHash}/token_transfers`,
+   production: `https://explorer.celo.org/tx/${txHash}/tokens_transfers`,
+   test: `https://alfajores-blockscout.celo-testnet.org/tx/${txHash}/token_transfers`,
+   staging: `https://alfajores-blockscout.celo-testnet.org/tx/${txHash}/token_transfers`
+  },
+  bnb: {
+   development: "https://testnet.bscscan.com/tx/" + txHash,
+   production: "https://bscscan.com/tx/" + txHash,
+   test: "https://testnet.bscscan.com/tx/" + txHash,
+   staging: "https://testnet.bscscan.com/tx/" + txHash
+  },
+  near: {
+   development: "https://explorer.testnet.near.org/transactions/" + txHash,
+   production: "https://explorer.near.org/transactions/" + txHash,
+   test: "https://explorer.testnet.near.org/transactions/" + txHash,
+   staging: "https://explorer.testnet.near.org/transactions/" + txHash
+  },
+  xlm: {
+   development: "https://testnet.stellarchain.io/tx/" + txHash,
+   production: "https://stellarchain.io/tx/" + txHash,
+   test: "https://testnet.stellarchain.io/tx/" + txHash,
+   staging: "https://testnet.stellarchain.io/tx/" + txHash
+  },
+  xtz: {
+   development: "https://tezblock.io/transaction/" + txHash,
+   production: "https://tezblock.io/transaction/" + txHash,
+   test: "https://tezblock.io/transaction/" + txHash,
+   staging: "https://tezblock.io/transaction/" + txHash
+  }
+ };
+
+ return specialCoins[type]
+  ? specialCoins[type][process.env.NODE_ENV]
+  : explorer1;
 }

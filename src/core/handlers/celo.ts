@@ -1,12 +1,21 @@
 import Web3 from "web3";
 import * as ContractKit from "@celo/contractkit";
 import rp from "request-promise";
-import { Environment } from "../../env";
 
 const environment = process.env.NODE_ENV;
 
+const celo_mainnet = "https://forno.celo.org";
+const celo_testnet = "https://alfajores-forno.celo-testnet.org";
+
+const celo = {
+ development: celo_testnet,
+ production: celo_mainnet,
+ test: celo_testnet,
+ staging: celo_testnet
+};
+
 const web3 = new Web3();
-const kit = ContractKit.newKit(Environment.CELO[environment]);
+const kit = ContractKit.newKit(celo[environment]);
 
 const testnet_scan = "https://alfajores-blockscout.celo-testnet.org/api";
 const mainnet_scan = "https://explorer.celo.org/api";

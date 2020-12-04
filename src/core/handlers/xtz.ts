@@ -1,9 +1,7 @@
 import { KeyStoreUtils, SoftSigner } from "conseiljs-softsigner";
 import { TezosToolkit } from "@taquito/taquito";
-import { TezBridgeSigner } from "@taquito/tezbridge-signer";
 import {
  ConseilDataClient,
- ConseilFunction,
  ConseilOperator,
  ConseilQueryBuilder,
  ConseilSortDirection,
@@ -18,8 +16,7 @@ import db from "../../db";
 import { Environment } from "../../env";
 
 const { DBWallet } = db;
-const environment = process.env.NODE_ENV;
-const server = Environment.XTZ[environment];
+const server = "https://conseil-prod.cryptonomic-infra.tech:443";
 const apiKey = Environment.CONSEIL_API_KEY;
 const tezosNode = "https://mainnet-tezos.giganode.io";
 

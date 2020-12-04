@@ -1301,32 +1301,52 @@ export class WalletController {
     const response = await BNB.getTransactions(address);
     res.status(200).json({
      statusCode: 200,
-     response: response.payload
+     response: response.payload.map((tx: any) => ({
+      ...tx,
+      view_in_explorer: getExplorerLink(ticker, tx.hash)
+     }))
     });
    } else if (ticker.toLowerCase() === "xlm") {
     const response = await XLM.getTransactions(address);
     res.status(200).json({
      statusCode: 200,
-     response: response.payload
+     response: response.payload.map((tx: any) => ({
+      ...tx,
+      view_in_explorer: getExplorerLink(ticker, tx.hash)
+     }))
     });
    } else if (ticker.toLowerCase() === "celo") {
     const response = await CELO.getTransactions(address);
     res.status(200).json({
      statusCode: 200,
-     response: response.payload
+     response: response.payload.map((tx: any) => ({
+      ...tx,
+      view_in_explorer: getExplorerLink(ticker, tx.hash)
+     }))
     });
    } else if (ticker.toLowerCase() === "xtz") {
     const response = await XTZ.getTransactions(address);
     res.status(200).json({
      statusCode: 200,
-     response: response.payload
+     response: response.payload.map((tx: any) => ({
+      ...tx,
+      view_in_explorer: getExplorerLink(ticker, tx.hash)
+     }))
     });
    } else if (ticker.toLowerCase() === "zil") {
     const response = await ZIL.getTransactions(address);
     res.status(200).json({
      statusCode: 200,
-     response: response.payload
+     response: response.payload.map((tx: any) => ({
+      ...tx,
+      view_in_explorer: getExplorerLink(ticker, tx.hash)
+     }))
     });
+   } else {
+    throw new CustomError(
+     400,
+     "Transaction history isn't available yet for " + ticker.toLowerCase()
+    );
    }
   } catch (error) {
    res.status(error.code || 500).send(error.message);

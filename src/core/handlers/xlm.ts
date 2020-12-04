@@ -1,16 +1,27 @@
 import * as Stellar from "stellar-sdk";
 import api from "node-fetch";
-import { Environment } from "../../env";
 
 const environment = process.env.NODE_ENV;
+
+const xlm_mainnet = "https://horizon.stellar.org";
+const xlm_testnet = "https://horizon-testnet.stellar.org";
+
+const apis = {
+ development: xlm_testnet,
+ production: xlm_mainnet,
+ test: xlm_testnet,
+ staging: xlm_testnet
+};
+
 const networks = {
  development: "TESTNET",
  production: "PUBLIC",
  test: "TESTNET",
  staging: "TESTNET"
 };
+
 const network = networks[environment];
-const xlm = new Stellar.Server(Environment.XLM[environment]);
+const xlm = new Stellar.Server(apis[environment]);
 
 export class XLM {
  static async generateAddress(): Promise<{ statusCode: number; payload: any }> {
