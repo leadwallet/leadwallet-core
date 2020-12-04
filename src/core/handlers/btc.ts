@@ -15,7 +15,10 @@ const blockCypherNetworks = {
 };
 const bcn = blockCypherNetworks[environment];
 const EXPLORER = "https://api.blockcypher.com/v1/btc/" + bcn;
-const CRYPTOAPI = Environment.CRYPTO_API + "/v1/bc/btc/" + COIN_NETWORK["btc"][process.env.NODE_ENV];
+const CRYPTOAPI =
+ Environment.CRYPTO_API +
+ "/v1/bc/btc/" +
+ COIN_NETWORK["btc"][process.env.NODE_ENV];
 
 export class BTC {
  static async createAddress(): Promise<{ payload: any; statusCode: number }> {
@@ -34,16 +37,18 @@ export class BTC {
     }
    });
   } catch (error) {
-   return Promise.reject(
-    new Error(error.message)
-   );
+   return Promise.reject(new Error(error.message));
   }
  }
 
- static async getAddressDetails(address: string): Promise<{ payload: any; statusCode: number; }> {
+ static async getAddressDetails(
+  address: string
+ ): Promise<{ payload: any; statusCode: number }> {
   try {
-   const response = await rp.get(EXPLORER + "/addrs/" + address, { ...options });
-   
+   const response = await rp.get(EXPLORER + "/addrs/" + address, {
+    ...options
+   });
+
    if (response.statusCode >= 400)
     throw new CustomError(response.statusCode, response.body);
    // console.log(response.body);
@@ -51,22 +56,20 @@ export class BTC {
     statusCode: 200,
     payload: {
      address: response.body.address,
-     balance: response.body.final_balance / (100 * (10 ** 6))
+     balance: response.body.final_balance / (100 * 10 ** 6)
     }
    });
   } catch (error) {
-   return Promise.reject(
-    new Error(error.message)
-   );
+   return Promise.reject(new Error(error.message));
   }
  }
 
  static async sendToken(
-  inputs: { address: string; value: number; }[], 
-  outputs: { address: string; value: number; }[],
-  fee: { address: string; value: number; },
+  inputs: { address: string; value: number }[],
+  outputs: { address: string; value: number }[],
+  fee: { address: string; value: number },
   wif?: string
- ): Promise<{ payload: any; statusCode: number; }> {
+ ): Promise<{ payload: any; statusCode: number }> {
   try {
    const keypair = bitcoin.ECPair.fromWIF(wif, network);
    const payments = bitcoin.payments.p2wpkh({
@@ -83,7 +86,7 @@ export class BTC {
     address = pBase58.address;
    // console.log("Address: " + payments.address);
    const txb = new bitcoin.Psbt({ network });
-   
+
    // const feeValue = outputs.map(o => o.value)
    //  .concat(localFee.value)
    //  .reduce((prev, current) => prev + current);
@@ -106,7 +109,10 @@ export class BTC {
    });
 
    if (txPrepareResponse.statusCode >= 400)
-    throw new CustomError(txPrepareResponse.statusCode, txPrepareResponse.body.meta.error.message);
+    throw new CustomError(
+     txPrepareResponse.statusCode,
+     txPrepareResponse.body.meta.error.message
+    );
 
    console.log("Transaction hex: " + txPrepareResponse.body.payload.hex);
 
@@ -118,38 +124,52 @@ export class BTC {
    });
 
    if (txDecoded.statusCode >= 400)
-    throw new CustomError(txDecoded.statusCode, txDecoded.body.meta.error.message);
+    throw new CustomError(
+     txDecoded.statusCode,
+     txDecoded.body.meta.error.message
+    );
 
    const txs = txDecoded.body.payload;
    console.log(JSON.stringify(txs));
    console.log(txDecoded.body.payload.vin);
 
-   const unspentTxResponse = await rp.get(CRYPTOAPI + "/address/" + address + "/unspent-transactions", {
-    ...options
-   });
+   const unspentTxResponse = await rp.get(
+    CRYPTOAPI + "/address/" + address + "/unspent-transactions",
+    {
+     ...options
+    }
+   );
 
    if (unspentTxResponse.statusCode >= 400)
-    throw new CustomError(unspentTxResponse.statusCode, unspentTxResponse.body.meta.error.message);
+    throw new CustomError(
+     unspentTxResponse.statusCode,
+     unspentTxResponse.body.meta.error.message
+    );
 
    const allUnspent = unspentTxResponse.body.payload;
-   let unspentTxs = allUnspent[0]
+   let unspentTxs = allUnspent[0];
 
    for (const unspent of allUnspent)
-    if (unspent.amount > unspentTxs.amount)
-     unspentTxs = unspent;
+    if (unspent.amount > unspentTxs.amount) unspentTxs = unspent;
 
    console.log(unspentTxs);
    console.log("All unspent", unspentTxResponse.body.payload);
 
-   const rawTxsResponse = await rp.get(CRYPTOAPI + "/txs/raw/txid/" + unspentTxs.txid, {
-    ...options
-   });
+   const rawTxsResponse = await rp.get(
+    CRYPTOAPI + "/txs/raw/txid/" + unspentTxs.txid,
+    {
+     ...options
+    }
+   );
 
    if (rawTxsResponse.statusCode >= 400)
-    throw new CustomError(rawTxsResponse.statusCode, rawTxsResponse.body.meta.error.message);
+    throw new CustomError(
+     rawTxsResponse.statusCode,
+     rawTxsResponse.body.meta.error.message
+    );
 
-   const rawHex = (rawTxsResponse.body.payload.hex);
-   
+   const rawHex = rawTxsResponse.body.payload.hex;
+
    txb.addInput({
     hash: unspentTxs.txid,
     index: unspentTxs.vout,
@@ -175,14 +195,16 @@ export class BTC {
    // });
 
    const signed = txb.signInput(0, keypair);
-   
-   signed.validateSignaturesOfInput(0)
+
+   signed.validateSignaturesOfInput(0);
    const final = signed.finalizeAllInputs();
 
    const txn = final.extractTransaction();
    const hex = txn.toHex();
 
-   console.log("tx inputs: " + JSON.stringify(txn.ins.map(i => i.hash.toString("hex"))));
+   console.log(
+    "tx inputs: " + JSON.stringify(txn.ins.map(i => i.hash.toString("hex")))
+   );
 
    console.log("Tx Hex: " + hex);
 
@@ -194,7 +216,10 @@ export class BTC {
    });
 
    if (broadcastResponse.statusCode >= 400)
-    throw new CustomError(broadcastResponse.statusCode, broadcastResponse.body.meta.error.message);
+    throw new CustomError(
+     broadcastResponse.statusCode,
+     broadcastResponse.body.meta.error.message
+    );
 
    const txId = broadcastResponse.body.payload.txid;
 
@@ -206,14 +231,12 @@ export class BTC {
     }
    });
   } catch (error) {
-   return Promise.reject(
-    new Error(error.message)
-   );
+   return Promise.reject(new Error(error.message));
   }
  }
 
  // static async signTransaction(
- //  hex: string, 
+ //  hex: string,
  //  wifs: Array<string>
  // ): Promise<{ payload: any; statusCode: number }> {
  //  const response = await rp.post(BTCROOT + "/txs/sign", {
@@ -237,7 +260,9 @@ export class BTC {
  //  });
  // }
 
- static async importWallet(privateKey: string): Promise<{ payload: any; statusCode: number }> {
+ static async importWallet(
+  privateKey: string
+ ): Promise<{ payload: any; statusCode: number }> {
   try {
    const keyPair = bitcoin.ECPair.fromPrivateKey(
     Buffer.from(privateKey, "hex"),
@@ -257,9 +282,7 @@ export class BTC {
     }
    });
   } catch (error) {
-   return Promise.reject(
-    new Error(error.message)
-   );
+   return Promise.reject(new Error(error.message));
   }
  }
 }

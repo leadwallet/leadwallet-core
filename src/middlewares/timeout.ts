@@ -1,45 +1,27 @@
 import express from "express";
+// import DelayedResponse from "http-delayed-response";
+import { CustomError } from "../custom";
 
-export const timeout = (timeout: number = 40000) => {
+export const timeout = (timeout: number = 12000) => {
  return (
-  req: express.Request, 
-  res: express.Response, 
+  req: express.Request,
+  res: express.Response,
   next: express.NextFunction
  ) => {
-  const space = " ";
-  let isFinished = false;
-  let isDataSent = false;
-  
-  res.on("finish", () => {
-   isFinished = true;
-  });
-
-  res.on("end", () => {
-   isFinished = true;
-  });
-
-  res.on("close", () => {
-   isFinished = true;
-  });
-
-  res.on("data", (data) => {
-   if (data !== space)
-    isDataSent = true;
-  });
-
-  const waitAndSend = () => {
-   setTimeout(() => {
-    if (!isFinished && !isDataSent) {
-     if (!res.headersSent)
-      res.writeHead(202);
-
-     res.write(space);
-     waitAndSend();
+  try {
+   res.setTimeout(timeout, () => {
+    try {
+     throw new CustomError(
+      408,
+      "Server did not respond on time but your request is still processed behind the scenes."
+     );
+    } catch (error) {
+     res.status(error.code || 500).send(error.message);
     }
-   }, timeout);
-  };
-
-  waitAndSend();
-  next();
+   });
+   next();
+  } catch (error) {
+   res.status(error.code || 500).send(error.message);
+  }
  };
 };

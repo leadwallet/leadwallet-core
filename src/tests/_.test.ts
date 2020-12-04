@@ -4,14 +4,28 @@ import app from "..";
 
 const ROOT = "/api/v1/wallet";
 const recoveryPhrase: string[] = [
- "denial", "filial", "fantasy", "philosophical", "faint", "apparition", "bloat", "garrison", "loch-ness",
- "pitiable", "admiral", "quality", "infer", "subtle", "torpor", "morbid"
+ "denial",
+ "filial",
+ "fantasy",
+ "philosophical",
+ "faint",
+ "apparition",
+ "bloat",
+ "garrison",
+ "loch-ness",
+ "pitiable",
+ "admiral",
+ "quality",
+ "infer",
+ "subtle",
+ "torpor",
+ "morbid"
 ];
 let token: string = "";
 
 describe("TESTS", () => {
  describe("WALLET IMPLEMENTATION TESTS", () => {
-  it("should create wallet", (done) => {
+  it("should create wallet", done => {
    request(app)
     .post(ROOT + "/create")
     .send({ recoveryPhrase })
@@ -22,7 +36,7 @@ describe("TESTS", () => {
      done(err);
     });
   });
-  it("should retrieve wallet", (done) => {
+  it("should retrieve wallet", done => {
    request(app)
     .get(ROOT + "/retrieve")
     .set("Authorization", `Bearer ${token}`)

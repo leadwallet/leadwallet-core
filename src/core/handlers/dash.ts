@@ -6,7 +6,7 @@ const dashPath = "/v1/bc/dash/" + COIN_NETWORK["dash"][process.env.NODE_ENV];
 const DASHROOT = Environment.CRYPTO_API + dashPath;
 
 export class DASH {
- static async createAddress(): Promise<{ payload: any; statusCode: number; }> {
+ static async createAddress(): Promise<{ payload: any; statusCode: number }> {
   const response = await rp.post(DASHROOT + "/address", { ...options });
   return Promise.resolve({
    statusCode: response.statusCode,
@@ -14,8 +14,12 @@ export class DASH {
   });
  }
 
- static async getAddressDetails(address: string): Promise<{ payload: any; statusCode: number; }> {
-  const response = await rp.get(DASHROOT + "/address/" + address, { ...options });
+ static async getAddressDetails(
+  address: string
+ ): Promise<{ payload: any; statusCode: number }> {
+  const response = await rp.get(DASHROOT + "/address/" + address, {
+   ...options
+  });
   return Promise.resolve({
    statusCode: response.statusCode,
    payload: response.body.payload || response.body.meta.error.message
@@ -23,22 +27,22 @@ export class DASH {
  }
 
  static async sendToken(
-  inputs: { address: string; value: number; }[],
-  outputs: { address: string; value: number; }[],
-  fee: { value: number; }
- ): Promise<{ payload: any; statusCode: number; }> {
+  inputs: { address: string; value: number }[],
+  outputs: { address: string; value: number }[],
+  fee: { value: number }
+ ): Promise<{ payload: any; statusCode: number }> {
   const response = await rp.post(DASHROOT + "/txs/create", {
    ...options,
-   body: { 
+   body: {
     inputs: inputs.map(i => ({
      ...i,
      value: parseFloat(Number(i.value).toFixed(8))
-    })), 
+    })),
     outputs: outputs.map(o => ({
      ...o,
      value: parseFloat(Number(o.value).toFixed(8))
-    })), 
-    fee 
+    })),
+    fee
    }
   });
   return Promise.resolve({
@@ -47,7 +51,10 @@ export class DASH {
   });
  }
 
- static async signTransaction(hex: string, wifs: Array<string>): Promise<{ payload: any; statusCode: number; }> {
+ static async signTransaction(
+  hex: string,
+  wifs: Array<string>
+ ): Promise<{ payload: any; statusCode: number }> {
   const response = await rp.post(DASHROOT + "/txs/sign", {
    ...options,
    body: { hex, wifs }
@@ -58,7 +65,9 @@ export class DASH {
   });
  }
 
- static async broadcastTransaction(hex: string): Promise<{ payload: any; statusCode: number; }> {
+ static async broadcastTransaction(
+  hex: string
+ ): Promise<{ payload: any; statusCode: number }> {
   const response = await rp.post(DASHROOT + "/txs/send", {
    ...options,
    body: { hex }

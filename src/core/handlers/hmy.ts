@@ -30,7 +30,7 @@
 
 //  static async sendToken(
 //   from: string,
-//   to: string, 
+//   to: string,
 //   value: number,
 //   gasLimit: string,
 //   shardID: number = 0,
