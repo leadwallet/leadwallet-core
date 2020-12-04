@@ -2,7 +2,6 @@ import * as Near from "near-api-js";
 import BN from "bn.js";
 import crypto from "crypto";
 import createRandomString from "crypto-random-string";
-import { Environment } from "../../env";
 
 const environment = process.env.NODE_ENV;
 
@@ -13,8 +12,18 @@ const keyStores = {
  production: new Near.keyStores.UnencryptedFileSystemKeyStore("keystore")
 };
 
+const near_mainnet = "https://rpc.mainnet.near.org";
+const near_testnet = "https://rpc.testnet.near.org";
+
+const nodes = {
+ development: near_testnet,
+ production: near_mainnet,
+ test: near_testnet,
+ staging: near_testnet
+};
+
 const nConfig = {
- nodeUrl: Environment.NEAR[environment],
+ nodeUrl: nodes[environment],
  deps: {
   keyStore: keyStores[environment]
  }
