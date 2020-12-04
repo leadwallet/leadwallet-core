@@ -38,7 +38,7 @@ const networks = {
 
 const helpers = {
  development: "https://helper.testnet.near.org",
- production: "https://helper.nearprotocol.com",
+ production: "https://helper.mainnet.near.org",
  test: "https://helper.testnet.near.org",
  staging: "https://helper.testnet.near.org"
 };
