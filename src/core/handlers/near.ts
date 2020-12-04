@@ -5,12 +5,12 @@ import createRandomString from "crypto-random-string";
 
 const environment = process.env.NODE_ENV;
 
-const keyStores = {
- development: new Near.keyStores.InMemoryKeyStore(),
- staging: new Near.keyStores.InMemoryKeyStore(),
- test: new Near.keyStores.InMemoryKeyStore(),
- production: new Near.keyStores.UnencryptedFileSystemKeyStore("keystore")
-};
+// const keyStores = {
+//  development: new Near.keyStores.InMemoryKeyStore(),
+//  staging: new Near.keyStores.InMemoryKeyStore(),
+//  test: new Near.keyStores.InMemoryKeyStore(),
+//  production: new Near.keyStores.UnencryptedFileSystemKeyStore("keystore")
+// };
 
 const near_mainnet = "https://rpc.mainnet.near.org";
 const near_testnet = "https://rpc.testnet.near.org";
@@ -25,7 +25,7 @@ const nodes = {
 const nConfig: any = {
  nodeUrl: nodes[environment],
  deps: {
-  keyStore: keyStores[environment]
+  keyStore: new Near.keyStores.InMemoryKeyStore()
  }
 };
 
@@ -49,6 +49,7 @@ const helperUrl = helpers[environment];
 const api = () =>
  Near.connect({
   ...nConfig,
+  networkId,
   helperUrl
  });
 
