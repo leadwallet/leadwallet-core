@@ -1,10 +1,12 @@
-ARG NODE_VERSION=12-alpine
-FROM node:${NODE_VERSION}
+FROM ubuntu:14.04
+RUN apt-get install -y curl
+RUN curl --silent --location https://deb.nodesource.com/setup_12.x | sudo bash -
+RUN apt-get install -y nodejs
+RUN apt-get install -y npm
+RUN apt-get install -y build-essential
+RUN apt-get install -y git
 COPY src ./src
 COPY *.json ./
-RUN apt-get update && apt-get install -y git
-RUN rm -rf /node_modules
-RUN npm cache clean --force
 RUN npm install -g node-gyp
 RUN npm install
 COPY . .
