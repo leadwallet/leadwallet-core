@@ -3,8 +3,8 @@ import rp from "request-promise";
 
 const environment = process.env.NODE_ENV;
 
-const bsc_mainnet = "https://bsc.dataseed1.binance.org:443";
-const bsc_testnet = "https://data-seed-prebsc-1-s1.binance.org:8545";
+const bsc_mainnet = "https://bsc.dataseed1.binance.org";
+const bsc_testnet = "https://data-seed-prebsc-1-s1.binance.org";
 
 const bsc = {
  development: bsc_testnet,
@@ -33,7 +33,7 @@ export class BNB {
  ): Promise<{ statusCode: number; payload: any }> {
   try {
    const account = web3.eth.accounts.create(mnemonic);
-   console.log("======== " + account.address);
+   // console.log("======== " + account.address);
    return Promise.resolve({
     statusCode: 200,
     payload: {
@@ -50,6 +50,7 @@ export class BNB {
   address: string
  ): Promise<{ statusCode: number; payload: any }> {
   try {
+   console.log("=========" + address)
    const balance = await web3.eth.getBalance(address);
    console.log(balance);
    // console.log(JSON.stringify(balance));
