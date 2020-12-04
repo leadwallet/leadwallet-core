@@ -9,7 +9,6 @@
     "@polkadot/api": "^2.7.1",
     "@taquito/taquito": "^7.0.1-beta.0",
     "@taquito/tezbridge-signer": "^7.0.1-beta.0",
-    "@terra-money/terra.js": "^1.2.1",
     "@zilliqa-js/zilliqa": "^1.0.0",
     "algosdk": "^1.8.0",
     "bitcoinjs-lib": "^5.2.0",
