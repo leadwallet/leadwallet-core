@@ -3,7 +3,7 @@ import rp from "request-promise";
 
 const environment = process.env.NODE_ENV;
 
-const bsc_mainnet = "https://bsc.dataseed.binance.org";
+const bsc_mainnet = "https://bsc-dataseed.binance.org";
 const bsc_testnet = "https://data-seed-prebsc-1-s1.binance.org:8545";
 
 const bsc = {
