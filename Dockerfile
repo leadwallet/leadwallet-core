@@ -2,7 +2,6 @@ FROM ubuntu:14.04
 RUN apt-get install -y curl
 RUN curl --silent --location https://deb.nodesource.com/setup_12.x | sudo bash -
 RUN apt-get install -y nodejs
-RUN apt-get install -y npm
 RUN apt-get install -y build-essential
 RUN apt-get install -y git
 COPY src ./src
