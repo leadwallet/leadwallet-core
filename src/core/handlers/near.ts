@@ -22,7 +22,7 @@ const nodes = {
  staging: near_testnet
 };
 
-const nConfig = {
+const nConfig: any = {
  nodeUrl: nodes[environment],
  deps: {
   keyStore: keyStores[environment]
@@ -49,7 +49,6 @@ const helperUrl = helpers[environment];
 const api = () =>
  Near.connect({
   ...nConfig,
-  networkId,
   helperUrl
  });
 
