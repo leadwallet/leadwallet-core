@@ -31,7 +31,7 @@ const nConfig = {
 
 const networks = {
  development: "testnet",
- production: "default",
+ production: "mainnet",
  test: "testnet",
  staging: "testnet"
 };
