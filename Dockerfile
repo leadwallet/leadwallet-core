@@ -4,6 +4,7 @@ COPY src ./src
 COPY *.json ./
 RUN rm -rf /node_modules
 RUN npm cache clean --force
+RUN npm install -g node-gyp
 RUN npm install
 COPY . .
 EXPOSE $PORT
