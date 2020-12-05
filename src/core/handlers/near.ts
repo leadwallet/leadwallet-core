@@ -38,19 +38,28 @@ const networks = {
 
 const helpers = {
  development: "https://helper.testnet.near.org",
- production: "https://helper.nearprotocol.com",
+ production: "https://helper.mainnet.near.org",
  test: "https://helper.testnet.near.org",
  staging: "https://helper.testnet.near.org"
 };
 
+const wallets = {
+ development: "https://wallet.testnet.near.org",
+ production: "https://wallet.near.org",
+ test: "https://wallet.testnet.near.org",
+ staging: "https://wallet.testnet.near.org"
+};
+
 const networkId = networks[environment];
 const helperUrl = helpers[environment];
+const walletUrl = wallets[environment];
 
 const api = () =>
  Near.connect({
   ...nConfig,
   networkId,
-  helperUrl
+  helperUrl,
+  walletUrl
  });
 
 export class NEAR {
