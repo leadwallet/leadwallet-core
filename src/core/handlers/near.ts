@@ -43,23 +43,23 @@ const helpers = {
  staging: "https://helper.testnet.near.org"
 };
 
-const wallets = {
- development: "https://wallet.testnet.near.org",
- production: "https://wallet.near.org",
- test: "https://wallet.testnet.near.org",
- staging: "https://wallet.testnet.near.org"
-};
+// const wallets = {
+//  development: "https://wallet.testnet.near.org",
+//  production: "https://wallet.near.org",
+//  test: "https://wallet.testnet.near.org",
+//  staging: "https://wallet.testnet.near.org"
+// };
 
 const networkId = networks[environment];
 const helperUrl = helpers[environment];
-const walletUrl = wallets[environment];
+// const walletUrl = wallets[environment];
 
 const api = () =>
  Near.connect({
   ...nConfig,
   networkId,
-  helperUrl,
-  walletUrl
+  helperUrl
+  // walletUrl
  });
 
 export class NEAR {
@@ -70,7 +70,7 @@ export class NEAR {
    const randomString = createRandomString({ length: 58 });
    const keyPair = Near.utils.KeyPairEd25519.fromRandom();
    const accountId = randomString + ".near";
-   console.log(keyPair.getPublicKey().toString());
+   // console.log(keyPair.getPublicKey().toString());
    const acc = await near.createAccount(accountId, keyPair.getPublicKey());
    // const acc = new Near.Account(near.connection, accountId);
    return Promise.resolve({
