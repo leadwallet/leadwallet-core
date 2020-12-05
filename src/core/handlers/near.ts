@@ -61,8 +61,8 @@ export class NEAR {
    const randomString = createRandomString({ length: 58 });
    const keyPair = Near.utils.KeyPairEd25519.fromRandom();
    const accountId = randomString + ".near";
-   await near.createAccount(accountId, keyPair.getPublicKey());
-   const acc = new Near.Account(near.connection, accountId);
+   const acc = await near.createAccount(accountId, keyPair.getPublicKey());
+   // const acc = new Near.Account(near.connection, accountId);
    return Promise.resolve({
     statusCode: 201,
     payload: {
