@@ -38,7 +38,7 @@ const networks = {
 
 const helpers = {
  development: "https://helper.testnet.near.org",
- production: "https://helper.mainnet.near.org",
+ production: "https://helper.nearprotocol.com",
  test: "https://helper.testnet.near.org",
  staging: "https://helper.testnet.near.org"
 };
@@ -57,7 +57,7 @@ export class NEAR {
  static async createAddress(): Promise<{ statusCode: number; payload: any }> {
   try {
    const near = await api();
-   const randomString = createRandomString({ length: 30 });
+   const randomString = createRandomString({ length: 64 });
    const keyPair = Near.utils.KeyPairEd25519.fromRandom();
    await near.createAccount(randomString, keyPair.getPublicKey());
    const acc = new Near.Account(near.connection, randomString);
