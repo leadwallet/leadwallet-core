@@ -57,6 +57,7 @@ export class NEAR {
  static async createAddress(): Promise<{ statusCode: number; payload: any }> {
   try {
    const near = await api();
+   console.log(near.connection.networkId);
    const randomString = createRandomString({ length: 58 });
    const keyPair = Near.utils.KeyPairEd25519.fromRandom();
    const accountId = randomString + ".near";
