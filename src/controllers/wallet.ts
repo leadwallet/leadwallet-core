@@ -1802,6 +1802,7 @@ export class WalletController {
     }
    });
   } catch (error) {
+   console.log(error);
    res.status(error.code || 500).send(error.message);
   }
  }
