@@ -17,7 +17,7 @@ import {
  XTZ,
  XLM,
  CELO,
- NEAR,
+ // NEAR,
  ZIL
 } from "../core/handlers";
 import { TransactionService } from "../core/handlers/transaction_handler";
@@ -79,7 +79,7 @@ export class WalletController {
     XTZ.generateAddress(keyPair.privateKey),
     XLM.generateAddress(),
     CELO.createAddress(keyPair.privateKey),
-    NEAR.createAddress(),
+    // NEAR.createAddress(),
     ZIL.generateAddress()
    ];
 
@@ -96,7 +96,7 @@ export class WalletController {
     xtzAddressCreationResponse,
     xlmAddressCreationResponse,
     celoAddressCreationResponse,
-    nearAddressCreationResponse,
+    // nearAddressCreationResponse,
     zilAddressCreationResponse
    ] = await Promise.all(allPromises);
 
@@ -113,7 +113,7 @@ export class WalletController {
     XTZ.getAddressDetails(xtzAddressCreationResponse.payload.address),
     XLM.getAddressDetails(xlmAddressCreationResponse.payload.address),
     CELO.getAddressDetails(celoAddressCreationResponse.payload.address),
-    NEAR.getAddressDetails(nearAddressCreationResponse.payload.address),
+    // NEAR.getAddressDetails(nearAddressCreationResponse.payload.address),
     ZIL.getAddressDetails(zilAddressCreationResponse.payload.address)
    ];
 
@@ -130,7 +130,7 @@ export class WalletController {
     xtzAddressDetailsResponse,
     xlmAddressDetailsResponse,
     celoAddressDetailsResponse,
-    nearAddressDetailsResponse,
+    // nearAddressDetailsResponse,
     zilAddressDetailsResponse
    ] = await Promise.all(allDetailsPromises);
 
@@ -151,8 +151,8 @@ export class WalletController {
      parseFloat(bnbAddressDetailsResponse.payload.balance) +
      // dotAddressDetailsResponse.payload.balance +
      xtzAddressDetailsResponse.payload.balance +
-     xlmAddressDetailsResponse.payload.balance +
-     nearAddressDetailsResponse.payload.balance,
+     xlmAddressDetailsResponse.payload.balance,
+    // nearAddressDetailsResponse.payload.balance,
     // hmyAddressCreationResponse.payload.balance
     hash: Tokenizers.hash(keyPair.publicKey + keyPair.privateKey),
     btc: {
@@ -219,11 +219,11 @@ export class WalletController {
      pk: celoAddressCreationResponse.payload.privateKey,
      balance: celoAddressDetailsResponse.payload.balance
     },
-    near: {
-     address: nearAddressCreationResponse.payload.address,
-     pk: nearAddressCreationResponse.payload.privateKey,
-     balance: nearAddressDetailsResponse.payload.balance
-    },
+    // near: {
+    //  address: nearAddressCreationResponse.payload.address,
+    //  pk: nearAddressCreationResponse.payload.privateKey,
+    //  balance: nearAddressDetailsResponse.payload.balance
+    // },
     zil: {
      address: zilAddressCreationResponse.payload.address,
      pk: zilAddressCreationResponse.payload.privateKey,
@@ -254,6 +254,7 @@ export class WalletController {
     response
    });
   } catch (error) {
+   console.log(error);
    res.status(error.code || 500).send(error.message);
   }
  }
@@ -287,6 +288,9 @@ export class WalletController {
    // Get user's wallet
    const wallet = req.wallet;
 
+   // Remove NEAR from all wallets on update
+   if (wallet.near) wallet.near = null;
+
    // Get all address details
    const allAddressDetails = [
     wallet.btc ? BTC.getAddressDetails(wallet.btc.address) : null,
@@ -303,7 +307,7 @@ export class WalletController {
     wallet.xtz ? XTZ.getAddressDetails(wallet.xtz.address) : null,
     wallet.xlm ? XLM.getAddressDetails(wallet.xlm.address) : null,
     wallet.celo ? CELO.getAddressDetails(wallet.celo.address) : null,
-    wallet.near ? NEAR.getAddressDetails(wallet.near.address) : null,
+    // wallet.near ? NEAR.getAddressDetails(wallet.near.address) : null,
     wallet.zil ? ZIL.getAddressDetails(wallet.zil.address) : null
    ];
    // Update wallet
@@ -320,7 +324,7 @@ export class WalletController {
     xtzDetailsResponse,
     xlmDetailsResponse,
     celoDetailsResponse,
-    nearDetailsResponse,
+    // nearDetailsResponse,
     zilDetailsResponse
    ] = await Promise.all(allAddressDetails);
    if (
@@ -342,11 +346,9 @@ export class WalletController {
     "trx",
     "dash",
     "bnb",
-    "dot",
     "xtz",
     "xlm",
     "celo",
-    "near",
     "zil"
    ];
    const balances = {
@@ -361,7 +363,7 @@ export class WalletController {
     xtz: parseFloat(xtzDetailsResponse?.payload.balance || "0"),
     xlm: parseFloat(xlmDetailsResponse?.payload.balance || "0"),
     celo: parseFloat(celoDetailsResponse?.payload.balance || "0"),
-    near: parseFloat(nearDetailsResponse?.payload.balance || "0"),
+    // near: parseFloat(nearDetailsResponse?.payload.balance || "0"),
     zil: parseFloat(zilDetailsResponse?.payload.balance || "0")
    };
    // hmyDetailsResponse.payload.balance
@@ -375,6 +377,14 @@ export class WalletController {
      newBalance = newBalance + balances[ticker];
      if (ticker === "eth")
       wallet.eth.tokens = ethDetailsResponse?.payload.tokens;
+    }
+
+   const removeTickers = ["bnb", "xtz", "xlm", "celo", "zil", "near"];
+
+   for (const ticker of removeTickers)
+    if (wallet[ticker]) {
+     console.log(ticker);
+     wallet[ticker] = null;
     }
 
    wallet.balance = newBalance;
@@ -505,11 +515,9 @@ export class WalletController {
     "trx",
     "dash",
     "bnb",
-    "dot",
     "xtz",
     "xlm",
     "celo",
-    "near",
     "zil"
    ];
 
@@ -524,7 +532,7 @@ export class WalletController {
     XTZ.generateAddress(wallet.privateKey),
     XLM.generateAddress(),
     CELO.createAddress(wallet.privateKey),
-    NEAR.createAddress(),
+    // NEAR.createAddress(),
     ZIL.generateAddress()
    ];
 
@@ -539,7 +547,7 @@ export class WalletController {
     xtzAddressCreationResponse,
     xlmAddressCreationResponse,
     celoAddressCreationResponse,
-    nearAddressCreationResponse,
+    // nearAddressCreationResponse,
     zilAddressCreationResponse
    ] = await Promise.all(allPromises);
 
@@ -554,7 +562,7 @@ export class WalletController {
     XTZ.getAddressDetails(xtzAddressCreationResponse.payload.address),
     XLM.getAddressDetails(xlmAddressCreationResponse.payload.address),
     CELO.getAddressDetails(celoAddressCreationResponse.payload.address),
-    NEAR.getAddressDetails(nearAddressCreationResponse.payload.address),
+    // NEAR.getAddressDetails(nearAddressCreationResponse.payload.address),
     ZIL.getAddressDetails(zilAddressCreationResponse.payload.address)
    ];
 
@@ -569,7 +577,7 @@ export class WalletController {
     xtzAddressDetailsResponse,
     xlmAddressDetailsResponse,
     celoAddressDetailsResponse,
-    nearAddressDetailsResponse,
+    // nearAddressDetailsResponse,
     zilAddressDetailsResponse
    ] = await Promise.all(allDetailsPromises);
 
@@ -628,11 +636,11 @@ export class WalletController {
      pk: celoAddressCreationResponse.payload.privateKey,
      balance: celoAddressDetailsResponse.payload.balance
     },
-    near: {
-     address: nearAddressCreationResponse.payload.address,
-     pk: nearAddressCreationResponse.payload.privateKey,
-     balance: nearAddressDetailsResponse.payload.balance
-    },
+    // near: {
+    //  address: nearAddressCreationResponse.payload.address,
+    //  pk: nearAddressCreationResponse.payload.privateKey,
+    //  balance: nearAddressDetailsResponse.payload.balance
+    // },
     zil: {
      address: zilAddressCreationResponse.payload.address,
      pk: zilAddressCreationResponse.payload.privateKey,
@@ -1105,22 +1113,6 @@ export class WalletController {
      req.body.value
     );
     txHash = celoSentResponse.payload.hash;
-   } else if (type === "near") {
-    balance = req.body.value;
-
-    if (senderWallet.balance < balance)
-     throw new CustomError(400, "Insufficient wallet balance");
-
-    if (senderWallet.near.balance < balance)
-     throw new CustomError(400, "Insufficient DOGE balance");
-
-    const nearSentResponse = await NEAR.sendToken(
-     senderWallet.near.pk,
-     senderWallet.near.address,
-     req.body.to,
-     req.body.value
-    );
-    txHash = nearSentResponse.payload.hash;
    } else if (type === "xtz") {
     balance = req.body.value;
 
@@ -1641,11 +1633,9 @@ export class WalletController {
     "trx",
     "dash",
     "bnb",
-    "dot",
     "xtz",
     "xlm",
     "celo",
-    "near",
     "zil"
    ];
 
@@ -1662,7 +1652,7 @@ export class WalletController {
     XTZ.generateAddress(wallet.privateKey),
     XLM.generateAddress(),
     CELO.createAddress(wallet.privateKey),
-    NEAR.createAddress(),
+    // NEAR.createAddress(),
     ZIL.generateAddress()
    ];
 
@@ -1677,7 +1667,7 @@ export class WalletController {
     xtzAddressCreationResponse,
     xlmAddressCreationResponse,
     celoAddressCreationResponse,
-    nearAddressCreationResponse,
+    // nearAddressCreationResponse,
     zilAddressCreationResponse
    ] = await Promise.all(allPromises);
 
@@ -1692,7 +1682,7 @@ export class WalletController {
     XTZ.getAddressDetails(xtzAddressCreationResponse.payload.address),
     XLM.getAddressDetails(xlmAddressCreationResponse.payload.address),
     CELO.getAddressDetails(celoAddressCreationResponse.payload.address),
-    NEAR.getAddressDetails(nearAddressCreationResponse.payload.address),
+    // NEAR.getAddressDetails(nearAddressCreationResponse.payload.address),
     ZIL.getAddressDetails(zilAddressCreationResponse.payload.address)
    ];
 
@@ -1707,7 +1697,7 @@ export class WalletController {
     xtzAddressDetailsResponse,
     xlmAddressDetailsResponse,
     celoAddressDetailsResponse,
-    nearAddressDetailsResponse,
+    // nearAddressDetailsResponse,
     zilAddressDetailsResponse
    ] = await Promise.all(allDetailsPromises);
 
@@ -1744,7 +1734,6 @@ export class WalletController {
      wif: dashAddressCreationResponse.payload.wif,
      balance: parseFloat(dashAddressDetailsResponse.payload.balance)
     },
-
     bnb: {
      address: bnbAddressCreationResponse.payload.address,
      pk: bnbAddressCreationResponse.payload.privateKey,
@@ -1766,11 +1755,11 @@ export class WalletController {
      pk: celoAddressCreationResponse.payload.privateKey,
      balance: celoAddressDetailsResponse.payload.balance
     },
-    near: {
-     address: nearAddressCreationResponse.payload.address,
-     pk: nearAddressCreationResponse.payload.privateKey,
-     balance: nearAddressDetailsResponse.payload.balance
-    },
+    // near: {
+    //  address: nearAddressCreationResponse.payload.address,
+    //  pk: nearAddressCreationResponse.payload.privateKey,
+    //  balance: nearAddressDetailsResponse.payload.balance
+    // },
     zil: {
      address: zilAddressCreationResponse.payload.address,
      pk: zilAddressCreationResponse.payload.privateKey,
@@ -1803,6 +1792,7 @@ export class WalletController {
     }
    });
   } catch (error) {
+   console.log(error);
    res.status(error.code || 500).send(error.message);
   }
  }

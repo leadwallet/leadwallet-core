@@ -619,13 +619,12 @@ export const CURRENT_COINS: Array<string> = [
  "eth",
  "dash",
  "doge",
- "trx",
- "bnb",
- "xtz",
- "xlm",
- "celo",
- "near",
- "zil"
+ "trx"
+ // "bnb",
+ // "xtz",
+ // "xlm",
+ // "celo",
+ // "zil"
 ];
 export const CRYPTO_API_COINS: Array<string> = [
  "btc",
@@ -689,12 +688,12 @@ export const COIN_NETWORK = {
   test: "testnet",
   staging: "mainnet"
  },
- near: {
-  development: "testnet",
-  production: "mainnet",
-  test: "testnet",
-  staging: "mainnet"
- },
+ // near: {
+ //  development: "testnet",
+ //  production: "mainnet",
+ //  test: "testnet",
+ //  staging: "mainnet"
+ // },
  xtz: {
   development: "testnet",
   production: "mainnet",
@@ -792,12 +791,12 @@ export function getExplorerLink(type: string, txHash: string): string {
    test: "https://testnet.bscscan.com/tx/" + txHash,
    staging: "https://testnet.bscscan.com/tx/" + txHash
   },
-  near: {
-   development: "https://explorer.testnet.near.org/transactions/" + txHash,
-   production: "https://explorer.near.org/transactions/" + txHash,
-   test: "https://explorer.testnet.near.org/transactions/" + txHash,
-   staging: "https://explorer.testnet.near.org/transactions/" + txHash
-  },
+  // near: {
+  //  development: "https://explorer.testnet.near.org/transactions/" + txHash,
+  //  production: "https://explorer.near.org/transactions/" + txHash,
+  //  test: "https://explorer.testnet.near.org/transactions/" + txHash,
+  //  staging: "https://explorer.testnet.near.org/transactions/" + txHash
+  // },
   xlm: {
    development: "https://testnet.stellarchain.io/tx/" + txHash,
    production: "https://stellarchain.io/tx/" + txHash,
