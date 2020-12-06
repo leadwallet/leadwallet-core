@@ -382,7 +382,10 @@ export class WalletController {
    const removeTickers = ["bnb", "xtz", "xlm", "celo", "zil", "near"];
 
    for (const ticker of removeTickers)
-    if (wallet[ticker]) wallet[ticker] = null;
+    if (wallet[ticker]) {
+     console.log(ticker);
+     wallet[ticker] = null;
+    }
 
    wallet.balance = newBalance;
    // Update wallet in db
