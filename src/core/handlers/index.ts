@@ -11,6 +11,6 @@ export * from "./bnb";
 export * from "./xtz";
 export * from "./xlm";
 export * from "./celo";
-export * from "./near";
+// export * from "./near";
 export * from "./zil";
 // export * from "./hmy";
