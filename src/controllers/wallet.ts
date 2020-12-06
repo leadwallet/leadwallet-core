@@ -152,7 +152,7 @@ export class WalletController {
      // dotAddressDetailsResponse.payload.balance +
      xtzAddressDetailsResponse.payload.balance +
      xlmAddressDetailsResponse.payload.balance,
-     // nearAddressDetailsResponse.payload.balance,
+    // nearAddressDetailsResponse.payload.balance,
     // hmyAddressCreationResponse.payload.balance
     hash: Tokenizers.hash(keyPair.publicKey + keyPair.privateKey),
     btc: {
@@ -286,11 +286,10 @@ export class WalletController {
  ): Promise<void> {
   try {
    // Get user's wallet
-   const wallet: any = req.wallet;
+   const wallet = req.wallet;
 
    // Remove NEAR from all wallets on update
-   if (wallet.near)
-    wallet.near = null;
+   if (wallet.near) wallet.near = null;
 
    // Get all address details
    const allAddressDetails = [
@@ -347,7 +346,6 @@ export class WalletController {
     "trx",
     "dash",
     "bnb",
-    "dot",
     "xtz",
     "xlm",
     "celo",
@@ -380,6 +378,11 @@ export class WalletController {
      if (ticker === "eth")
       wallet.eth.tokens = ethDetailsResponse?.payload.tokens;
     }
+
+   const removeTickers = ["bnb", "xtz", "xlm", "celo", "zil", "near"];
+
+   for (const ticker of removeTickers)
+    if (wallet[ticker]) wallet[ticker] = null;
 
    wallet.balance = newBalance;
    // Update wallet in db
