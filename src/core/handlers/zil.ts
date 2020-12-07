@@ -18,7 +18,7 @@ const testnet = "https://dev-api.zilliqa.com";
 const mainnet = "https://api.zilliqa.com";
 
 const apis = {
- development: mainnet,
+ development: testnet,
  production: mainnet,
  test: testnet,
  staging: testnet

@@ -701,7 +701,7 @@ export const COIN_NETWORK = {
   staging: "mainnet"
  },
  zil: {
-  development: "mainnet",
+  development: "testnet",
   production: "mainnet",
   test: "testnet",
   staging: "mainnet"
