@@ -1490,6 +1490,8 @@ export const addCustomERC20Token = async (wallet: Wallet, body: any) => {
   contract: body.contract,
   symbol: body.symbol,
   name: body.name,
+  decimals:
+   typeof body.decimals === "string" ? parseInt(body.decimals) : body.decimals,
   type: "ERC-20",
   balance: "0"
  };
