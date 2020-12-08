@@ -5,4 +5,5 @@ export interface ERCToken {
  type: string;
  balance: string;
  rate_in_usd?: number;
+ decimals?: number;
 }
