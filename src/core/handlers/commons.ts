@@ -619,12 +619,12 @@ export const CURRENT_COINS: Array<string> = [
  "eth",
  "dash",
  "doge",
- "trx"
- // "bnb",
- // "xtz",
- // "xlm",
- // "celo",
- // "zil"
+ "trx",
+ "bnb",
+ "xtz",
+ "xlm",
+ "celo",
+ "zil"
 ];
 export const CRYPTO_API_COINS: Array<string> = [
  "btc",
@@ -701,7 +701,7 @@ export const COIN_NETWORK = {
   staging: "mainnet"
  },
  zil: {
-  development: "mainnet",
+  development: "testnet",
   production: "mainnet",
   test: "testnet",
   staging: "mainnet"
