@@ -115,18 +115,20 @@ export class ZIL {
 
    if (res.statusCode >= 400) throw new Error(res.body.meta.error.message);
 
-   const mappedTxs = res.body.payload.map((tx: any) => ({
-    from: tx.from,
-    to: tx.to,
-    nonce: tx.nonce,
-    amount:
-     tx.from.toLowerCase() === address.toLowerCase()
-      ? "-" + parseFloat(tx.value)
-      : "+" + parseFloat(tx.value),
-    hash: tx.hash,
-    date: tx.datetime,
-    status: tx.confirmations > 0 ? "Confirmed" : "Pending"
-   }));
+   const mappedTxs = res.body.payload
+    ? res.body.payload.map((tx: any) => ({
+       from: tx.from,
+       to: tx.to,
+       nonce: tx.nonce,
+       amount:
+        tx.from.toLowerCase() === address.toLowerCase()
+         ? "-" + parseFloat(tx.value)
+         : "+" + parseFloat(tx.value),
+       hash: tx.hash,
+       date: tx.datetime,
+       status: tx.confirmations > 0 ? "Confirmed" : "Pending"
+      }))
+    : [];
 
    return Promise.resolve({
     statusCode: 200,
