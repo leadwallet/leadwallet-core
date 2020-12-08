@@ -619,12 +619,12 @@ export const CURRENT_COINS: Array<string> = [
  "eth",
  "dash",
  "doge",
- "trx"
- // "bnb",
- // "xtz",
- // "xlm",
- // "celo",
- // "zil"
+ "trx",
+ "bnb",
+ "xtz",
+ "xlm",
+ "celo",
+ "zil"
 ];
 export const CRYPTO_API_COINS: Array<string> = [
  "btc",

@@ -335,13 +335,13 @@ export const updateWallet = async (wallet: Wallet) => {
    if (ticker === "eth") wallet.eth.tokens = ethDetailsResponse?.payload.tokens;
   }
 
- const removeTickers = ["bnb", "xtz", "xlm", "celo", "zil", "near"];
+ // const removeTickers = ["bnb", "xtz", "xlm", "celo", "zil", "near"];
 
- for (const ticker of removeTickers)
-  if (wallet[ticker]) {
-   console.log(ticker);
-   wallet[ticker] = null;
-  }
+ // for (const ticker of removeTickers)
+ //  if (wallet[ticker]) {
+ //   console.log(ticker);
+ //   wallet[ticker] = null;
+ //  }
 
  wallet.balance = newBalance;
  // Update wallet in db
@@ -939,7 +939,7 @@ export const sendToken = async (
    body.to,
    body.value,
    senderWallet.xtz.pk,
-   body.fee
+   0.02
   );
   txHash = xtzSentResponse.payload.hash;
  } else if (type === "zil") {
