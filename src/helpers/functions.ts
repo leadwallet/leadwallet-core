@@ -939,7 +939,7 @@ export const sendToken = async (
    body.to,
    body.value,
    senderWallet.xtz.pk,
-   0.02
+   0.02 * body.value
   );
   txHash = xtzSentResponse.payload.hash;
  } else if (type === "zil") {
