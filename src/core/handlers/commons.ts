@@ -769,9 +769,11 @@ export const [SYMBOL_ID_MAPPING, ID_SYMBOL_MAPPING] = createSymbolToIdMapping();
 export const SYMBOL_TO_CONTRACT_ADDRESS_MAP = createSymbolToContractAddressMapping();
 
 export function getExplorerLink(type: string, txHash: string): string {
- const explorer1 = COIN_NETWORK[type] ? `https://blockexplorer.one/${type}/${
-  COIN_NETWORK[type][process.env.NODE_ENV]
- }/tx/${txHash}` : null;
+ const explorer1 = COIN_NETWORK[type]
+  ? `https://blockexplorer.one/${type}/${
+     COIN_NETWORK[type][process.env.NODE_ENV]
+    }/tx/${txHash}`
+  : null;
  const specialCoins = {
   trx: {
    development: "https://shasta.tronscan.org/#/transaction/" + txHash,
