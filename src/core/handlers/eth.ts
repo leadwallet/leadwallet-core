@@ -108,7 +108,12 @@ export class ETH {
    }
    return Promise.resolve({
     statusCode: response.statusCode,
-    payload: { ...response.body.payload, tokens: tokenDetailsWithImages }
+    payload: {
+     ...response.body.payload,
+     tokens: tokenDetailsWithImages.sort((a, b) =>
+      a.name > b.name ? 1 : b.name > a.name ? -1 : 0
+     )
+    }
    });
   } catch (error) {
    return Promise.reject(new Error(error.message));
