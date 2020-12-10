@@ -86,9 +86,19 @@ export class ETH {
     );
     if (contractDetails.statusCode >= 400) {
      console.log("Couldn't get image url for " + tokenDetail.name);
-     // If image is not available preoceeding with empty image urls
+     // If image is not available, proceed with custom image
      // console.log(tokenDetail);
-     tokenDetailsWithImages.push({ ...tokenDetail, image: {} });
+     tokenDetailsWithImages.push({
+      ...tokenDetail,
+      image: {
+       thumb:
+        "https://u20.plpstatic.ru/s/31g6ba0061/d3d591315e90751dab06ebbc70adfc38/b07feb7649a38a684a95c374ea2ca2e6.png",
+       small:
+        "https://u20.plpstatic.ru/s/31g6ba0061/d3d591315e90751dab06ebbc70adfc38/b07feb7649a38a684a95c374ea2ca2e6.png",
+       large:
+        "https://u20.plpstatic.ru/s/31g6ba0061/d3d591315e90751dab06ebbc70adfc38/b07feb7649a38a684a95c374ea2ca2e6.png"
+      }
+     });
     } else {
      tokenDetailsWithImages.push({
       ...tokenDetail,
