@@ -67,14 +67,19 @@ export class BNB {
 
  static async sendToken(
   to: string,
-  gasPrice: number,
-  gas: number,
   value: number,
   pk: string,
   nonce?: number
  ): Promise<{ statusCode: number; payload: any }> {
   try {
    const account = web3.eth.accounts.privateKeyToAccount(pk);
+   const gasPrice = parseFloat(await web3.eth.getGasPrice());
+   const gas = await web3.eth.estimateGas({
+    to,
+    from: account.address,
+    gasPrice,
+    value: value * 10 ** 18
+   });
    const signedTx = await account.signTransaction({
     to,
     gasPrice,
@@ -143,6 +148,27 @@ export class BNB {
     payload: {
      address: account.address,
      privateKey: account.privateKey
+    }
+   });
+  } catch (error) {
+   return Promise.reject(new Error(error.message));
+  }
+ }
+
+ static async getFee(body: any): Promise<{ statusCode: number; payload: any }> {
+  try {
+   const gasLimit = await web3.eth.estimateGas({
+    from: body.fromAddress,
+    to: body.toAddress,
+    value: body.value
+   });
+   const gasPrice = await web3.eth.getGasPrice();
+
+   return Promise.resolve({
+    statusCode: 200,
+    payload: {
+     gasLimit,
+     gasPrice
     }
    });
   } catch (error) {

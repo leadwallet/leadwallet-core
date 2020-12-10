@@ -886,8 +886,6 @@ export const sendToken = async (
 
   const bnbSentResponse = await BNB.sendToken(
    body.to,
-   body.gasPrice,
-   body.gasLimit,
    body.value,
    senderWallet.bnb.pk,
    body.nonce
