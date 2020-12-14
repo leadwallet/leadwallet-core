@@ -80,14 +80,14 @@ export class XLM {
  ): Promise<{ statusCode: number; payload: any }> {
   try {
    const pair = Stellar.Keypair.fromSecret(secret);
-   const destination = await xlm.loadAccount(to);
+   // const destination = await xlm.loadAccount(to);
    const source = await xlm.loadAccount(pair.publicKey());
    const txBuilder = new Stellar.TransactionBuilder(source, {
     fee: Stellar.BASE_FEE,
     networkPassphrase: Stellar.Networks[network]
    });
    const operation = Stellar.Operation.payment({
-    destination: destination.accountId(),
+    destination: to,
     asset: Stellar.Asset.native(),
     amount: amount.toString()
    });
