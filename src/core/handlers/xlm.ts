@@ -1,4 +1,5 @@
 import * as Stellar from "stellar-sdk";
+import randomString from "crypto-random-string";
 import api from "node-fetch";
 
 const environment = process.env.NODE_ENV;
@@ -92,6 +93,11 @@ export class XLM {
     amount: amount.toString()
    });
    const tx = txBuilder
+    .addMemo(
+     Stellar.Memo.text(
+      "Lead-Memo-" + Date.now() + "" + randomString({ length: 10 })
+     )
+    )
     .addOperation(operation)
     .setTimeout(60 * 20)
     .build();
