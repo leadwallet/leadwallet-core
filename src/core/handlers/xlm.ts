@@ -95,7 +95,7 @@ export class XLM {
    const tx = txBuilder
     .addMemo(
      Stellar.Memo.text(
-      "Lead-Memo-" + Date.now() + "" + randomString({ length: 10 })
+      "Lead-Memo-" + Date.now() + "-" + randomString({ length: 10 })
      )
     )
     .addOperation(operation)
