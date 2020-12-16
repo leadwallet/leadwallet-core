@@ -109,7 +109,7 @@ export class XTZ {
    return Promise.resolve({
     statusCode: 200,
     payload: {
-     hash: tx.operationGroupID
+     hash: tx.operationGroupID.replace('"', "")
     }
    });
   } catch (error) {
