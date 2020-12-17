@@ -23,7 +23,7 @@ export class WalletController {
     response
    });
   } catch (error) {
-   console.log(error);
+   console.log(JSON.stringify(error));
    res.status(error.code || 500).send(error.message);
   }
  }
