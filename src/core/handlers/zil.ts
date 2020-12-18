@@ -58,7 +58,12 @@ export class ZIL {
     payload: { balance }
    });
   } catch (error) {
-   return Promise.reject(new Error(error.message));
+   return Promise.resolve({
+    statusCode: 200,
+    payload: {
+     balance: 0
+    }
+   });
   }
  }
 

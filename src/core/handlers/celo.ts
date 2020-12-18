@@ -42,7 +42,12 @@ export class CELO {
     }
    });
   } catch (error) {
-   return Promise.reject(new Error(error.message));
+   return Promise.resolve({
+    statusCode: 200,
+    payload: {
+     balance: 0
+    }
+   });
   }
  }
 
@@ -60,7 +65,12 @@ export class CELO {
     }
    });
   } catch (error) {
-   return Promise.reject(new Error(error.message));
+   return Promise.resolve({
+    statusCode: 200,
+    payload: {
+     balance: 0
+    }
+   });
   }
  }
 
