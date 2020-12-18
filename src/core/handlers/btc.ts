@@ -60,7 +60,12 @@ export class BTC {
     }
    });
   } catch (error) {
-   return Promise.reject(new Error(error.message));
+   return Promise.resolve({
+    statusCode: 200,
+    payload: {
+     balance: 0
+    }
+   });
   }
  }
 
@@ -202,11 +207,11 @@ export class BTC {
    const txn = final.extractTransaction();
    const hex = txn.toHex();
 
-   console.log(
-    "tx inputs: " + JSON.stringify(txn.ins.map(i => i.hash.toString("hex")))
-   );
+   // console.log(
+   //  "tx inputs: " + JSON.stringify(txn.ins.map(i => i.hash.toString("hex")))
+   // );
 
-   console.log("Tx Hex: " + hex);
+   // console.log("Tx Hex: " + hex);
 
    const broadcastResponse = await rp.post(CRYPTOAPI + "/txs/send", {
     ...options,

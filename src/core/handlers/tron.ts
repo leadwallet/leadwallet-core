@@ -50,10 +50,12 @@ export class TRON {
     statusCode: 200
    });
   } catch (error) {
-   console.error(error);
+   // console.error(error);
    return Promise.resolve({
-    payload: error,
-    statusCode: 500
+    payload: {
+     balance: 0
+    },
+    statusCode: 200
    });
   }
  }

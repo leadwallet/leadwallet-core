@@ -35,13 +35,26 @@ export class LTC {
  static async getAddressDetails(
   address: string
  ): Promise<{ payload: any; statusCode: number }> {
-  const response = await rp.get(LTCROOT + "/address/" + address, {
-   ...options
-  });
-  return Promise.resolve({
-   statusCode: response.statusCode,
-   payload: response.body.payload || response.body.meta.error.message
-  });
+  try {
+   const response = await rp.get(LTCROOT + "/address/" + address, {
+    ...options
+   });
+
+   if (response.statusCode >= 400)
+    throw new Error(response.body.meta.error.message);
+
+   return Promise.resolve({
+    statusCode: 200,
+    payload: response.body.payload
+   });
+  } catch (error) {
+   return Promise.resolve({
+    statusCode: 200,
+    payload: {
+     balance: 0
+    }
+   });
+  }
  }
 
  static async sendToken(
@@ -49,51 +62,75 @@ export class LTC {
   outputs: { address: string; value: number }[],
   fee: { value: number }
  ): Promise<{ payload: any; statusCode: number }> {
-  const response = await rp.post(LTCROOT + "/txs/create", {
-   ...options,
-   body: {
-    inputs: inputs.map(i => ({
-     ...i,
-     value: parseFloat(Number(i.value).toFixed(8))
-    })),
-    outputs: outputs.map(o => ({
-     ...o,
-     value: parseFloat(Number(o.value).toFixed(8))
-    })),
-    fee
-   }
-  });
-  return Promise.resolve({
-   statusCode: response.statusCode,
-   payload: response.body.payload || response.body.meta.error.message
-  });
+  try {
+   const response = await rp.post(LTCROOT + "/txs/create", {
+    ...options,
+    body: {
+     inputs: inputs.map(i => ({
+      ...i,
+      value: parseFloat(Number(i.value).toFixed(8))
+     })),
+     outputs: outputs.map(o => ({
+      ...o,
+      value: parseFloat(Number(o.value).toFixed(8))
+     })),
+     fee
+    }
+   });
+
+   if (response.statusCode >= 400)
+    throw new Error(response.body.meta.error.message);
+
+   return Promise.resolve({
+    statusCode: 200,
+    payload: response.body.payload
+   });
+  } catch (error) {
+   return Promise.reject(new Error(error.message));
+  }
  }
 
  static async signTransaction(
   hex: string,
   wifs: Array<string>
  ): Promise<{ payload: any; statusCode: number }> {
-  const response = await rp.post(LTCROOT + "/txs/sign", {
-   ...options,
-   body: { hex, wifs }
-  });
-  return Promise.resolve({
-   statusCode: response.statusCode,
-   payload: response.body.payload || response.body.meta.error.message
-  });
+  try {
+   const response = await rp.post(LTCROOT + "/txs/sign", {
+    ...options,
+    body: { hex, wifs }
+   });
+
+   if (response.statusCode >= 400)
+    throw new Error(response.body.meta.error.message);
+
+   return Promise.resolve({
+    statusCode: 200,
+    payload: response.body.payload
+   });
+  } catch (error) {
+   return Promise.reject(new Error(error.message));
+  }
  }
 
  static async broadcastTransaction(
   hex: string
  ): Promise<{ payload: any; statusCode: number }> {
-  const response = await rp.post(LTCROOT + "/txs/send", {
-   ...options,
-   body: { hex }
-  });
-  return Promise.resolve({
-   statusCode: response.statusCode,
-   payload: response.body.payload
-  });
+  try {
+   const response = await rp.post(LTCROOT + "/txs/send", {
+    ...options,
+    body: { hex }
+   });
+
+   if (response.statusCode >= 400)
+    throw new Error(response.body.meta.error.message);
+
+   return Promise.resolve({
+    statusCode: 200,
+    payload: response.body.payload
+   });
+  } catch (error) {
+   return Promise.reject(new Error(error.message));
+  }
  }
 
  static async importWallet(

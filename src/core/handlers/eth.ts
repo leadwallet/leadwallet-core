@@ -116,7 +116,13 @@ export class ETH {
     }
    });
   } catch (error) {
-   return Promise.reject(new Error(error.message));
+   return Promise.resolve({
+    statusCode: 200,
+    payload: {
+     balance: 0,
+     tokens: []
+    }
+   });
   }
  }
 
@@ -146,11 +152,13 @@ export class ETH {
      hex: signedTx.rawTransaction
     }
    });
+
+   if (sendSignedTxResponse.statusCode >= 400)
+    throw new Error(sendSignedTxResponse.body.meta.error.message);
+
    return Promise.resolve({
     statusCode: sendSignedTxResponse.statusCode,
-    payload:
-     sendSignedTxResponse.body.payload ||
-     sendSignedTxResponse.body.meta.error.message
+    payload: sendSignedTxResponse.body.payload
    });
   } catch (error) {
    return Promise.reject(new Error(error.message));
@@ -166,35 +174,50 @@ export class ETH {
   gasPrice: number,
   gasLimit: number
  ): Promise<{ statusCode: number; payload: any }> {
-  const response = await rp.post(CRYPTOAPI + "/tokens/transfer", {
-   ...options,
-   body: {
-    fromAddress,
-    toAddress,
-    privateKey,
-    gasPrice,
-    gasLimit,
-    contract,
-    token
-   }
-  });
+  try {
+   const response = await rp.post(CRYPTOAPI + "/tokens/transfer", {
+    ...options,
+    body: {
+     fromAddress,
+     toAddress,
+     privateKey,
+     gasPrice,
+     gasLimit,
+     contract,
+     token
+    }
+   });
 
-  return Promise.resolve({
-   statusCode: response.statusCode,
-   payload: response.body.payload || response.body.meta.error.message
-  });
+   if (response.statusCode >= 400)
+    throw new Error(response.body.meta.error.message);
+
+   return Promise.resolve({
+    statusCode: 200,
+    payload: response.body.payload
+   });
+  } catch (error) {
+   return Promise.reject(new Error(error.message));
+  }
  }
 
  static async getERC20Tokens(
   address: string
  ): Promise<{ statusCode: number; payload: any }> {
-  const response = await rp.get(CRYPTOAPI + "/tokens/address/" + address, {
-   ...options
-  });
-  return Promise.resolve({
-   statusCode: response.statusCode,
-   payload: response.body.payload || response.body.meta.error.message
-  });
+  try {
+   const response = await rp.get(CRYPTOAPI + "/tokens/address/" + address, {
+    ...options
+   });
+
+   if (response.statusCode >= 400)
+    throw new Error(response.body.meta.error.message);
+
+   return Promise.resolve({
+    statusCode: 200,
+    payload: response.body.payload
+   });
+  } catch (error) {
+   return Promise.reject(new Error(error.message));
+  }
  }
 
  static async getTransactionDetails(
