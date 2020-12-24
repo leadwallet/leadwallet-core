@@ -7,7 +7,7 @@ export * from "./tron";
 export * from "./dash";
 // export * from "./xrp";
 export * from "./bnb";
-// export * from "./dot";
+export * from "./dot";
 export * from "./xtz";
 export * from "./xlm";
 export * from "./celo";

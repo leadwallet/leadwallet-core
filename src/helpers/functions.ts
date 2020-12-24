@@ -12,7 +12,7 @@ import {
  DASH,
  // XRP,
  BNB,
- // DOT,
+ DOT,
  XTZ,
  XLM,
  CELO,
@@ -65,7 +65,7 @@ export const createWallet = async (recoveryPhrase: Array<string>) => {
   TRON.generateAddress(),
   // XRP.generateAddress(),
   BNB.generateAddress(keyPair.privateKey),
-  // DOT.generateAddress(keyPair.publicKey, phrase.trim()),
+  DOT.generateAddress(keyPair.publicKey),
   XTZ.generateAddress(keyPair.privateKey),
   XLM.generateAddress(),
   CELO.createAddress(keyPair.privateKey),
@@ -82,7 +82,7 @@ export const createWallet = async (recoveryPhrase: Array<string>) => {
   tronAddressCreationResponse,
   // xrpAddressCreationResponse,
   bnbAddressCreationResponse,
-  // dotAddressCreationResponse,
+  dotAddressCreationResponse,
   xtzAddressCreationResponse,
   xlmAddressCreationResponse,
   celoAddressCreationResponse,
@@ -99,7 +99,7 @@ export const createWallet = async (recoveryPhrase: Array<string>) => {
   TRON.getAddressDetails(tronAddressCreationResponse.payload.base58),
   // XRP.getAddressDetails(xrpAddressCreationResponse.payload.address),
   BNB.getAddressDetails(bnbAddressCreationResponse.payload.address),
-  // DOT.getAddressDetails(dotAddressCreationResponse.payload.address),
+  DOT.getAddressDetails(dotAddressCreationResponse.payload.address),
   XTZ.getAddressDetails(xtzAddressCreationResponse.payload.address),
   XLM.getAddressDetails(xlmAddressCreationResponse.payload.address),
   CELO.getAddressDetails(celoAddressCreationResponse.payload.address),
@@ -116,7 +116,7 @@ export const createWallet = async (recoveryPhrase: Array<string>) => {
   tronAddressDetailsResponse,
   // xrpAddressDetailsResponse,
   bnbAddressDetailsResponse,
-  // dotAddressDetailsResponse,
+  dotAddressDetailsResponse,
   xtzAddressDetailsResponse,
   xlmAddressDetailsResponse,
   celoAddressDetailsResponse,
@@ -187,12 +187,11 @@ export const createWallet = async (recoveryPhrase: Array<string>) => {
    pk: bnbAddressCreationResponse.payload.privateKey,
    balance: bnbAddressDetailsResponse.payload.balance
   },
-  // dot: {
-  //  address: dotAddressCreationResponse.payload.address,
-  //  pk: dotAddressCreationResponse.payload.privateKey,
-  //  balance: dotAddressDetailsResponse.payload.balance,
-  //  password: dotAddressCreationResponse.payload.password
-  // },
+  dot: {
+   address: dotAddressCreationResponse.payload.address,
+   pk: dotAddressCreationResponse.payload.privateKey,
+   balance: dotAddressDetailsResponse.payload.balance
+  },
   xtz: {
    address: xtzAddressCreationResponse.payload.address,
    pk: xtzAddressCreationResponse.payload.privateKey,
@@ -246,7 +245,7 @@ export const getWallet = async (privateKey: string, publicKey: string) => {
 
 export const updateWallet = async (wallet: Wallet) => {
  // Remove NEAR from all wallets on update
- if (wallet.near) wallet.near = null;
+ // if (wallet.near) wallet.near = null;
 
  // Get all address details
  const allAddressDetails = [
@@ -260,7 +259,7 @@ export const updateWallet = async (wallet: Wallet) => {
   wallet.dash ? DASH.getAddressDetails(wallet.dash.address) : null,
   // wallet.xrp ? XRP.getAddressDetails(wallet.xrp.address) : null,
   wallet.bnb ? BNB.getAddressDetails(wallet.bnb.address) : null,
-  // wallet.dot ? DOT.getAddressDetails(wallet.dot.address) : null,
+  wallet.dot ? DOT.getAddressDetails(wallet.dot.address) : null,
   wallet.xtz ? XTZ.getAddressDetails(wallet.xtz.address) : null,
   wallet.xlm ? XLM.getAddressDetails(wallet.xlm.address) : null,
   wallet.celo ? CELO.getAddressDetails(wallet.celo.address) : null,
@@ -277,7 +276,7 @@ export const updateWallet = async (wallet: Wallet) => {
   dashDetailsResponse,
   // xrpDetailsResponse,
   bnbDetailsResponse,
-  // dotDetailsResponse,
+  dotDetailsResponse,
   xtzDetailsResponse,
   xlmDetailsResponse,
   celoDetailsResponse,
@@ -303,6 +302,7 @@ export const updateWallet = async (wallet: Wallet) => {
   "trx",
   "dash",
   "bnb",
+  "dot",
   "xtz",
   "xlm",
   "celo",
@@ -316,7 +316,7 @@ export const updateWallet = async (wallet: Wallet) => {
   trx: parseFloat(tronDetailsResponse.payload.balance || "0"),
   dash: parseFloat(dashDetailsResponse.payload.balance || "0"),
   bnb: parseFloat(bnbDetailsResponse?.payload.balance || "0"),
-  // dot: parseFloat(dotDetailsResponse?.payload.balance || "0"),
+  dot: parseFloat(dotDetailsResponse?.payload.balance || "0"),
   xtz: parseFloat(xtzDetailsResponse?.payload.balance || "0"),
   xlm: parseFloat(xlmDetailsResponse?.payload.balance || "0"),
   celo: parseFloat(celoDetailsResponse?.payload.balance || "0"),
@@ -358,6 +358,7 @@ export const importWallet = async (wallet: Wallet) => {
   "trx",
   "dash",
   "bnb",
+  "dot",
   "xtz",
   "xlm",
   "celo",
@@ -372,6 +373,7 @@ export const importWallet = async (wallet: Wallet) => {
   DASH.createAddress(),
   TRON.generateAddress(),
   BNB.generateAddress(wallet.privateKey),
+  DOT.generateAddress(wallet.publicKey),
   XTZ.generateAddress(wallet.privateKey),
   XLM.generateAddress(),
   CELO.createAddress(wallet.privateKey),
@@ -387,6 +389,7 @@ export const importWallet = async (wallet: Wallet) => {
   dashAddressCreationResponse,
   tronAddressCreationResponse,
   bnbAddressCreationResponse,
+  dotAddressCreationResponse,
   xtzAddressCreationResponse,
   xlmAddressCreationResponse,
   celoAddressCreationResponse,
@@ -402,6 +405,7 @@ export const importWallet = async (wallet: Wallet) => {
   DASH.getAddressDetails(dashAddressCreationResponse.payload.address),
   TRON.getAddressDetails(tronAddressCreationResponse.payload.base58),
   BNB.getAddressDetails(bnbAddressCreationResponse.payload.address),
+  DOT.getAddressDetails(dotAddressCreationResponse.payload.address),
   XTZ.getAddressDetails(xtzAddressCreationResponse.payload.address),
   XLM.getAddressDetails(xlmAddressCreationResponse.payload.address),
   CELO.getAddressDetails(celoAddressCreationResponse.payload.address),
@@ -417,6 +421,7 @@ export const importWallet = async (wallet: Wallet) => {
   dashAddressDetailsResponse,
   tronAddressDetailsResponse,
   bnbAddressDetailsResponse,
+  dotAddressDetailsResponse,
   xtzAddressDetailsResponse,
   xlmAddressDetailsResponse,
   celoAddressDetailsResponse,
@@ -457,11 +462,15 @@ export const importWallet = async (wallet: Wallet) => {
    wif: dashAddressCreationResponse.payload.wif,
    balance: parseFloat(dashAddressDetailsResponse.payload.balance)
   },
-
   bnb: {
    address: bnbAddressCreationResponse.payload.address,
    pk: bnbAddressCreationResponse.payload.privateKey,
    balance: bnbAddressDetailsResponse.payload.balance
+  },
+  dot: {
+   address: dotAddressCreationResponse.payload.address,
+   pk: dotAddressCreationResponse.payload.privateKey,
+   balance: dotAddressDetailsResponse.payload.balance
   },
   xtz: {
    address: xtzAddressCreationResponse.payload.address,
@@ -892,6 +901,22 @@ export const sendToken = async (
   );
 
   txHash = bnbSentResponse.payload.hash;
+ } else if (type === "dot") {
+  balance = body.value;
+
+  if (senderWallet.balance < balance)
+   throw new CustomError(400, "Insufficient wallet balance");
+
+  if (senderWallet.dot.balance < balance)
+   throw new CustomError(400, "Insufficient DOT balance");
+
+  const dotSentResponse = await DOT.sendToken(
+   senderWallet.dot.pk,
+   body.to,
+   body.value
+  );
+
+  txHash = dotSentResponse.payload.hash;
  } else if (type === "xlm") {
   balance = body.value;
 
@@ -1104,6 +1129,13 @@ export const getTransactions = async (ticker: string, address: string) => {
   }));
  } else if (ticker.toLowerCase() === "zil") {
   const response = await ZIL.getTransactions(address);
+
+  payload = response.payload.map((tx: any) => ({
+   ...tx,
+   view_in_explorer: getExplorerLink(ticker, tx.hash)
+  }));
+ } else if (ticker.toLowerCase() === "dot") {
+  const response = await DOT.getTransactions(address);
 
   payload = response.payload.map((tx: any) => ({
    ...tx,

@@ -621,6 +621,7 @@ export const CURRENT_COINS: Array<string> = [
  "doge",
  "trx",
  "bnb",
+ "dot",
  "xtz",
  "xlm",
  "celo",
@@ -792,6 +793,12 @@ export function getExplorerLink(type: string, txHash: string): string {
    production: "https://bscscan.com/tx/" + txHash,
    test: "https://testnet.bscscan.com/tx/" + txHash,
    staging: "https://testnet.bscscan.com/tx/" + txHash
+  },
+  dot: {
+   development: "https://westend.subscan.io/extrinsic/" + txHash,
+   production: "https://polkadot.subscan.io/extrinsic/" + txHash,
+   test: "https://westend.subscan.io/extrinsic/" + txHash,
+   staging: "https://westend.subscan.io/extrinsic/" + txHash
   },
   // near: {
   //  development: "https://explorer.testnet.near.org/transactions/" + txHash,

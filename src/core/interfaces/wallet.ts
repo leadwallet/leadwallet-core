@@ -51,12 +51,11 @@ export interface Wallet {
   pk?: string;
   balance: number;
  };
- // dot?: {
- //  address: string;
- //  pk: string;
- //  balance: number;
- //  password?: string;
- // };
+ dot?: {
+  address: string;
+  pk: string;
+  balance: number;
+ };
  // one?: {
  //  address: string;
  //  balance: number;
