@@ -1343,6 +1343,7 @@ export const importByPrivateKey = async (wallet: Wallet) => {
   "trx",
   "dash",
   "bnb",
+  "dot",
   "xtz",
   "xlm",
   "celo",
@@ -1359,6 +1360,7 @@ export const importByPrivateKey = async (wallet: Wallet) => {
   DASH.createAddress(),
   TRON.generateAddress(),
   BNB.generateAddress(wallet.privateKey),
+  DOT.generateAddress(wallet.publicKey),
   XTZ.generateAddress(wallet.privateKey),
   XLM.generateAddress(),
   CELO.createAddress(wallet.privateKey),
@@ -1374,6 +1376,7 @@ export const importByPrivateKey = async (wallet: Wallet) => {
   dashAddressCreationResponse,
   tronAddressCreationResponse,
   bnbAddressCreationResponse,
+  dotAddressCreationResponse,
   xtzAddressCreationResponse,
   xlmAddressCreationResponse,
   celoAddressCreationResponse,
@@ -1389,6 +1392,7 @@ export const importByPrivateKey = async (wallet: Wallet) => {
   DASH.getAddressDetails(dashAddressCreationResponse.payload.address),
   TRON.getAddressDetails(tronAddressCreationResponse.payload.base58),
   BNB.getAddressDetails(bnbAddressCreationResponse.payload.address),
+  DOT.getAddressDetails(dotAddressCreationResponse.payload.address),
   XTZ.getAddressDetails(xtzAddressCreationResponse.payload.address),
   XLM.getAddressDetails(xlmAddressCreationResponse.payload.address),
   CELO.getAddressDetails(celoAddressCreationResponse.payload.address),
@@ -1404,6 +1408,7 @@ export const importByPrivateKey = async (wallet: Wallet) => {
   dashAddressDetailsResponse,
   tronAddressDetailsResponse,
   bnbAddressDetailsResponse,
+  dotAddressDetailsResponse,
   xtzAddressDetailsResponse,
   xlmAddressDetailsResponse,
   celoAddressDetailsResponse,
@@ -1448,6 +1453,11 @@ export const importByPrivateKey = async (wallet: Wallet) => {
    address: bnbAddressCreationResponse.payload.address,
    pk: bnbAddressCreationResponse.payload.privateKey,
    balance: bnbAddressDetailsResponse.payload.balance
+  },
+  dot: {
+   address: dotAddressCreationResponse.payload.address,
+   pk: dotAddressCreationResponse.payload.privateKey,
+   balance: dotAddressDetailsResponse.payload.balance
   },
   xtz: {
    address: xtzAddressCreationResponse.payload.address,
