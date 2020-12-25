@@ -14,3 +14,4 @@ export * from "./celo";
 // export * from "./near";
 export * from "./zil";
 // export * from "./hmy";
+export * from "./ksm";
