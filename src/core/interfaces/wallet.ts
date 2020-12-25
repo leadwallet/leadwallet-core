@@ -86,4 +86,9 @@ export interface Wallet {
   pk: string;
   balance: number;
  };
+ ksm?: {
+  address: string;
+  pk: string;
+  balance: number;
+ };
 }
