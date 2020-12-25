@@ -950,13 +950,13 @@ export const sendToken = async (
   if (senderWallet.ksm.balance < balance)
    throw new CustomError(400, "Insufficient KSM balance");
 
-   const ksmSentResponse = await KSM.sendToken(
-    senderWallet.ksm.pk,
-    body.to,
-    body.value
-   );
- 
-   txHash = ksmSentResponse.payload.hash;
+  const ksmSentResponse = await KSM.sendToken(
+   senderWallet.ksm.pk,
+   body.to,
+   body.value
+  );
+
+  txHash = ksmSentResponse.payload.hash;
  } else if (type === "xlm") {
   balance = body.value;
 
