@@ -625,7 +625,8 @@ export const CURRENT_COINS: Array<string> = [
  "xtz",
  "xlm",
  "celo",
- "zil"
+ "zil",
+ "ksm"
 ];
 export const CRYPTO_API_COINS: Array<string> = [
  "btc",
@@ -817,6 +818,12 @@ export function getExplorerLink(type: string, txHash: string): string {
    production: "https://tezblock.io/transaction/" + txHash,
    test: "https://tezblock.io/transaction/" + txHash,
    staging: "https://tezblock.io/transaction/" + txHash
+  },
+  ksm: {
+   development: "https://westend.subscan.io/extrinsic/" + txHash,
+   production: "https://kusama.subscan.io/extrinsic/" + txHash,
+   test: "https://westend.subscan.io/extrinsic/" + txHash,
+   staging: "https://westend.subscan.io/extrinsic/" + txHash
   }
  };
 
