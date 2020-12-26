@@ -62,7 +62,7 @@ export class DOT {
    const account = await api.query.system.account(address);
    const { data: balance } = account;
    // console.log("dots: " + balance.free.toNumber());
-   await api.disconnect();
+   // await api.disconnect();
    return Promise.resolve({
     statusCode: 200,
     payload: {
@@ -86,7 +86,7 @@ export class DOT {
    const txHash = await api.tx.balances
     .transfer(to, value * 10 ** 12)
     .signAndSend(pair);
-   await api.disconnect();
+   // await api.disconnect();
    return Promise.resolve({
     statusCode: 200,
     payload: {
