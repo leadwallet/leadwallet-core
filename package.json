@@ -71,7 +71,7 @@
     "build": "tsc -p .",
     "clean:build": "npm run clean-dir && npm run build",
     "dev": "npm run clean:build && cross-env NODE_ENV=development node build/index.js",
-    "prod": "export NODE_OPTIONS=--max_old_space_size=2042 && npm run clean:build && cross-env NODE_ENV=production node build/index.js",
+    "prod": "npm run clean:build && cross-env NODE_ENV=production node build/index.js",
     "stage": "npm run clean:build && cross-env NODE_ENV=staging node build/index.js",
     "clean:build:test": "npm run clean:build && cross-env NODE_ENV=test npm run test",
     "format": "prettier --config .prettierrc.json src/**/*.ts --write"
