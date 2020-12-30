@@ -24,9 +24,7 @@ export class WalletModel {
 
  async create(wallet: Wallet, privateKey: string): Promise<Wallet> {
   const encryptedWallet = Tokenizers.encryptWallet(wallet);
-  const walletModel:
-   | (mongoose.Document & { encryptedWallet: string })
-   | any = await this.model.create({
+  const walletModel: any = await this.model.create({
    encryptedPrivateKey: Tokenizers.encryptPrivateKey(
     privateKey,
     wallet.publicKey
