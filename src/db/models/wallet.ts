@@ -3,7 +3,7 @@ import { Wallet } from "../../core/interfaces";
 import { Tokenizers } from "../../core/utils";
 
 export class WalletModel {
- model: mongoose.Model<mongoose.Document, {}>;
+ model: mongoose.Model<mongoose.Document>;
 
  constructor() {
   this.define();
