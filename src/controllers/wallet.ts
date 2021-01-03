@@ -24,7 +24,7 @@ export class WalletController {
    });
   } catch (error) {
    console.log(JSON.stringify(error));
-   res.status(error.code || 500).send(error.message);
+   res.status(500).send(error.message);
   }
  }
 
