@@ -32,7 +32,6 @@ import { WalletAdaptor } from "../core/utils/wallet_adaptor";
 import { CurrencyConverter } from "../core/utils/currency_converter";
 import { TransactionFeeService } from "../core/handlers/transaction_fee_service";
 import { ERCToken } from "../core/interfaces/token";
-import { sendMail } from "./mail";
 
 const { DBWallet } = db;
 const errorCodes = {
@@ -569,7 +568,6 @@ export const sendToken = async (
  let balance: number = 0;
  let txHash: string = "";
  let txId: string = "";
- let recipient: string = "";
  if (type === "btc") {
   // Increment balance for every input
   for (const i of body.inputs) balance = balance + i.value;
@@ -597,7 +595,6 @@ export const sendToken = async (
   senderWallet.btc.balance = senderWallet.btc.balance - balance;
   txHash = btcSentResponse.payload.txId;
   txId = btcSentResponse.payload.txId;
-  recipient = body.outputs[0].address;
  } else if (type === "eth") {
   // Increment balance
   balance = balance + body.value;
@@ -643,7 +640,6 @@ export const sendToken = async (
   // Update sender's wallet eth balance
   senderWallet.eth.balance = senderWallet.eth.balance - balance;
   txHash = ethSentResponse.payload.hex;
-  recipient = body.toAddress;
  } else if (type === "doge") {
   // Increment balance
   for (const i of body.inputs) balance = balance + i.value;
@@ -718,7 +714,6 @@ export const sendToken = async (
   // Update sender's wallet doge balance
   senderWallet.doge.balance = senderWallet.doge.balance - balance;
   txHash = broadcastTransactionResponse.payload.txid;
-  recipient = body.outputs[0].address;
  } else if (type === "ltc") {
   // Increment balance
   for (const i of body.inputs) balance = balance + i.value;
@@ -795,7 +790,6 @@ export const sendToken = async (
   // Update sender wallet's LTC balance
   senderWallet.ltc.balance = senderWallet.ltc.balance - balance;
   txHash = broadcastTransactionResponse.payload.txid;
-  recipient = body.outputs[0].address;
  } else if (type === "trx") {
   balance = balance + body.amount;
 
@@ -853,7 +847,6 @@ export const sendToken = async (
   // Update sender's wallet tron balance
   senderWallet.trx.balance = senderWallet.trx.balance - balance;
   txHash = signTransactionResponse.payload.transaction.txID;
-  recipient = body.to;
  } else if (type === "dash") {
   // Increment balance
   for (const i of body.inputs) balance = balance + i.value;
@@ -928,7 +921,6 @@ export const sendToken = async (
   // Update sender wallet's LTC balance
   senderWallet.dash.balance = senderWallet.dash.balance - balance;
   txHash = broadcastTransactionResponse.payload.txid;
-  recipient = body.outputs[0].address;
  } else if (type === "bnb") {
   balance = body.value;
 
@@ -946,7 +938,6 @@ export const sendToken = async (
   );
 
   txHash = bnbSentResponse.payload.hash;
-  recipient = body.to;
  } else if (type === "dot") {
   balance = body.value;
 
@@ -979,7 +970,6 @@ export const sendToken = async (
   );
 
   txHash = ksmSentResponse.payload.hash;
-  recipient = body.to;
  } else if (type === "xlm") {
   balance = body.value;
 
@@ -995,7 +985,6 @@ export const sendToken = async (
    body.value
   );
   txHash = xlmSentResponse.payload.hash;
-  recipient = body.to;
  } else if (type === "celo") {
   balance = body.value;
 
@@ -1011,7 +1000,6 @@ export const sendToken = async (
    body.value
   );
   txHash = celoSentResponse.payload.hash;
-  recipient = body.to;
  } else if (type === "xtz") {
   balance = body.value;
 
@@ -1030,7 +1018,6 @@ export const sendToken = async (
    0.02 * body.value
   );
   txHash = xtzSentResponse.payload.hash;
-  recipient = body.to;
  } else if (type === "zil") {
   balance = body.value;
 
@@ -1046,7 +1033,6 @@ export const sendToken = async (
    body.value
   );
   txHash = zilSentResponse.payload.hash;
-  recipient = body.to;
  } else {
   throw new CustomError(400, type + " not available yet.");
  }
@@ -1056,16 +1042,6 @@ export const sendToken = async (
 
  // Update sender's wallet
  const updatedSenderWallet = await DBWallet.updateWallet(pk, senderWallet);
-
- // Send mail
- const mail = await sendMail("analytics", {
-  coin: type,
-  hash: txHash,
-  sender: senderWallet[type].address,
-  recipient
- });
-
- console.log(mail);
 
  // API response
  return Promise.resolve({
