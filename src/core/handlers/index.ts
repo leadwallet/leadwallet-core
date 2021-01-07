@@ -15,3 +15,4 @@ export * from "./celo";
 export * from "./zil";
 // export * from "./hmy";
 export * from "./ksm";
+export * from "./xem";

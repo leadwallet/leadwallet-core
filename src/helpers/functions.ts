@@ -18,7 +18,8 @@ import {
  CELO,
  // NEAR,
  ZIL,
- KSM
+ KSM,
+ XEM
 } from "../core/handlers";
 import { TransactionService } from "../core/handlers/transaction_handler";
 import {
@@ -72,7 +73,8 @@ export const createWallet = async (recoveryPhrase: Array<string>) => {
   CELO.createAddress(keyPair.privateKey),
   // NEAR.createAddress(),
   ZIL.generateAddress(),
-  KSM.generateAddress(keyPair.publicKey)
+  KSM.generateAddress(keyPair.publicKey),
+  XEM.generateAddress()
  ];
 
  const [
@@ -90,7 +92,8 @@ export const createWallet = async (recoveryPhrase: Array<string>) => {
   celoAddressCreationResponse,
   // nearAddressCreationResponse,
   zilAddressCreationResponse,
-  ksmAddressCreationResponse
+  ksmAddressCreationResponse,
+  xemAddressCreationResponse
  ] = await Promise.all(allPromises);
 
  const allDetailsPromises = [
@@ -108,7 +111,8 @@ export const createWallet = async (recoveryPhrase: Array<string>) => {
   CELO.getAddressDetails(celoAddressCreationResponse.payload.address),
   // NEAR.getAddressDetails(nearAddressCreationResponse.payload.address),
   ZIL.getAddressDetails(zilAddressCreationResponse.payload.address),
-  KSM.getAddressDetails(ksmAddressCreationResponse.payload.address)
+  KSM.getAddressDetails(ksmAddressCreationResponse.payload.address),
+  XEM.getAddressDetails(xemAddressCreationResponse.payload.address)
  ];
 
  const [
@@ -126,7 +130,8 @@ export const createWallet = async (recoveryPhrase: Array<string>) => {
   celoAddressDetailsResponse,
   // nearAddressDetailsResponse,
   zilAddressDetailsResponse,
-  ksmAddressDetailsResponse
+  ksmAddressDetailsResponse,
+  xemAddressDetailsResponse
  ] = await Promise.all(allDetailsPromises);
 
  console.log("Got all address details");
@@ -144,9 +149,12 @@ export const createWallet = async (recoveryPhrase: Array<string>) => {
    parseFloat(dashAddressDetailsResponse.payload.balance) +
    // xrpAddressDetailsResponse.payload.balance +
    parseFloat(bnbAddressDetailsResponse.payload.balance) +
-   // dotAddressDetailsResponse.payload.balance +
+   dotAddressDetailsResponse.payload.balance +
    xtzAddressDetailsResponse.payload.balance +
-   xlmAddressDetailsResponse.payload.balance,
+   xlmAddressDetailsResponse.payload.balance +
+   celoAddressDetailsResponse.payload.balance +
+   ksmAddressDetailsResponse.payload.balance +
+   xemAddressDetailsResponse.payload.balance,
   // nearAddressDetailsResponse.payload.balance,
   // hmyAddressCreationResponse.payload.balance
   hash: Tokenizers.hash(keyPair.publicKey + keyPair.privateKey),
@@ -227,6 +235,11 @@ export const createWallet = async (recoveryPhrase: Array<string>) => {
    address: ksmAddressCreationResponse.payload.address,
    pk: ksmAddressCreationResponse.payload.privateKey,
    balance: ksmAddressDetailsResponse.payload.balance
+  },
+  xem: {
+   address: xemAddressCreationResponse.payload.address,
+   pk: xemAddressCreationResponse.payload.privateKey,
+   balance: xemAddressDetailsResponse.payload.balance
   }
   // one: {
   //  address: hmyAddressCreationResponse.payload.address,

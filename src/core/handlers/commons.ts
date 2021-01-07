@@ -626,7 +626,8 @@ export const CURRENT_COINS: Array<string> = [
  "xlm",
  "celo",
  "zil",
- "ksm"
+ "ksm",
+ "xem"
 ];
 export const CRYPTO_API_COINS: Array<string> = [
  "btc",
