@@ -18,7 +18,8 @@ import {
  CELO,
  // NEAR,
  ZIL,
- KSM
+ KSM,
+ // XEM
 } from "../core/handlers";
 import { TransactionService } from "../core/handlers/transaction_handler";
 import {
@@ -31,7 +32,6 @@ import { WalletAdaptor } from "../core/utils/wallet_adaptor";
 import { CurrencyConverter } from "../core/utils/currency_converter";
 import { TransactionFeeService } from "../core/handlers/transaction_fee_service";
 import { ERCToken } from "../core/interfaces/token";
-import { sendMail } from "./mail";
 
 const { DBWallet } = db;
 const errorCodes = {
@@ -73,7 +73,8 @@ export const createWallet = async (recoveryPhrase: Array<string>) => {
   CELO.createAddress(keyPair.privateKey),
   // NEAR.createAddress(),
   ZIL.generateAddress(),
-  KSM.generateAddress(keyPair.publicKey)
+  KSM.generateAddress(keyPair.publicKey),
+  // XEM.generateAddress()
  ];
 
  const [
@@ -91,7 +92,8 @@ export const createWallet = async (recoveryPhrase: Array<string>) => {
   celoAddressCreationResponse,
   // nearAddressCreationResponse,
   zilAddressCreationResponse,
-  ksmAddressCreationResponse
+  ksmAddressCreationResponse,
+  // xemAddressCreationResponse
  ] = await Promise.all(allPromises);
 
  const allDetailsPromises = [
@@ -109,7 +111,8 @@ export const createWallet = async (recoveryPhrase: Array<string>) => {
   CELO.getAddressDetails(celoAddressCreationResponse.payload.address),
   // NEAR.getAddressDetails(nearAddressCreationResponse.payload.address),
   ZIL.getAddressDetails(zilAddressCreationResponse.payload.address),
-  KSM.getAddressDetails(ksmAddressCreationResponse.payload.address)
+  KSM.getAddressDetails(ksmAddressCreationResponse.payload.address),
+  // XEM.getAddressDetails(xemAddressCreationResponse.payload.address)
  ];
 
  const [
@@ -127,7 +130,8 @@ export const createWallet = async (recoveryPhrase: Array<string>) => {
   celoAddressDetailsResponse,
   // nearAddressDetailsResponse,
   zilAddressDetailsResponse,
-  ksmAddressDetailsResponse
+  ksmAddressDetailsResponse,
+  // xemAddressDetailsResponse
  ] = await Promise.all(allDetailsPromises);
 
  console.log("Got all address details");
@@ -145,9 +149,12 @@ export const createWallet = async (recoveryPhrase: Array<string>) => {
    parseFloat(dashAddressDetailsResponse.payload.balance) +
    // xrpAddressDetailsResponse.payload.balance +
    parseFloat(bnbAddressDetailsResponse.payload.balance) +
-   // dotAddressDetailsResponse.payload.balance +
+   dotAddressDetailsResponse.payload.balance +
    xtzAddressDetailsResponse.payload.balance +
-   xlmAddressDetailsResponse.payload.balance,
+   xlmAddressDetailsResponse.payload.balance +
+   celoAddressDetailsResponse.payload.balance +
+   ksmAddressDetailsResponse.payload.balance,
+   // xemAddressDetailsResponse.payload.balance,
   // nearAddressDetailsResponse.payload.balance,
   // hmyAddressCreationResponse.payload.balance
   hash: Tokenizers.hash(keyPair.publicKey + keyPair.privateKey),
@@ -228,7 +235,12 @@ export const createWallet = async (recoveryPhrase: Array<string>) => {
    address: ksmAddressCreationResponse.payload.address,
    pk: ksmAddressCreationResponse.payload.privateKey,
    balance: ksmAddressDetailsResponse.payload.balance
-  }
+  },
+  // xem: {
+  //  address: xemAddressCreationResponse.payload.address,
+  //  pk: xemAddressCreationResponse.payload.privateKey,
+  //  balance: xemAddressDetailsResponse.payload.balance
+  // }
   // one: {
   //  address: hmyAddressCreationResponse.payload.address,
   //  balance: hmyAddressCreationResponse.payload.balance
@@ -556,7 +568,6 @@ export const sendToken = async (
  let balance: number = 0;
  let txHash: string = "";
  let txId: string = "";
- let recipient: string = "";
  if (type === "btc") {
   // Increment balance for every input
   for (const i of body.inputs) balance = balance + i.value;
@@ -584,7 +595,6 @@ export const sendToken = async (
   senderWallet.btc.balance = senderWallet.btc.balance - balance;
   txHash = btcSentResponse.payload.txId;
   txId = btcSentResponse.payload.txId;
-  recipient = body.outputs[0].address;
  } else if (type === "eth") {
   // Increment balance
   balance = balance + body.value;
@@ -630,7 +640,6 @@ export const sendToken = async (
   // Update sender's wallet eth balance
   senderWallet.eth.balance = senderWallet.eth.balance - balance;
   txHash = ethSentResponse.payload.hex;
-  recipient = body.toAddress;
  } else if (type === "doge") {
   // Increment balance
   for (const i of body.inputs) balance = balance + i.value;
@@ -705,7 +714,6 @@ export const sendToken = async (
   // Update sender's wallet doge balance
   senderWallet.doge.balance = senderWallet.doge.balance - balance;
   txHash = broadcastTransactionResponse.payload.txid;
-  recipient = body.outputs[0].address;
  } else if (type === "ltc") {
   // Increment balance
   for (const i of body.inputs) balance = balance + i.value;
@@ -782,7 +790,6 @@ export const sendToken = async (
   // Update sender wallet's LTC balance
   senderWallet.ltc.balance = senderWallet.ltc.balance - balance;
   txHash = broadcastTransactionResponse.payload.txid;
-  recipient = body.outputs[0].address;
  } else if (type === "trx") {
   balance = balance + body.amount;
 
@@ -840,7 +847,6 @@ export const sendToken = async (
   // Update sender's wallet tron balance
   senderWallet.trx.balance = senderWallet.trx.balance - balance;
   txHash = signTransactionResponse.payload.transaction.txID;
-  recipient = body.to;
  } else if (type === "dash") {
   // Increment balance
   for (const i of body.inputs) balance = balance + i.value;
@@ -915,7 +921,6 @@ export const sendToken = async (
   // Update sender wallet's LTC balance
   senderWallet.dash.balance = senderWallet.dash.balance - balance;
   txHash = broadcastTransactionResponse.payload.txid;
-  recipient = body.outputs[0].address;
  } else if (type === "bnb") {
   balance = body.value;
 
@@ -933,7 +938,6 @@ export const sendToken = async (
   );
 
   txHash = bnbSentResponse.payload.hash;
-  recipient = body.to;
  } else if (type === "dot") {
   balance = body.value;
 
@@ -966,7 +970,6 @@ export const sendToken = async (
   );
 
   txHash = ksmSentResponse.payload.hash;
-  recipient = body.to;
  } else if (type === "xlm") {
   balance = body.value;
 
@@ -982,7 +985,6 @@ export const sendToken = async (
    body.value
   );
   txHash = xlmSentResponse.payload.hash;
-  recipient = body.to;
  } else if (type === "celo") {
   balance = body.value;
 
@@ -998,7 +1000,6 @@ export const sendToken = async (
    body.value
   );
   txHash = celoSentResponse.payload.hash;
-  recipient = body.to;
  } else if (type === "xtz") {
   balance = body.value;
 
@@ -1017,7 +1018,6 @@ export const sendToken = async (
    0.02 * body.value
   );
   txHash = xtzSentResponse.payload.hash;
-  recipient = body.to;
  } else if (type === "zil") {
   balance = body.value;
 
@@ -1033,7 +1033,6 @@ export const sendToken = async (
    body.value
   );
   txHash = zilSentResponse.payload.hash;
-  recipient = body.to;
  } else {
   throw new CustomError(400, type + " not available yet.");
  }
@@ -1043,16 +1042,6 @@ export const sendToken = async (
 
  // Update sender's wallet
  const updatedSenderWallet = await DBWallet.updateWallet(pk, senderWallet);
-
- // Send mail
- const mail = await sendMail("analytics", {
-  coin: type,
-  hash: txHash,
-  sender: senderWallet[type].address,
-  recipient
- });
-
- console.log(mail);
 
  // API response
  return Promise.resolve({
