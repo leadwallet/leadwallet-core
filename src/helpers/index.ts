@@ -1,2 +1,2 @@
 export * from "./functions";
-export * from "./mail";
+// export * from "./mail";

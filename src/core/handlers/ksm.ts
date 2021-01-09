@@ -1,6 +1,10 @@
 import { ApiPromise, Keyring, WsProvider } from "@polkadot/api";
 import { u8aToHex } from "@polkadot/util";
-import { mnemonicGenerate, mnemonicToMiniSecret, cryptoWaitReady } from "@polkadot/util-crypto";
+import {
+ mnemonicGenerate,
+ mnemonicToMiniSecret,
+ cryptoWaitReady
+} from "@polkadot/util-crypto";
 import rp from "request-promise";
 // import cryptoRandom from "crypto-random-string";
 

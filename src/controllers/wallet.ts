@@ -24,12 +24,12 @@ export class WalletController {
    });
   } catch (error) {
    // console.log(JSON.stringify(error));
-   await helpers.sendMail("err", {
-    aspect: "Core",
-    feature: "createWallet()",
-    endpoint: req.path,
-    exact: error.message
-   });
+   // await helpers.sendMail("err", {
+   //  aspect: "Core",
+   //  feature: "createWallet()",
+   //  endpoint: req.path,
+   //  exact: error.message
+   // });
    res.status(500).send(error.message);
   }
  }
@@ -51,12 +51,12 @@ export class WalletController {
     response
    });
   } catch (error) {
-   await helpers.sendMail("err", {
-    aspect: "Core",
-    feature: "getWallet()",
-    endpoint: req.path,
-    exact: error.message
-   });
+   // await helpers.sendMail("err", {
+   //  aspect: "Core",
+   //  feature: "getWallet()",
+   //  endpoint: req.path,
+   //  exact: error.message
+   // });
    res.status(error.code || 500).send(error.message);
   }
  }
@@ -78,12 +78,12 @@ export class WalletController {
    });
   } catch (error) {
    // console.log(error);
-   await helpers.sendMail("err", {
-    aspect: "Core",
-    feature: "updateWallet()",
-    endpoint: req.path,
-    exact: error.message
-   });
+   // await helpers.sendMail("err", {
+   //  aspect: "Core",
+   //  feature: "updateWallet()",
+   //  endpoint: req.path,
+   //  exact: error.message
+   // });
    res.status(error.code || 500).send(error.message);
   }
  }
@@ -203,12 +203,12 @@ export class WalletController {
     response
    });
   } catch (error) {
-   await helpers.sendMail("err", {
-    aspect: "Core",
-    feature: "importWallet()",
-    endpoint: req.path,
-    exact: error.message
-   });
+   // await helpers.sendMail("err", {
+   //  aspect: "Core",
+   //  feature: "importWallet()",
+   //  endpoint: req.path,
+   //  exact: error.message
+   // });
    res.status(500).send(error.message);
   }
  }
@@ -241,12 +241,12 @@ export class WalletController {
    });
   } catch (error) {
    // console.log(error);
-   await helpers.sendMail("err", {
-    aspect: "Core",
-    feature: "sendToken()",
-    endpoint: req.path,
-    exact: error.message
-   });
+   // await helpers.sendMail("err", {
+   //  aspect: "Core",
+   //  feature: "sendToken()",
+   //  endpoint: req.path,
+   //  exact: error.message
+   // });
    res.status(error.code || 500).send(error.message);
   }
  }
@@ -266,12 +266,12 @@ export class WalletController {
     response
    });
   } catch (error) {
-   await helpers.sendMail("err", {
-    aspect: "Core",
-    feature: "getTransactions()",
-    endpoint: req.path,
-    exact: error.message
-   });
+   // await helpers.sendMail("err", {
+   //  aspect: "Core",
+   //  feature: "getTransactions()",
+   //  endpoint: req.path,
+   //  exact: error.message
+   // });
    res.status(error.code || 500).send(error.message);
   }
  }
@@ -288,12 +288,12 @@ export class WalletController {
     response
    });
   } catch (error) {
-   await helpers.sendMail("err", {
-    aspect: "Core",
-    feature: "refreshPrices()",
-    endpoint: req.path,
-    exact: error.message
-   });
+   // await helpers.sendMail("err", {
+   //  aspect: "Core",
+   //  feature: "refreshPrices()",
+   //  endpoint: req.path,
+   //  exact: error.message
+   // });
    res.status(error.code || 500).send(error.message);
   }
  }
@@ -310,12 +310,12 @@ export class WalletController {
     response
    });
   } catch (error) {
-   await helpers.sendMail("err", {
-    aspect: "Core",
-    feature: "refreshPrice()",
-    endpoint: req.path,
-    exact: error.message
-   });
+   // await helpers.sendMail("err", {
+   //  aspect: "Core",
+   //  feature: "refreshPrice()",
+   //  endpoint: req.path,
+   //  exact: error.message
+   // });
    res.status(error.code || 500).send(error.message);
   }
  }
@@ -358,12 +358,12 @@ export class WalletController {
     txFee
    });
   } catch (error) {
-   await helpers.sendMail("err", {
-    aspect: "Core",
-    feature: "getEstimatedTransactionFee()",
-    endpoint: req.path,
-    exact: error.message
-   });
+   // await helpers.sendMail("err", {
+   //  aspect: "Core",
+   //  feature: "getEstimatedTransactionFee()",
+   //  endpoint: req.path,
+   //  exact: error.message
+   // });
    res.status(500).send(error.message);
   }
  }
@@ -381,12 +381,12 @@ export class WalletController {
     response
    });
   } catch (error) {
-   await helpers.sendMail("err", {
-    aspect: "Core",
-    feature: "getERC20Tokens()",
-    endpoint: req.path,
-    exact: error.message
-   });
+   // await helpers.sendMail("err", {
+   //  aspect: "Core",
+   //  feature: "getERC20Tokens()",
+   //  endpoint: req.path,
+   //  exact: error.message
+   // });
    res.status(error.code || 500).send(error.message);
   }
  }
@@ -403,12 +403,12 @@ export class WalletController {
     response
    });
   } catch (error) {
-   await helpers.sendMail("err", {
-    aspect: "Core",
-    feature: "transferERC20Token()",
-    endpoint: req.path,
-    exact: error.message
-   });
+   // await helpers.sendMail("err", {
+   //  aspect: "Core",
+   //  feature: "transferERC20Token()",
+   //  endpoint: req.path,
+   //  exact: error.message
+   // });
    res.status(error.code || 500).send(error.message);
   }
  }
@@ -425,12 +425,12 @@ export class WalletController {
     response: { ...txn.payload }
    });
   } catch (error) {
-   await helpers.sendMail("err", {
-    aspect: "Core",
-    feature: "getETHTransactionDetails()",
-    endpoint: req.path,
-    exact: error.message
-   });
+   // await helpers.sendMail("err", {
+   //  aspect: "Core",
+   //  feature: "getETHTransactionDetails()",
+   //  endpoint: req.path,
+   //  exact: error.message
+   // });
    res.status(error.code || 500).send(error.message);
   }
  }
@@ -449,12 +449,12 @@ export class WalletController {
     response
    });
   } catch (error) {
-   await helpers.sendMail("err", {
-    aspect: "Core",
-    feature: "importCoin()",
-    endpoint: req.path,
-    exact: error.message
-   });
+   // await helpers.sendMail("err", {
+   //  aspect: "Core",
+   //  feature: "importCoin()",
+   //  endpoint: req.path,
+   //  exact: error.message
+   // });
    res.status(error.code || 500).send(error.message);
   }
  }
@@ -469,12 +469,12 @@ export class WalletController {
    });
   } catch (error) {
    // console.log(error);
-   await helpers.sendMail("err", {
-    aspect: "Core",
-    feature: "importByPrivateKey()",
-    endpoint: req.path,
-    exact: error.message
-   });
+   // await helpers.sendMail("err", {
+   //  aspect: "Core",
+   //  feature: "importByPrivateKey()",
+   //  endpoint: req.path,
+   //  exact: error.message
+   // });
    res.status(error.code || 500).send(error.message);
   }
  }
@@ -490,12 +490,12 @@ export class WalletController {
     response
    });
   } catch (error) {
-   await helpers.sendMail("err", {
-    aspect: "Core",
-    feature: "getSupportedERC20Tokens()",
-    endpoint: req.path,
-    exact: error.message
-   });
+   // await helpers.sendMail("err", {
+   //  aspect: "Core",
+   //  feature: "getSupportedERC20Tokens()",
+   //  endpoint: req.path,
+   //  exact: error.message
+   // });
    res.status(error.code || 500).send(error.message);
   }
  }
@@ -512,12 +512,12 @@ export class WalletController {
     response: "Successfully added custom token"
    });
   } catch (error) {
-   await helpers.sendMail("err", {
-    aspect: "Core",
-    feature: "addCustomERC20Token()",
-    endpoint: req.path,
-    exact: error.message
-   });
+   // await helpers.sendMail("err", {
+   //  aspect: "Core",
+   //  feature: "addCustomERC20Token()",
+   //  endpoint: req.path,
+   //  exact: error.message
+   // });
    res.status(500).send(error.message);
   }
  }
