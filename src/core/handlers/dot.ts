@@ -1,6 +1,10 @@
 import { ApiPromise, Keyring, WsProvider } from "@polkadot/api";
 import { u8aToHex } from "@polkadot/util";
-import { mnemonicToMiniSecret, mnemonicGenerate } from "@polkadot/util-crypto";
+import {
+ mnemonicGenerate,
+ mnemonicToMiniSecret,
+ cryptoWaitReady
+} from "@polkadot/util-crypto";
 import rp from "request-promise";
 // import cryptoRandom from "crypto-random-string";
 
@@ -37,8 +41,9 @@ export class DOT {
   name: string
  ): Promise<{ statusCode: number; payload: any }> {
   try {
+   // await cryptoWaitReady();
    const keyring = new Keyring({ type: "sr25519", ss58Format });
-   const mnemonic = mnemonicGenerate(12);
+   const mnemonic = mnemonicGenerate();
    const miniSecret = u8aToHex(mnemonicToMiniSecret(mnemonic));
    const pair = keyring.createFromUri(miniSecret, { name });
    return Promise.resolve({
