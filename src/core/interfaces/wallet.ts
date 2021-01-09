@@ -91,4 +91,9 @@ export interface Wallet {
   pk: string;
   balance: number;
  };
+ xem?: {
+  address: string;
+  pk: string;
+  balance: number;
+ };
 }

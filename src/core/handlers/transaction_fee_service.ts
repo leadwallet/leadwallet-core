@@ -4,7 +4,7 @@ import { CRYPTO_API_COINS, options, COIN_NETWORK } from "./commons";
 import { CustomError } from "../../custom";
 
 export class TransactionFeeService {
- public static async getERC20TransactionFee(
+ public static async getERCTransactionFee(
   fromAddress: string,
   toAddress: string,
   contract: string,
