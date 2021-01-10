@@ -213,6 +213,41 @@ export class ETH {
   }
  }
 
+ static async transferERC721(
+  fromAddress: string,
+  toAddress: string,
+  contract: string,
+  privateKey: string,
+  token: number,
+  gasPrice: number,
+  gasLimit: number
+ ): Promise<{ statusCode: number; payload: any }> {
+  try {
+   const response = await rp.post(CRYPTOAPI + "/tokens/transfer", {
+    ...options,
+    body: {
+     fromAddress,
+     toAddress,
+     privateKey,
+     gasPrice,
+     gasLimit,
+     contract,
+     token
+    }
+   });
+
+   if (response.statusCode >= 400)
+    throw new Error(response.body.meta.error.message);
+
+   return Promise.resolve({
+    statusCode: 200,
+    payload: response.body.payload
+   });
+  } catch (error) {
+   return Promise.reject(new Error(error.message));
+  }
+ }
+
  static async getERC20Tokens(
   address: string
  ): Promise<{ statusCode: number; payload: any }> {

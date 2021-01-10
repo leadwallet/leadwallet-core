@@ -413,6 +413,28 @@ export class WalletController {
   }
  }
 
+ static async transferERC721Token(
+  req: express.Request & { wallet: Wallet },
+  res: express.Response
+ ): Promise<any> {
+  try {
+   const { wallet, body } = req;
+   const response = await helpers.transferERC721Tokens(wallet, body);
+   res.status(200).json({
+    statusCode: 200,
+    response
+   });
+  } catch (error) {
+   // await helpers.sendMail("err", {
+   //  aspect: "Core",
+   //  feature: "transferERC20Token()",
+   //  endpoint: req.path,
+   //  exact: error.message
+   // });
+   res.status(error.code || 500).send(error.message);
+  }
+ }
+
  static async getETHTransactionDetails(
   req: express.Request & { wallet: Wallet },
   res: express.Response
@@ -518,6 +540,22 @@ export class WalletController {
    //  endpoint: req.path,
    //  exact: error.message
    // });
+   res.status(500).send(error.message);
+  }
+ }
+
+ static async addCustomERC721Token(
+  req: express.Request & { wallet: Wallet },
+  res: express.Response
+ ): Promise<any> {
+  try {
+   const { wallet, body } = req;
+   await helpers.addCustomERC721Token(wallet, body);
+   res.status(200).json({
+    statusCode: 200,
+    response: "Successfully added custom token"
+   });
+  } catch (error) {
    res.status(500).send(error.message);
   }
  }
