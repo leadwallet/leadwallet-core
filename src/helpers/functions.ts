@@ -18,7 +18,8 @@ import {
  CELO,
  // NEAR,
  ZIL,
- KSM
+ KSM,
+ XEM
 } from "../core/handlers";
 import { TransactionService } from "../core/handlers/transaction_handler";
 import {
@@ -73,7 +74,8 @@ export const createWallet = async (recoveryPhrase: Array<string>) => {
   CELO.createAddress(keyPair.privateKey),
   // NEAR.createAddress(),
   ZIL.generateAddress(),
-  KSM.generateAddress(keyPair.publicKey)
+  KSM.generateAddress(keyPair.publicKey),
+  XEM.generateAddress()
  ];
 
  const [
@@ -91,7 +93,8 @@ export const createWallet = async (recoveryPhrase: Array<string>) => {
   celoAddressCreationResponse,
   // nearAddressCreationResponse,
   zilAddressCreationResponse,
-  ksmAddressCreationResponse
+  ksmAddressCreationResponse,
+  xemAddressCreationResponse
  ] = await Promise.all(allPromises);
 
  const allDetailsPromises = [
@@ -109,7 +112,8 @@ export const createWallet = async (recoveryPhrase: Array<string>) => {
   CELO.getAddressDetails(celoAddressCreationResponse.payload.address),
   // NEAR.getAddressDetails(nearAddressCreationResponse.payload.address),
   ZIL.getAddressDetails(zilAddressCreationResponse.payload.address),
-  KSM.getAddressDetails(ksmAddressCreationResponse.payload.address)
+  KSM.getAddressDetails(ksmAddressCreationResponse.payload.address),
+  XEM.getAddressDetails(xemAddressCreationResponse.payload.address)
  ];
 
  const [
@@ -127,7 +131,8 @@ export const createWallet = async (recoveryPhrase: Array<string>) => {
   celoAddressDetailsResponse,
   // nearAddressDetailsResponse,
   zilAddressDetailsResponse,
-  ksmAddressDetailsResponse
+  ksmAddressDetailsResponse,
+  xemAddressDetailsResponse
  ] = await Promise.all(allDetailsPromises);
 
  console.log("Got all address details");
@@ -145,9 +150,12 @@ export const createWallet = async (recoveryPhrase: Array<string>) => {
    parseFloat(dashAddressDetailsResponse.payload.balance) +
    // xrpAddressDetailsResponse.payload.balance +
    parseFloat(bnbAddressDetailsResponse.payload.balance) +
-   // dotAddressDetailsResponse.payload.balance +
+   dotAddressDetailsResponse.payload.balance +
    xtzAddressDetailsResponse.payload.balance +
-   xlmAddressDetailsResponse.payload.balance,
+   xlmAddressDetailsResponse.payload.balance +
+   celoAddressDetailsResponse.payload.balance +
+   ksmAddressDetailsResponse.payload.balance +
+   xemAddressDetailsResponse.payload.balance,
   // nearAddressDetailsResponse.payload.balance,
   // hmyAddressCreationResponse.payload.balance
   hash: Tokenizers.hash(keyPair.publicKey + keyPair.privateKey),
@@ -228,6 +236,11 @@ export const createWallet = async (recoveryPhrase: Array<string>) => {
    address: ksmAddressCreationResponse.payload.address,
    pk: ksmAddressCreationResponse.payload.privateKey,
    balance: ksmAddressDetailsResponse.payload.balance
+  },
+  xem: {
+   address: xemAddressCreationResponse.payload.address,
+   pk: xemAddressCreationResponse.payload.privateKey,
+   balance: xemAddressDetailsResponse.payload.balance
   }
   // one: {
   //  address: hmyAddressCreationResponse.payload.address,
@@ -276,7 +289,8 @@ export const updateWallet = async (wallet: Wallet) => {
   wallet.celo ? CELO.getAddressDetails(wallet.celo.address) : null,
   // wallet.near ? NEAR.getAddressDetails(wallet.near.address) : null,
   wallet.zil ? ZIL.getAddressDetails(wallet.zil.address) : null,
-  wallet.ksm ? KSM.getAddressDetails(wallet.ksm.address) : null
+  wallet.ksm ? KSM.getAddressDetails(wallet.ksm.address) : null,
+  wallet.xem ? XEM.getAddressDetails(wallet.xem.address) : null
  ];
  // Update wallet
  const [
@@ -294,7 +308,8 @@ export const updateWallet = async (wallet: Wallet) => {
   celoDetailsResponse,
   // nearDetailsResponse,
   zilDetailsResponse,
-  ksmDetailsResponse
+  ksmDetailsResponse,
+  xemDetailsResponse
  ] = await Promise.all(allAddressDetails);
  if (
   btcDetailsResponse.statusCode >= 400 ||
@@ -320,7 +335,8 @@ export const updateWallet = async (wallet: Wallet) => {
   "xlm",
   "celo",
   "zil",
-  "ksm"
+  "ksm",
+  "xem"
  ];
  const balances = {
   btc: parseFloat(btcDetailsResponse?.payload.balance || "0"),
@@ -336,7 +352,8 @@ export const updateWallet = async (wallet: Wallet) => {
   celo: parseFloat(celoDetailsResponse?.payload.balance || "0"),
   // near: parseFloat(nearDetailsResponse?.payload.balance || "0"),
   zil: parseFloat(zilDetailsResponse?.payload.balance || "0"),
-  ksm: parseFloat(ksmDetailsResponse?.payload.balance || "0")
+  ksm: parseFloat(ksmDetailsResponse?.payload.balance || "0"),
+  xem: parseFloat(xemDetailsResponse?.payload.balance || "0")
  };
  // hmyDetailsResponse.payload.balance
  // wallet.one.balance = hmyDetailsResponse.payload.balance;
@@ -378,7 +395,8 @@ export const importWallet = async (wallet: Wallet) => {
   "xlm",
   "celo",
   "zil",
-  "ksm"
+  "ksm",
+  "xem"
  ];
 
  const allPromises = [
@@ -395,7 +413,8 @@ export const importWallet = async (wallet: Wallet) => {
   CELO.createAddress(wallet.privateKey),
   // NEAR.createAddress(),
   ZIL.generateAddress(),
-  KSM.generateAddress(wallet.publicKey)
+  KSM.generateAddress(wallet.publicKey),
+  XEM.generateAddress()
  ];
 
  const [
@@ -412,7 +431,8 @@ export const importWallet = async (wallet: Wallet) => {
   celoAddressCreationResponse,
   // nearAddressCreationResponse,
   zilAddressCreationResponse,
-  ksmAddressCreationResponse
+  ksmAddressCreationResponse,
+  xemAddressCreationResponse
  ] = await Promise.all(allPromises);
 
  const allDetailsPromises = [
@@ -429,7 +449,8 @@ export const importWallet = async (wallet: Wallet) => {
   CELO.getAddressDetails(celoAddressCreationResponse.payload.address),
   // NEAR.getAddressDetails(nearAddressCreationResponse.payload.address),
   ZIL.getAddressDetails(zilAddressCreationResponse.payload.address),
-  KSM.getAddressDetails(ksmAddressCreationResponse.payload.address)
+  KSM.getAddressDetails(ksmAddressCreationResponse.payload.address),
+  XEM.getAddressDetails(xemAddressCreationResponse.payload.address)
  ];
 
  const [
@@ -446,7 +467,8 @@ export const importWallet = async (wallet: Wallet) => {
   celoAddressDetailsResponse,
   // nearAddressDetailsResponse,
   zilAddressDetailsResponse,
-  ksmAddressDetailsResponse
+  ksmAddressDetailsResponse,
+  xemAddressDetailsResponse
  ] = await Promise.all(allDetailsPromises);
 
  const coins = {
@@ -522,6 +544,11 @@ export const importWallet = async (wallet: Wallet) => {
    address: ksmAddressCreationResponse.payload.address,
    pk: ksmAddressCreationResponse.payload.privateKey,
    balance: ksmAddressDetailsResponse.payload.balance
+  },
+  xem: {
+   address: xemAddressCreationResponse.payload.address,
+   pk: xemAddressCreationResponse.payload.privateKey,
+   balance: xemAddressDetailsResponse.payload.balance
   }
  };
 
@@ -1034,6 +1061,22 @@ export const sendToken = async (
   );
   txHash = zilSentResponse.payload.hash;
   recipient = body.to;
+ } else if (type === "xem") {
+  balance = body.value;
+
+  if (senderWallet.balance < balance)
+   throw new CustomError(400, "Insufficeint wallet balance");
+
+  if (senderWallet.xem.balance < balance)
+   throw new CustomError(400, "Insufficient XEM balance");
+
+  const xemSentResponse = await XEM.sendToken(
+   senderWallet.xem.pk,
+   body.to,
+   body.value
+  );
+  txHash = xemSentResponse.payload.hash;
+  recipient = body.to;
  } else {
   throw new CustomError(400, type + " not available yet.");
  }
@@ -1052,7 +1095,7 @@ export const sendToken = async (
   recipient
  });
 
- console.log(mail);
+ console.log(JSON.stringify(mail));
 
  // API response
  return Promise.resolve({
@@ -1212,6 +1255,13 @@ export const getTransactions = async (ticker: string, address: string) => {
    ...tx,
    view_in_explorer: getExplorerLink(ticker, tx.hash)
   }));
+ } else if (ticker.toLowerCase() === "xem") {
+  const response = await XEM.getTransactions(address);
+
+  payload = response.payload.map((tx: any) => ({
+   ...tx,
+   view_in_explorer: getExplorerLink(ticker, tx.hash)
+  }));
  } else {
   throw new CustomError(
    400,
@@ -1251,8 +1301,8 @@ export const getEstimatedTransactionFee = async (
  value: number
 ) => {
  const txFee: any =
-  ticker.toLowerCase() === "erc-20"
-   ? await TransactionFeeService.getERC20TransactionFee(
+  ticker.toLowerCase() === "erc-20" || ticker.toLowerCase() === "erc-721"
+   ? await TransactionFeeService.getERCTransactionFee(
       fromAddress,
       toAddress,
       contract,
@@ -1324,6 +1374,48 @@ export const transferERC20Tokens = async (wallet: Wallet, body: any) => {
    transferTokenResponse.statusCode,
    transferTokenResponse.payload || errorCodes[transferTokenResponse.statusCode]
   );
+
+ const mail = await sendMail("analytics", {
+  coin: "erc20",
+  hash: transferTokenResponse.payload.hex,
+  sender: wallet.eth.address,
+  recipient: body.to
+ });
+
+ console.log(JSON.stringify(mail));
+
+ return Promise.resolve({
+  message: "Successfully transferred token.",
+  txHash: transferTokenResponse.payload.hex,
+  view_in_explorer: getExplorerLink("eth", transferTokenResponse.payload.hex)
+ });
+};
+
+export const transferERC721Tokens = async (wallet: Wallet, body: any) => {
+ const transferTokenResponse = await ETH.transferERC721(
+  wallet.eth.address,
+  body.to,
+  body.contract,
+  wallet.eth.pk,
+  body.tokens,
+  body.gasPrice,
+  body.gasLimit
+ );
+
+ if (transferTokenResponse.statusCode >= 400)
+  throw new CustomError(
+   transferTokenResponse.statusCode,
+   transferTokenResponse.payload || errorCodes[transferTokenResponse.statusCode]
+  );
+
+ const mail = await sendMail("analytics", {
+  coin: "erc721",
+  hash: transferTokenResponse.payload.hex,
+  sender: wallet.eth.address,
+  recipient: body.to
+ });
+
+ console.log(JSON.stringify(mail));
 
  return Promise.resolve({
   message: "Successfully transferred token.",
@@ -1419,7 +1511,8 @@ export const importByPrivateKey = async (wallet: Wallet) => {
   "xlm",
   "celo",
   "zil",
-  "ksm"
+  "ksm",
+  "xem"
  ];
 
  if (!wallet) throw new CustomError(404, "Wallet not found");
@@ -1438,7 +1531,8 @@ export const importByPrivateKey = async (wallet: Wallet) => {
   CELO.createAddress(wallet.privateKey),
   // NEAR.createAddress(),
   ZIL.generateAddress(),
-  KSM.generateAddress(wallet.publicKey)
+  KSM.generateAddress(wallet.publicKey),
+  XEM.generateAddress()
  ];
 
  const [
@@ -1455,7 +1549,8 @@ export const importByPrivateKey = async (wallet: Wallet) => {
   celoAddressCreationResponse,
   // nearAddressCreationResponse,
   zilAddressCreationResponse,
-  ksmAddressCreationResponse
+  ksmAddressCreationResponse,
+  xemAddressCreationResponse
  ] = await Promise.all(allPromises);
 
  const allDetailsPromises = [
@@ -1472,7 +1567,8 @@ export const importByPrivateKey = async (wallet: Wallet) => {
   CELO.getAddressDetails(celoAddressCreationResponse.payload.address),
   // NEAR.getAddressDetails(nearAddressCreationResponse.payload.address),
   ZIL.getAddressDetails(zilAddressCreationResponse.payload.address),
-  KSM.getAddressDetails(ksmAddressCreationResponse.payload.address)
+  KSM.getAddressDetails(ksmAddressCreationResponse.payload.address),
+  XEM.getAddressDetails(xemAddressCreationResponse.payload.address)
  ];
 
  const [
@@ -1489,7 +1585,8 @@ export const importByPrivateKey = async (wallet: Wallet) => {
   celoAddressDetailsResponse,
   // nearAddressDetailsResponse,
   zilAddressDetailsResponse,
-  ksmAddressDetailsResponse
+  ksmAddressDetailsResponse,
+  xemAddressDetailsResponse
  ] = await Promise.all(allDetailsPromises);
 
  const coins = {
@@ -1565,6 +1662,11 @@ export const importByPrivateKey = async (wallet: Wallet) => {
    address: ksmAddressCreationResponse.payload.address,
    pk: ksmAddressCreationResponse.payload.privateKey,
    balance: ksmAddressDetailsResponse.payload.balance
+  },
+  xem: {
+   address: xemAddressCreationResponse.payload.address,
+   pk: xemAddressCreationResponse.payload.privateKey,
+   balance: xemAddressDetailsResponse.payload.balance
   }
  };
 
@@ -1614,6 +1716,19 @@ export const addCustomERC20Token = async (wallet: Wallet, body: any) => {
   decimals:
    typeof body.decimals === "string" ? parseInt(body.decimals) : body.decimals,
   type: "ERC-20",
+  balance: "0"
+ };
+ wallet.eth.tokens = [...wallet.eth.tokens, newToken];
+ await DBWallet.updateWallet(wallet.privateKey, wallet);
+};
+
+export const addCustomERC721Token = async (wallet: Wallet, body: any) => {
+ const newToken: ERCToken = {
+  contract: body.contract,
+  symbol: body.symbol,
+  name: body.name,
+  decimals: null,
+  type: "ERC-721",
   balance: "0"
  };
  wallet.eth.tokens = [...wallet.eth.tokens, newToken];

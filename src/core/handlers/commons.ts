@@ -626,7 +626,8 @@ export const CURRENT_COINS: Array<string> = [
  "xlm",
  "celo",
  "zil",
- "ksm"
+ "ksm",
+ "xem"
 ];
 export const CRYPTO_API_COINS: Array<string> = [
  "btc",
@@ -824,6 +825,12 @@ export function getExplorerLink(type: string, txHash: string): string {
    production: "https://kusama.subscan.io/extrinsic/" + txHash,
    test: "https://westend.subscan.io/extrinsic/" + txHash,
    staging: "https://westend.subscan.io/extrinsic/" + txHash
+  },
+  xem: {
+   development: "https://chain.nem.ninja/#/transfer/" + txHash,
+   production: "https://chain.nem.ninja/#/transfer/" + txHash,
+   test: "https://chain.nem.ninja/#/transfer/" + txHash,
+   staging: "https://chain.nem.ninja/#/transfer/" + txHash
   }
  };
 
