@@ -1357,6 +1357,30 @@ export const transferERC20Tokens = async (wallet: Wallet, body: any) => {
  });
 };
 
+export const transferERC721Tokens = async (wallet: Wallet, body: any) => {
+ const transferTokenResponse = await ETH.transferERC721(
+  wallet.eth.address,
+  body.to,
+  body.contract,
+  wallet.eth.pk,
+  body.tokens,
+  body.gasPrice,
+  body.gasLimit
+ );
+
+ if (transferTokenResponse.statusCode >= 400)
+  throw new CustomError(
+   transferTokenResponse.statusCode,
+   transferTokenResponse.payload || errorCodes[transferTokenResponse.statusCode]
+  );
+
+ return Promise.resolve({
+  message: "Successfully transferred token.",
+  txHash: transferTokenResponse.payload.hex,
+  view_in_explorer: getExplorerLink("eth", transferTokenResponse.payload.hex)
+ });
+};
+
 export const getEthTransactionDetails = async (wallet: Wallet, params: any) => {
  const txn = await ETH.getTransactionDetails(params.txHash, wallet.eth.address);
 
@@ -1660,8 +1684,7 @@ export const addCustomERC721Token = async (wallet: Wallet, body: any) => {
   contract: body.contract,
   symbol: body.symbol,
   name: body.name,
-  decimals:
-   typeof body.decimals === "string" ? parseInt(body.decimals) : body.decimals,
+  decimals: null,
   type: "ERC-721",
   balance: "0"
  };
