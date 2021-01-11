@@ -83,6 +83,12 @@ router.post(
  WalletMiddleware.getWalletFromRequest,
  WalletController.addCustomERC20Token
 );
+router.post(
+ "/addERC721",
+ WalletMiddleware.getKeyPair,
+ WalletMiddleware.getWalletFromRequest,
+ WalletController.addCustomERC721Token
+);
 // router.get(
 //  "/price/erc20/:contract",
 //  WalletController.getErc20Price
