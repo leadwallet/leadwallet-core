@@ -427,7 +427,7 @@ export class WalletController {
   } catch (error) {
    await helpers.sendMail("err", {
     aspect: "Core",
-    feature: "transferERC20Token()",
+    feature: "transferERC721Token()",
     endpoint: req.path,
     exact: error.message
    });
@@ -556,7 +556,12 @@ export class WalletController {
     response: "Successfully added custom token"
    });
   } catch (error) {
-   
+   await helpers.sendMail("err", {
+    aspect: "Core",
+    feature: "addCustomERC721Token()",
+    endpoint: req.path,
+    exact: error.message
+   });
    res.status(500).send(error.message);
   }
  }
