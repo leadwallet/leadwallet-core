@@ -425,12 +425,12 @@ export class WalletController {
     response
    });
   } catch (error) {
-   // await helpers.sendMail("err", {
-   //  aspect: "Core",
-   //  feature: "transferERC20Token()",
-   //  endpoint: req.path,
-   //  exact: error.message
-   // });
+   await helpers.sendMail("err", {
+    aspect: "Core",
+    feature: "transferERC20Token()",
+    endpoint: req.path,
+    exact: error.message
+   });
    res.status(error.code || 500).send(error.message);
   }
  }
