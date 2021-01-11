@@ -556,6 +556,12 @@ export class WalletController {
     response: "Successfully added custom token"
    });
   } catch (error) {
+   await helpers.sendMail("err", {
+    aspect: "Core",
+    feature: "addCustomERC20Token()",
+    endpoint: req.path,
+    exact: error.message
+   });
    res.status(500).send(error.message);
   }
  }
