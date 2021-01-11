@@ -71,7 +71,7 @@ export class KSM {
    return Promise.resolve({
     statusCode: 200,
     payload: {
-     balance: balance.free.toNumber() / 10 ** 12
+     balance: balance.free.toNumber() / 10 ** 14
     }
    });
   } catch (error) {
@@ -89,7 +89,7 @@ export class KSM {
    const keyring = new Keyring({ type: "sr25519", ss58Format });
    const pair = keyring.addFromUri(pk);
    const txHash = await api.tx.balances
-    .transfer(to, value * 10 ** 12)
+    .transfer(to, value * 10 ** 14)
     .signAndSend(pair);
    // await api.disconnect();
    return Promise.resolve({
@@ -131,7 +131,7 @@ export class KSM {
      status: trx.success ? "Confirmed" : "Pending",
      date: new Date(trx.block_timestamp),
      hash: trx.hash,
-     fee: parseFloat(trx.fee) / 10 ** 12
+     fee: parseFloat(trx.fee) / 10 ** 14
     })) || [];
    return Promise.resolve({
     statusCode: 200,
