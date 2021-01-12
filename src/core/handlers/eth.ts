@@ -69,6 +69,7 @@ export class ETH {
 
    let tokenDetails: Array<any> = tokensResponse.body.payload;
    const tokenDetailsWithImages: Array<any> = [];
+   const collectibleDetailsWithImages: Array<any> = [];
    const tokensFiltered = tokens.filter(
     t => !tokenDetails.map(d => d.contract).includes(t.contract)
    );
@@ -101,7 +102,7 @@ export class ETH {
        }
       });
      else
-      tokenDetailsWithImages.push({
+      collectibleDetailsWithImages.push({
        ...tokenDetail,
        image: {
         thumb:
@@ -113,10 +114,16 @@ export class ETH {
        }
       });
     } else {
-     tokenDetailsWithImages.push({
-      ...tokenDetail,
-      image: contractDetails.body.image
-     });
+     if (tokenDetail.type.toLowerCase() === "erc-20")
+      tokenDetailsWithImages.push({
+       ...tokenDetail,
+       image: contractDetails.body.image
+      });
+     else
+      collectibleDetailsWithImages.push({
+       ...tokenDetail,
+       image: contractDetails.body.image
+      });
     }
    }
    return Promise.resolve({
@@ -124,6 +131,9 @@ export class ETH {
     payload: {
      ...response.body.payload,
      tokens: tokenDetailsWithImages.sort((a, b) =>
+      a.name > b.name ? 1 : b.name > a.name ? -1 : 0
+     ),
+     collectibles: collectibleDetailsWithImages.sort((a, b) =>
       a.name > b.name ? 1 : b.name > a.name ? -1 : 0
      )
     }
