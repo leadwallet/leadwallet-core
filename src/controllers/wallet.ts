@@ -413,6 +413,28 @@ export class WalletController {
   }
  }
 
+ static async transferERC721Token(
+  req: express.Request & { wallet: Wallet },
+  res: express.Response
+ ): Promise<any> {
+  try {
+   const { wallet, body } = req;
+   const response = await helpers.transferERC721Tokens(wallet, body);
+   res.status(200).json({
+    statusCode: 200,
+    response
+   });
+  } catch (error) {
+   await helpers.sendMail("err", {
+    aspect: "Core",
+    feature: "transferERC721Token()",
+    endpoint: req.path,
+    exact: error.message
+   });
+   res.status(error.code || 500).send(error.message);
+  }
+ }
+
  static async getETHTransactionDetails(
   req: express.Request & { wallet: Wallet },
   res: express.Response
