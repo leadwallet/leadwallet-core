@@ -54,7 +54,7 @@ export class TransactionService {
    payload: response.body.payload
   });
  }
- static async getERC20Transactions(
+ static async getERCTransactions(
   address: string
  ): Promise<{ payload: any; statusCode: number }> {
   const api =
