@@ -22,32 +22,32 @@ const COINGECKO_TOKEN_PRICE_ROOT =
 export class CurrencyConverter {
  private static instance: CurrencyConverter;
  private currencyMap: Map<string, number>;
- private erc20TokensMap: Map<string, number>;
+ private ercTokensMap: Map<string, number>;
  private constructor() {}
 
  public static async getInstance(): Promise<CurrencyConverter> {
   if (!CurrencyConverter.instance) {
    CurrencyConverter.instance = new CurrencyConverter();
    CurrencyConverter.instance.currencyMap = new Map<string, number>();
-   CurrencyConverter.instance.erc20TokensMap = new Map<string, number>();
-   CurrencyConverter.instance.erc20TokensMap.set(
+   CurrencyConverter.instance.ercTokensMap = new Map<string, number>();
+   CurrencyConverter.instance.ercTokensMap.set(
     "0xdac17f958d2ee523a2206206994597c13d831ec7",
     1
    );
    await CurrencyConverter.refreshCurrencyMap();
-   await CurrencyConverter.refreshERC20TokensMap();
+   await CurrencyConverter.refreshERCTokensMap();
    setInterval(async () => {
     CurrencyConverter.refreshCurrencyMap();
    }, 60000);
    setInterval(async () => {
-    CurrencyConverter.refreshERC20TokensMap();
+    CurrencyConverter.refreshERCTokensMap();
    }, 60000);
   }
   return Promise.resolve(CurrencyConverter.instance);
  }
- private static async refreshERC20TokensMap() {
+ private static async refreshERCTokensMap() {
   const contracts = Array.from(
-   CurrencyConverter.instance.erc20TokensMap.keys()
+   CurrencyConverter.instance.ercTokensMap.keys()
   ).join();
   const response = await rp.get(
    COINGECKO_TOKEN_PRICE_ROOT +
@@ -70,7 +70,7 @@ export class CurrencyConverter {
    const values = response.body;
    for (const contract of contracts.split(",")) {
     // console.log(values[contract]["usd"]);
-    CurrencyConverter.instance.erc20TokensMap.set(
+    CurrencyConverter.instance.ercTokensMap.set(
      contract,
      values[contract]["usd"]
     );
@@ -110,9 +110,9 @@ export class CurrencyConverter {
   let responseValues = [];
   let newContracts = [];
   for (const contract of contracts.split(",")) {
-   if (CurrencyConverter.instance.erc20TokensMap.has(contract)) {
+   if (CurrencyConverter.instance.ercTokensMap.has(contract)) {
     const value = {};
-    value[contract] = CurrencyConverter.instance.erc20TokensMap.get(contract);
+    value[contract] = CurrencyConverter.instance.ercTokensMap.get(contract);
     responseValues.push(value);
    } else {
     newContracts.push(contract);
@@ -147,7 +147,7 @@ export class CurrencyConverter {
      // console.log(contract);
      // console.log(values);
      value[contract] = values[contract]["usd"];
-     CurrencyConverter.instance.erc20TokensMap.set(
+     CurrencyConverter.instance.ercTokensMap.set(
       contract,
       values[contract]["usd"]
      );

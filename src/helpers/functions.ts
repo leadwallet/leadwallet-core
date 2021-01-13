@@ -169,6 +169,7 @@ export const createWallet = async (recoveryPhrase: Array<string>) => {
    address: ethAddressCreationResponse.payload.address,
    balance: parseFloat(ethAddressDetailsResponse.payload.balance),
    tokens: ethAddressDetailsResponse.payload.tokens,
+   collectibles: ethAddressDetailsResponse.payload.collectibles,
    pk: ethAddressCreationResponse.payload.privateKey
   },
   doge: {
@@ -270,12 +271,14 @@ export const getWallet = async (privateKey: string, publicKey: string) => {
 export const updateWallet = async (wallet: Wallet) => {
  // Remove NEAR from all wallets on update
  // if (wallet.near) wallet.near = null;
-
  // Get all address details
  const allAddressDetails = [
   wallet.btc ? BTC.getAddressDetails(wallet.btc.address) : null,
   wallet.eth
-   ? ETH.getAddressDetails(wallet.eth.address, wallet.eth.tokens)
+   ? ETH.getAddressDetails(wallet.eth.address, [
+      ...wallet.eth.tokens,
+      ...(wallet.eth.collectibles || [])
+     ])
    : null,
   wallet.doge ? DOGE.getAddressDetails(wallet.doge.address) : null,
   wallet.ltc ? LTC.getAddressDetails(wallet.ltc.address) : null,
@@ -482,6 +485,7 @@ export const importWallet = async (wallet: Wallet) => {
    address: ethAddressCreationResponse.payload.address,
    balance: parseFloat(ethAddressDetailsResponse.payload.balance),
    tokens: ethAddressDetailsResponse.payload.tokens,
+   collectibles: ethAddressDetailsResponse.payload.collectibles,
    pk: ethAddressCreationResponse.payload.privateKey
   },
   doge: {
@@ -1006,7 +1010,8 @@ export const sendToken = async (
   const xlmSentResponse = await XLM.sendToken(
    senderWallet.xlm.pk,
    body.to,
-   body.value
+   body.value,
+   body.memo
   );
   txHash = xlmSentResponse.payload.hash;
   recipient = body.to;
@@ -1088,14 +1093,14 @@ export const sendToken = async (
  const updatedSenderWallet = await DBWallet.updateWallet(pk, senderWallet);
 
  // Send mail
- const mail = await sendMail("analytics", {
-  coin: type,
-  hash: txHash,
-  sender: senderWallet[type].address,
-  recipient
- });
+ // const mail = await sendMail("analytics", {
+ //  coin: type,
+ //  hash: txHash,
+ //  sender: senderWallet[type].address,
+ //  recipient
+ // });
 
- console.log(JSON.stringify(mail));
+ // console.log(JSON.stringify(mail));
 
  // API response
  return Promise.resolve({
@@ -1173,8 +1178,11 @@ export const getTransactions = async (ticker: string, address: string) => {
   }
 
   payload = apiResponse;
- } else if (ticker.toLowerCase() === "erc-20") {
-  const response = await TransactionService.getERC20Transactions(address);
+ } else if (
+  ticker.toLowerCase() === "erc-20" ||
+  ticker.toLowerCase() === "erc-721"
+ ) {
+  const response = await TransactionService.getERCTransactions(address);
   const apiResponse: Array<any> = response.payload.map((txn: any) => ({
    hash: txn.txHash,
    from: txn.from,
@@ -1600,6 +1608,7 @@ export const importByPrivateKey = async (wallet: Wallet) => {
    address: ethAddressCreationResponse.payload.address,
    balance: parseFloat(ethAddressDetailsResponse.payload.balance),
    tokens: ethAddressDetailsResponse.payload.tokens,
+   collectibles: ethAddressDetailsResponse.payload.collectibles,
    pk: ethAddressCreationResponse.payload.privateKey
   },
   doge: {
@@ -1731,6 +1740,6 @@ export const addCustomERC721Token = async (wallet: Wallet, body: any) => {
   type: "ERC-721",
   balance: "0"
  };
- wallet.eth.tokens = [...wallet.eth.tokens, newToken];
+ wallet.eth.collectibles = [...(wallet.eth.collectibles || []), newToken];
  await DBWallet.updateWallet(wallet.privateKey, wallet);
 };

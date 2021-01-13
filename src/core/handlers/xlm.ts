@@ -77,7 +77,8 @@ export class XLM {
  static async sendToken(
   secret: string,
   to: string,
-  amount: number
+  amount: number,
+  memoId?: string
  ): Promise<{ statusCode: number; payload: any }> {
   try {
    const pair = Stellar.Keypair.fromSecret(secret);
@@ -94,9 +95,11 @@ export class XLM {
    });
    const tx = txBuilder
     .addMemo(
-     Stellar.Memo.text(
-      "Lead-Memo-" + Date.now() + "-" + randomString({ length: 10 })
-     )
+     memoId
+      ? Stellar.Memo.text(memoId)
+      : Stellar.Memo.text(
+         "Lead-Memo-" + Date.now() + "-" + randomString({ length: 10 })
+        )
     )
     .addOperation(operation)
     .setTimeout(60 * 20)

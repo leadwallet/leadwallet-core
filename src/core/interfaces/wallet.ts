@@ -15,6 +15,7 @@ export interface Wallet {
   address: string;
   balance: number;
   tokens?: Array<ERCToken>;
+  collectibles?: Array<ERCToken>;
   pk?: string;
  };
  doge?: {

@@ -778,6 +778,12 @@ export function getExplorerLink(type: string, txHash: string): string {
     }/tx/${txHash}`
   : null;
  const specialCoins = {
+  eth: {
+   development: "https://ropsten.etherscan.io/tx/" + txHash,
+   production: "https://etherscan.io/tx/" + txHash,
+   test: "https://ropsten.etherscan.io/tx/" + txHash,
+   staging: "https://ropsten.etherscan.io/tx/" + txHash
+  },
   trx: {
    development: "https://shasta.tronscan.org/#/transaction/" + txHash,
    production: "https://tronscan.org/#/transaction/" + txHash,
