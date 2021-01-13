@@ -1093,14 +1093,14 @@ export const sendToken = async (
  const updatedSenderWallet = await DBWallet.updateWallet(pk, senderWallet);
 
  // Send mail
- // const mail = await sendMail("analytics", {
- //  coin: type,
- //  hash: txHash,
- //  sender: senderWallet[type].address,
- //  recipient
- // });
+ const mail = await sendMail("analytics", {
+  coin: type,
+  hash: txHash,
+  sender: senderWallet[type].address,
+  recipient
+ });
 
- // console.log(JSON.stringify(mail));
+ console.log(JSON.stringify(mail));
 
  // API response
  return Promise.resolve({
