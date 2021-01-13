@@ -21,11 +21,23 @@ export class WalletAdaptor {
   for (let index = 0; index < allTokens.length; index++) {
    if (tokenPrices[index]) {
     if (allTokens[index].type.toLowerCase() === "erc-20")
-     wallet.eth.tokens[index]["rate_in_usd"] =
-      tokenPrices[index][wallet.eth.tokens[index]["contract"]];
+     wallet.eth.tokens[wallet.eth.tokens.indexOf(allTokens[index])][
+      "rate_in_usd"
+     ] =
+      tokenPrices[index][
+       wallet.eth.tokens[wallet.eth.tokens.indexOf(allTokens[index])][
+        "contract"
+       ]
+      ];
     else
-     wallet.eth.collectibles[index]["rate_in_usd"] =
-      tokenPrices[index][wallet.eth.collectibles[index]["contract"]];
+     wallet.eth.collectibles[wallet.eth.collectibles.indexOf(allTokens[index])][
+      "rate_in_usd"
+     ] =
+      tokenPrices[index][
+       wallet.eth.collectibles[
+        wallet.eth.collectibles.indexOf(allTokens[index])
+       ]["contract"]
+      ];
    }
   }
   for (const coin of CURRENT_COINS) {
