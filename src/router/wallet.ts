@@ -60,6 +60,13 @@ router.post(
  WalletController.transferERC20Token
 );
 
+router.post(
+ "/transferERC721",
+ WalletMiddleware.getKeyPair,
+ WalletMiddleware.getWalletFromRequest,
+ WalletController.transferERC721Token
+);
+
 router.get(
  "/getEthTx/:txHash",
  WalletMiddleware.getKeyPair,
