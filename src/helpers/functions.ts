@@ -1010,7 +1010,8 @@ export const sendToken = async (
   const xlmSentResponse = await XLM.sendToken(
    senderWallet.xlm.pk,
    body.to,
-   body.value
+   body.value,
+   body.memo
   );
   txHash = xlmSentResponse.payload.hash;
   recipient = body.to;
@@ -1177,7 +1178,10 @@ export const getTransactions = async (ticker: string, address: string) => {
   }
 
   payload = apiResponse;
- } else if (ticker.toLowerCase() === "erc-20") {
+ } else if (
+  ticker.toLowerCase() === "erc-20" ||
+  ticker.toLowerCase() === "erc-721"
+ ) {
   const response = await TransactionService.getERCTransactions(address);
   const apiResponse: Array<any> = response.payload.map((txn: any) => ({
    hash: txn.txHash,
@@ -1379,14 +1383,14 @@ export const transferERC20Tokens = async (wallet: Wallet, body: any) => {
    transferTokenResponse.payload || errorCodes[transferTokenResponse.statusCode]
   );
 
- // const mail = await sendMail("analytics", {
- //  coin: "erc20",
- //  hash: transferTokenResponse.payload.hex,
- //  sender: wallet.eth.address,
- //  recipient: body.to
- // });
+ const mail = await sendMail("analytics", {
+  coin: "erc20",
+  hash: transferTokenResponse.payload.hex,
+  sender: wallet.eth.address,
+  recipient: body.to
+ });
 
- // console.log(JSON.stringify(mail));
+ console.log(JSON.stringify(mail));
 
  return Promise.resolve({
   message: "Successfully transferred token.",
@@ -1412,14 +1416,14 @@ export const transferERC721Tokens = async (wallet: Wallet, body: any) => {
    transferTokenResponse.payload || errorCodes[transferTokenResponse.statusCode]
   );
 
- // const mail = await sendMail("analytics", {
- //  coin: "erc721",
- //  hash: transferTokenResponse.payload.hex,
- //  sender: wallet.eth.address,
- //  recipient: body.to
- // });
+ const mail = await sendMail("analytics", {
+  coin: "erc721",
+  hash: transferTokenResponse.payload.hex,
+  sender: wallet.eth.address,
+  recipient: body.to
+ });
 
- // console.log(JSON.stringify(mail));
+ console.log(JSON.stringify(mail));
 
  return Promise.resolve({
   message: "Successfully transferred token.",

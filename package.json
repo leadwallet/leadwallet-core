@@ -35,7 +35,6 @@
     "mongoose": "^5.9.28",
     "morgan": "^1.10.0",
     "near-api-js": "^0.30.0",
-    "nem-sdk": "^1.6.8",
     "node-fetch": "^2.6.1",
     "request": "^2.88.2",
     "request-promise": "^4.2.6",

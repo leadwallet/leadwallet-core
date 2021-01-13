@@ -71,7 +71,7 @@ export class DOT {
    return Promise.resolve({
     statusCode: 200,
     payload: {
-     balance: balance.free.toNumber() / 10 ** 14
+     balance: balance.free.toNumber() / 10 ** 10
     }
    });
   } catch (error) {
@@ -89,7 +89,7 @@ export class DOT {
    const keyring = new Keyring({ type: "sr25519", ss58Format });
    const pair = keyring.addFromUri(pk);
    const txHash = await api.tx.balances
-    .transfer(to, value * 10 ** 14)
+    .transfer(to, value * 10 ** 10)
     .signAndSend(pair);
    // await api.disconnect();
    return Promise.resolve({
@@ -131,7 +131,7 @@ export class DOT {
      status: trx.success ? "Confirmed" : "Pending",
      date: new Date(trx.block_timestamp),
      hash: trx.hash,
-     fee: parseFloat(trx.fee) / 10 ** 14
+     fee: parseFloat(trx.fee) / 10 ** 10
     })) || [];
    return Promise.resolve({
     statusCode: 200,
