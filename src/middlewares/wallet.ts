@@ -7,117 +7,114 @@ import { Wallet } from "../core/interfaces";
 const { DBWallet } = db;
 
 export class WalletMiddleware {
-  static async getKeyPair(
-    req: express.Request & { privateKey: string; publicKey: string },
-    res: express.Response,
-    next: express.NextFunction
-  ): Promise<any> {
-    try {
-      // Request authorization header
-      const authorization = req.headers.authorization;
+ static async getKeyPair(
+  req: express.Request & { privateKey: string; publicKey: string },
+  res: express.Response,
+  next: express.NextFunction
+ ): Promise<any> {
+  try {
+   // Request authorization header
+   const authorization = req.headers.authorization;
 
-      // Throw error if header is null
-      if (!authorization)
-        throw new CustomError(400, "Authorization header is null.");
+   // Throw error if header is null
+   if (!authorization)
+    throw new CustomError(400, "Authorization header is null.");
 
-      // Throw error if header doesn't begin with a 'Bearer' string
-      if (!authorization.startsWith("Bearer"))
-        throw new CustomError(
-          400,
-          "Authorization header must begin with 'Bearer'"
-        );
+   // Throw error if header doesn't begin with a 'Bearer' string
+   if (!authorization.startsWith("Bearer"))
+    throw new CustomError(400, "Authorization header must begin with 'Bearer'");
 
-      // Token from authorization header
-      const token = authorization.substring(7, authorization.length);
+   // Token from authorization header
+   const token = authorization.substring(7, authorization.length);
 
-      // Check if token's length is equal to 0 and if it is, throw an error
-      if (token.trim().length === 0)
-        throw new CustomError(400, "Token not found in header.");
+   // Check if token's length is equal to 0 and if it is, throw an error
+   if (token.trim().length === 0)
+    throw new CustomError(400, "Token not found in header.");
 
-      // console.log(token);
+   // console.log(token);
 
-      // Key pair from token
-      const pair = Tokenizers.decodeToken(token);
+   // Key pair from token
+   const pair = Tokenizers.decodeToken(token);
 
-      // Confirm that object isn't null
-      if (!pair)
-        throw new CustomError(
-          400,
-          "Key pair object could not be deserialized from token."
-        );
+   // Confirm that object isn't null
+   if (!pair)
+    throw new CustomError(
+     400,
+     "Key pair object could not be deserialized from token."
+    );
 
-      // Modify the request if key pair was successfully deserialized
-      req.privateKey = pair.privateKey;
-      req.publicKey = pair.publicKey;
+   // Modify the request if key pair was successfully deserialized
+   req.privateKey = pair.privateKey;
+   req.publicKey = pair.publicKey;
 
-      // Pass control to the next controller
-      next();
-    } catch (error) {
-      // console.log(error);
-      res.status(error.code || 500).send(error.message);
-    }
+   // Pass control to the next controller
+   next();
+  } catch (error) {
+   // console.log(error);
+   res.status(error.code || 500).send(error.message);
   }
+ }
 
-  static async getWalletFromRequest(
-    req: express.Request & {
-      privateKey: string;
-      publicKey: string;
-      wallet: Wallet;
-    },
-    res: express.Response,
-    next: express.NextFunction
-  ) {
-    try {
-      // Get wallet from privateKey
-      const wallet = await DBWallet.getWallet(req.privateKey, req.publicKey);
+ static async getWalletFromRequest(
+  req: express.Request & {
+   privateKey: string;
+   publicKey: string;
+   wallet: Wallet;
+  },
+  res: express.Response,
+  next: express.NextFunction
+ ) {
+  try {
+   // Get wallet from privateKey
+   const wallet = await DBWallet.getWallet(req.privateKey, req.publicKey);
 
-      // Check if wallet is null
-      if (!wallet) throw new CustomError(404, "Wallet not found");
+   // Check if wallet is null
+   if (!wallet) throw new CustomError(404, "Wallet not found");
 
-      // Modify the request
-      req.wallet = wallet;
+   // Modify the request
+   req.wallet = wallet;
 
-      // Delegate control to the next function
-      next();
-    } catch (error) {
-      res.status(error.code || 500).send(error.message);
-    }
+   // Delegate control to the next function
+   next();
+  } catch (error) {
+   res.status(error.code || 500).send(error.message);
   }
+ }
 
-  static async recoverWallet(
-    req: express.Request & { wallet: Wallet },
-    res: express.Response,
-    next: express.NextFunction
-  ): Promise<any> {
-    try {
-      // Phrase to use in recovery
-      let phrase: string = "";
+ static async recoverWallet(
+  req: express.Request & { wallet: Wallet },
+  res: express.Response,
+  next: express.NextFunction
+ ): Promise<any> {
+  try {
+   // Phrase to use in recovery
+   let phrase: string = "";
 
-      // The incoming recovery phrase
-      const recoveryPhrase: string[] = req.body.recoveryPhrase;
+   // The incoming recovery phrase
+   const recoveryPhrase: string[] = req.body.recoveryPhrase;
 
-      // Loop through and append to actual phrase
-      for (const p of recoveryPhrase) phrase += p + " ";
+   // Loop through and append to actual phrase
+   for (const p of recoveryPhrase) phrase += p + " ";
 
-      // Generate key pair
-      const keyPair = await Tokenizers.generateKeyPairs(phrase);
+   // Generate key pair
+   const keyPair = await Tokenizers.generateKeyPairs(phrase);
 
-      // Get wallet using private key
-      const wallet: Wallet = await DBWallet.getWallet(
-        keyPair.privateKey,
-        keyPair.publicKey
-      );
+   // Get wallet using private key
+   const wallet: Wallet = await DBWallet.getWallet(
+    keyPair.privateKey,
+    keyPair.publicKey
+   );
 
-      // Respond with a 404 if wallet is not found
-      if (!wallet) throw new CustomError(404, "Wallet not found");
+   // Respond with a 404 if wallet is not found
+   if (!wallet) throw new CustomError(404, "Wallet not found");
 
-      // Modify the request
-      req.wallet = wallet;
+   // Modify the request
+   req.wallet = wallet;
 
-      // Delegate control to the next controller function
-      next();
-    } catch (error) {
-      res.status(error.code || 500).send(error.message);
-    }
+   // Delegate control to the next controller function
+   next();
+  } catch (error) {
+   res.status(error.code || 500).send(error.message);
   }
+ }
 }
