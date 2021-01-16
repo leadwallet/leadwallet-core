@@ -1,7 +1,7 @@
 import { WalletModel } from "./models";
 
 const db = {
- DBWallet: new WalletModel()
+  DBWallet: new WalletModel()
 };
 
 export default db;

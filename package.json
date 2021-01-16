@@ -43,7 +43,7 @@
     "stellar-sdk": "^7.0.0",
     "sync-request": "^6.1.0",
     "ton-client-node-js": "^0.26.1",
-    "tronweb": "^3.0.0",
+    "tronweb": "^3.2.2",
     "tslib": "^2.0.2",
     "typescript": "^3.9.7",
     "uuid": "^8.3.0",
