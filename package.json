@@ -6,6 +6,7 @@
   "dependencies": {
     "@binance-chain/javascript-sdk": "^4.1.1",
     "@celo/contractkit": "^0.4.1",
+    "@dashevo/dashcore-lib": "^0.19.19",
     "@polkadot/api": "^3.3.2",
     "@polkadot/keyring": "^5.2.3",
     "@polkadot/util": "^5.2.3",
