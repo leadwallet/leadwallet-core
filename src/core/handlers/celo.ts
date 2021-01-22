@@ -1,6 +1,7 @@
 import Web3 from "web3";
 import * as ContractKit from "@celo/contractkit";
 import rp from "request-promise";
+import { CUsd } from "../interfaces/token";
 
 const environment = process.env.NODE_ENV;
 
@@ -56,12 +57,26 @@ export class CELO {
  ): Promise<{ statusCode: number; payload: any }> {
   try {
    const goldToken = await kit.contracts.getGoldToken();
+   const stableToken = await kit.contracts.getStableToken();
    const balance = await goldToken.balanceOf(address);
+   const cUSDBalance = await stableToken.balanceOf(address);
+   const token: CUsd = {
+    balance: (cUSDBalance.toNumber() / 10 ** 18).toString(),
+    type: "ERC-20",
+    symbol: "cUSD"
+   };
+   const cusdImage = "";
+   const cusd = {
+    ...token,
+    rate_in_usd: 0,
+    image: cusdImage
+   };
    return Promise.resolve({
     statusCode: 200,
     payload: {
      address,
-     balance: balance.toNumber() / 10 ** 18
+     balance: balance.toNumber() / 10 ** 18,
+     cusd
     }
    });
   } catch (error) {
@@ -90,6 +105,34 @@ export class CELO {
    };
    const val = value * 10 ** 18;
    const tx = await goldToken.transfer(to, val.toString()).send(sendParam);
+   const receipt = await tx.waitReceipt();
+   return Promise.resolve({
+    statusCode: 200,
+    payload: {
+     hash: receipt.transactionHash
+    }
+   });
+  } catch (error) {
+   return Promise.reject(new Error(error.message));
+  }
+ }
+
+ static async sendCUSD(
+  pk: string,
+  to: string,
+  value: number
+ ): Promise<{ statusCode: number; payload: any }> {
+  try {
+   const account = web3.eth.accounts.privateKeyToAccount(pk);
+
+   kit.addAccount(account.privateKey);
+
+   const stableToken = await kit.contracts.getStableToken();
+   const sendParam: any = {
+    from: account.address
+   };
+   const val = value * 10 ** 18;
+   const tx = await stableToken.transfer(to, val.toString()).send(sendParam);
    const receipt = await tx.waitReceipt();
    return Promise.resolve({
     statusCode: 200,
@@ -133,6 +176,42 @@ export class CELO {
    );
    const mappedArray = res.body.result
     .filter((t: any) => t.tokenSymbol !== "cUSD")
+    .map((x: any) => ({
+     from: x.from,
+     to: x.to,
+     amount:
+      x.from.toLowerCase() === address.toLowerCase()
+       ? "-" + parseFloat(x.value) / 10 ** 18
+       : "+" + parseFloat(x.value) / 10 ** 18,
+     hash: x.hash,
+     status: parseInt(x.confirmations) > 0 ? "Confirmed" : "Pending",
+     nonce: parseInt(x.nonce),
+     date: new Date(parseInt(x.timeStamp))
+    }));
+
+   return Promise.resolve({
+    statusCode: 200,
+    payload: mappedArray
+   });
+  } catch (error) {
+   return Promise.reject(new Error(error.message));
+  }
+ }
+
+ static async getCUSDTransactions(
+  address: string
+ ): Promise<{ statusCode: number; payload: any }> {
+  try {
+   const res = await rp.get(
+    explorer + "?module=account&action=tokentx&address=" + address,
+    {
+     simple: true,
+     json: true,
+     resolveWithFullResponse: true
+    }
+   );
+   const mappedArray = res.body.result
+    .filter((t: any) => t.tokenSymbol === "cUSD")
     .map((x: any) => ({
      from: x.from,
      to: x.to,

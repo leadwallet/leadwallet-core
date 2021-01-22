@@ -17,3 +17,10 @@ export interface TRCToken {
  name: string;
  decimals?: number;
 }
+
+export interface CUsd {
+ symbol: string;
+ type: string;
+ balance: string;
+ rate_in_usd?: number;
+}

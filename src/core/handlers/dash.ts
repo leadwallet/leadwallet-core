@@ -12,12 +12,12 @@ const networks = {
  staging: "testnet"
 };
 
-const providers = {
- development: "https://dash.nownodes.io"
-};
+// const providers = {
+//  development: "https://dash.nownodes.io"
+// };
 
 const network = networks[environment];
-const provider = providers[environment];
+// const provider = providers[environment];
 
 // const options = {
 //  resolveWithFullResponse: true,
