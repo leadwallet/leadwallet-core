@@ -1,21 +1,31 @@
+import * as dashcore from "@dashevo/dashcore-lib";
 import rp from "request-promise";
 import { Environment } from "../../env";
 import { COIN_NETWORK, options } from "./commons";
 
-const dashPath = "/v1/bc/dash/" + COIN_NETWORK["dash"][process.env.NODE_ENV];
+const environment = process.env.NODE_ENV;
+
+const networks = {
+ development: "testnet",
+ production: "livenet"
+};
+
+const dashPath = "/v1/bc/dash/" + COIN_NETWORK["dash"][environment];
 const DASHROOT = Environment.CRYPTO_API + dashPath;
+const NOWNODES = "https://dash.nownodes.io";
+const network = networks[environment] || "testnet";
 
 export class DASH {
  static async createAddress(): Promise<{ payload: any; statusCode: number }> {
   try {
-   const response = await rp.post(DASHROOT + "/address", { ...options });
-
-   if (response.statusCode >= 400)
-    throw new Error(response.body.meta.error.message);
+   const pk = dashcore.PrivateKey.fromRandom(network);
+   const address = pk.toAddress(network).toString();
+   const wif = pk.toWIF();
+   const payload = { address, wif };
 
    return Promise.resolve({
     statusCode: 200,
-    payload: response.body.payload
+    payload
    });
   } catch (error) {
    return Promise.reject(new Error(error.message));
@@ -26,16 +36,18 @@ export class DASH {
   address: string
  ): Promise<{ payload: any; statusCode: number }> {
   try {
-   const response = await rp.get(DASHROOT + "/address/" + address, {
+   const response = await rp.get(NOWNODES + `/api/v2/address/${address}`, {
     ...options
    });
 
    if (response.statusCode >= 400)
-    throw new Error(response.body.meta.error.message);
+    throw new Error(response.body.error);
 
    return Promise.resolve({
     statusCode: 200,
-    payload: response.body.payload
+    payload: {
+     balance: parseFloat(response.body.balance) / 10 ** 8
+    }
    });
   } catch (error) {
    return Promise.resolve({
