@@ -67,6 +67,13 @@ router.post(
  WalletController.transferERC721Token
 );
 
+router.post(
+ "/transferTRXAsset",
+ WalletMiddleware.getKeyPair,
+ WalletMiddleware.getWalletFromRequest,
+ WalletController.transferTrxAssets
+);
+
 router.get(
  "/getEthTx/:txHash",
  WalletMiddleware.getKeyPair,
@@ -95,6 +102,12 @@ router.post(
  WalletMiddleware.getKeyPair,
  WalletMiddleware.getWalletFromRequest,
  WalletController.addCustomERC721Token
+);
+router.post(
+ "/addTRC",
+ WalletMiddleware.getKeyPair,
+ WalletMiddleware.getWalletFromRequest,
+ WalletController.addCustomTRCToken
 );
 // router.get(
 //  "/price/erc20/:contract",

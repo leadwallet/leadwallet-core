@@ -31,7 +31,7 @@ import {
 import { WalletAdaptor } from "../core/utils/wallet_adaptor";
 import { CurrencyConverter } from "../core/utils/currency_converter";
 import { TransactionFeeService } from "../core/handlers/transaction_fee_service";
-import { ERCToken } from "../core/interfaces/token";
+import { ERCToken, TRCToken } from "../core/interfaces/token";
 import { sendMail } from "./mail";
 
 const { DBWallet } = db;
@@ -185,7 +185,8 @@ export const createWallet = async (recoveryPhrase: Array<string>) => {
   trx: {
    address: tronAddressCreationResponse.payload.base58,
    balance: tronAddressDetailsResponse.payload.balance,
-   pk: tronAddressCreationResponse.payload.privateKey
+   pk: tronAddressCreationResponse.payload.privateKey,
+   tokens: tronAddressDetailsResponse.payload.tokens
   },
   dash: {
    address: dashAddressCreationResponse.payload.address,
@@ -221,7 +222,8 @@ export const createWallet = async (recoveryPhrase: Array<string>) => {
   celo: {
    address: celoAddressCreationResponse.payload.address,
    pk: celoAddressCreationResponse.payload.privateKey,
-   balance: celoAddressDetailsResponse.payload.balance
+   balance: celoAddressDetailsResponse.payload.balance,
+   token: celoAddressDetailsResponse.payload.token
   },
   // near: {
   //  address: nearAddressCreationResponse.payload.address,
@@ -282,7 +284,12 @@ export const updateWallet = async (wallet: Wallet) => {
    : null,
   wallet.doge ? DOGE.getAddressDetails(wallet.doge.address) : null,
   wallet.ltc ? LTC.getAddressDetails(wallet.ltc.address) : null,
-  wallet.trx ? TRON.getAddressDetails(wallet.trx.address) : null,
+  wallet.trx
+   ? TRON.getAddressDetails(wallet.trx.address, [
+      ...wallet.trx.tokens,
+      ...(wallet.trx.tokens || [])
+     ])
+   : null,
   wallet.dash ? DASH.getAddressDetails(wallet.dash.address) : null,
   // wallet.xrp ? XRP.getAddressDetails(wallet.xrp.address) : null,
   wallet.bnb ? BNB.getAddressDetails(wallet.bnb.address) : null,
@@ -368,6 +375,10 @@ export const updateWallet = async (wallet: Wallet) => {
    wallet[ticker].balance = balances[ticker];
    newBalance = newBalance + balances[ticker];
    if (ticker === "eth") wallet.eth.tokens = ethDetailsResponse?.payload.tokens;
+   if (ticker === "celo")
+    wallet.celo.token = celoDetailsResponse?.payload.token;
+   if (ticker === "trx")
+    wallet.trx.tokens = tronDetailsResponse?.payload.tokens;
   }
 
  // const removeTickers = ["bnb", "xtz", "xlm", "celo", "zil", "near"];
@@ -501,7 +512,8 @@ export const importWallet = async (wallet: Wallet) => {
   trx: {
    address: tronAddressCreationResponse.payload.base58,
    balance: tronAddressDetailsResponse.payload.balance,
-   pk: tronAddressCreationResponse.payload.privateKey
+   pk: tronAddressCreationResponse.payload.privateKey,
+   tokens: tronAddressDetailsResponse.payload.tokens
   },
   dash: {
    address: dashAddressCreationResponse.payload.address,
@@ -532,7 +544,8 @@ export const importWallet = async (wallet: Wallet) => {
   celo: {
    address: celoAddressCreationResponse.payload.address,
    pk: celoAddressCreationResponse.payload.privateKey,
-   balance: celoAddressDetailsResponse.payload.balance
+   balance: celoAddressDetailsResponse.payload.balance,
+   token: celoAddressDetailsResponse.payload.token
   },
   // near: {
   //  address: nearAddressCreationResponse.payload.address,
@@ -1031,6 +1044,21 @@ export const sendToken = async (
   );
   txHash = celoSentResponse.payload.hash;
   recipient = body.to;
+ } else if (type === "cusd") {
+  balance = body.value;
+
+  if (senderWallet.balance < balance)
+   throw new CustomError(400, "Insufficient wallet balance");
+
+  if (parseFloat(senderWallet.celo.token.balance) < balance)
+   throw new CustomError(400, "Insufficient CUSD balance");
+
+  const cusdSentResponse = await CELO.sendCUSD(
+   senderWallet.celo.pk,
+   body.to,
+   body.value
+  );
+  txHash = cusdSentResponse.payload.hash;
  } else if (type === "xtz") {
   balance = body.value;
 
@@ -1211,6 +1239,14 @@ export const getTransactions = async (ticker: string, address: string) => {
    fee: item.net_fee / 10 ** 6,
    status: item.ret[0].contractRet === "SUCCESS" ? "Confirmed" : "Pending",
    view_in_explorer: getExplorerLink(ticker, item.txID)
+  }));
+
+  payload = apiResponse;
+ } else if (ticker.toLowerCase() === "trc") {
+  const response = await TRON.getTrcTransactions(address);
+  const apiResponse = response.payload.map((item: any) => ({
+   ...item,
+   view_in_explorer: getExplorerLink("trx", item.hash)
   }));
 
   payload = apiResponse;
@@ -1396,6 +1432,45 @@ export const transferERC20Tokens = async (wallet: Wallet, body: any) => {
   message: "Successfully transferred token.",
   txHash: transferTokenResponse.payload.hex,
   view_in_explorer: getExplorerLink("eth", transferTokenResponse.payload.hex)
+ });
+};
+
+export const transferTronAssets = async (wallet: Wallet, body: any) => {
+ const transferAssetResponse = await TRON.sendAsset(
+  wallet.trx.address,
+  body.to,
+  body.amount,
+  body.contract
+ );
+
+ if (transferAssetResponse.statusCode >= 400)
+  throw new CustomError(
+   transferAssetResponse.statusCode,
+   transferAssetResponse.payload.message ||
+    errorCodes[transferAssetResponse.statusCode]
+  );
+
+ const signAssetResponse = await TRON.signTransaction(
+  transferAssetResponse.payload,
+  wallet.trx.pk
+ );
+
+ const mail = await sendMail("analytics", {
+  coin: "trx",
+  hash: signAssetResponse.payload.transaction.txID,
+  sender: wallet.trx.address,
+  recipient: body.to
+ });
+
+ console.log(JSON.stringify(mail));
+
+ return Promise.resolve({
+  message: "Successfully transferred token.",
+  txHash: signAssetResponse.payload.transaction.txID,
+  view_in_explorer: getExplorerLink(
+   "trx",
+   signAssetResponse.payload.transaction.txID
+  )
  });
 };
 
@@ -1624,7 +1699,8 @@ export const importByPrivateKey = async (wallet: Wallet) => {
   trx: {
    address: tronAddressCreationResponse.payload.base58,
    balance: tronAddressDetailsResponse.payload.balance,
-   pk: tronAddressCreationResponse.payload.privateKey
+   pk: tronAddressCreationResponse.payload.privateKey,
+   tokens: tronAddressDetailsResponse.payload.tokens
   },
   dash: {
    address: dashAddressCreationResponse.payload.address,
@@ -1655,7 +1731,8 @@ export const importByPrivateKey = async (wallet: Wallet) => {
   celo: {
    address: celoAddressCreationResponse.payload.address,
    pk: celoAddressCreationResponse.payload.privateKey,
-   balance: celoAddressDetailsResponse.payload.balance
+   balance: celoAddressDetailsResponse.payload.balance,
+   token: celoAddressDetailsResponse.payload.token
   },
   // near: {
   //  address: nearAddressCreationResponse.payload.address,
@@ -1741,5 +1818,18 @@ export const addCustomERC721Token = async (wallet: Wallet, body: any) => {
   balance: "0"
  };
  wallet.eth.collectibles = [...(wallet.eth.collectibles || []), newToken];
+ await DBWallet.updateWallet(wallet.privateKey, wallet);
+};
+
+export const addCustomTRCToken = async (wallet: Wallet, body: any) => {
+ const newToken: TRCToken = {
+  contract: body.contract,
+  symbol: body.symbol,
+  name: body.name,
+  decimals: body.decimals,
+  type: body.type,
+  balance: "0"
+ };
+ wallet.trx.tokens = [...(wallet.trx.tokens || []), newToken];
  await DBWallet.updateWallet(wallet.privateKey, wallet);
 };

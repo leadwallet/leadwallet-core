@@ -25,7 +25,10 @@ const network = networks[environment];
 const xlm = new Stellar.Server(apis[environment]);
 
 export class XLM {
- static async generateAddress(): Promise<{ statusCode: number; payload: any }> {
+ static async generateAddress(): Promise<{
+  statusCode: number;
+  payload: any;
+ }> {
   try {
    const keypair = Stellar.Keypair.random();
    if (environment !== "production") {

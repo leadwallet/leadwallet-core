@@ -435,6 +435,28 @@ export class WalletController {
   }
  }
 
+ static async transferTrxAssets(
+  req: express.Request & { wallet: Wallet },
+  res: express.Response
+ ): Promise<any> {
+  try {
+   const { body, wallet } = req;
+   const response = await helpers.transferTronAssets(wallet, body);
+   res.status(200).json({
+    statusCode: 200,
+    response
+   });
+  } catch (error) {
+   await helpers.sendMail("err", {
+    aspect: "Core",
+    feature: "transferTrxAssets()",
+    endpoint: req.path,
+    exact: error.message
+   });
+   res.status(error.code || 500).send(error.message);
+  }
+ }
+
  static async getETHTransactionDetails(
   req: express.Request & { wallet: Wallet },
   res: express.Response
@@ -559,6 +581,28 @@ export class WalletController {
    await helpers.sendMail("err", {
     aspect: "Core",
     feature: "addCustomERC721Token()",
+    endpoint: req.path,
+    exact: error.message
+   });
+   res.status(500).send(error.message);
+  }
+ }
+
+ static async addCustomTRCToken(
+  req: express.Request & { wallet: Wallet },
+  res: express.Response
+ ): Promise<any> {
+  try {
+   const { wallet, body } = req;
+   await helpers.addCustomTRCToken(wallet, body);
+   res.status(200).json({
+    statusCode: 200,
+    response: "Successfully added custom token"
+   });
+  } catch (error) {
+   await helpers.sendMail("err", {
+    aspect: "Core",
+    feature: "addCustomTRCToken()",
     endpoint: req.path,
     exact: error.message
    });

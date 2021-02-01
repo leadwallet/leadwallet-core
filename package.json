@@ -6,6 +6,7 @@
   "dependencies": {
     "@binance-chain/javascript-sdk": "^4.1.1",
     "@celo/contractkit": "^0.4.1",
+    "@dashevo/dashcore-lib": "^0.19.19",
     "@polkadot/api": "^3.3.2",
     "@polkadot/keyring": "^5.2.3",
     "@polkadot/util": "^5.2.3",
@@ -43,7 +44,7 @@
     "stellar-sdk": "^7.0.0",
     "sync-request": "^6.1.0",
     "ton-client-node-js": "^0.26.1",
-    "tronweb": "^3.0.0",
+    "tronweb": "^3.2.2",
     "tslib": "^2.0.2",
     "typescript": "^3.9.7",
     "uuid": "^8.3.0",
