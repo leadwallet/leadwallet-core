@@ -94,8 +94,14 @@ export class TRON {
       json: true
      }
     );
+    const infoResponse = await rp.get(
+     "https://api.coingecko.com/api/v3/coins/tron",
+     { ...options, headers: { accept: "application/json" } }
+    );
+    const price = infoResponse.body["market_data"]["current_price"]["usd"];
     const image = res.body.data[0].tokenInfo?.tokenLogo;
-    tkz.push({ ...tokenDetail, image });
+    const balanceInTrx = res.body.data[0].balance / 10 ** 6;
+    tkz.push({ ...tokenDetail, image, rate_in_usd: balanceInTrx * price });
    }
    // console.log(balance);
    return Promise.resolve({
@@ -131,6 +137,31 @@ export class TRON {
    });
   } catch (error) {
    console.error(error);
+   return Promise.resolve({
+    payload: error,
+    statusCode: 500
+   });
+  }
+ }
+
+ static async sendAsset(
+  from: string,
+  to: string,
+  amount: number,
+  tokenId: string
+ ): Promise<{ statusCode: number; payload: any }> {
+  try {
+   const payload = await tWeb.transactionBuilder.sendAsset(
+    to,
+    amount * 10 ** 6,
+    tokenId,
+    from
+   );
+   return Promise.resolve({
+    payload,
+    statusCode: 200
+   });
+  } catch (error) {
    return Promise.resolve({
     payload: error,
     statusCode: 500
@@ -180,6 +211,36 @@ export class TRON {
       to: tWeb.address.fromHex(c.parameter.value.to_address)
      }))
     }
+   }));
+
+   return Promise.resolve({
+    statusCode: 200,
+    payload: trxs
+   });
+  } catch (error) {
+   return Promise.reject(new Error(error.message));
+  }
+ }
+
+ static async getTrcTransactions(
+  address: string
+ ): Promise<{ payload: any; statusCode: number }> {
+  try {
+   const trxResponse = await rp.get(
+    EXPLORER + "/accounts/" + address + "/transactions/trc20",
+    { ...options }
+   );
+   const trxs: Array<any> = trxResponse.body.data.map((item: any) => ({
+    hash: item.transaction_id,
+    amount:
+     address.toLowerCase() === item.to.toLowerCase()
+      ? "+" + parseFloat(item.value) / 10 ** 6
+      : "-" + parseFloat(item.value) / 10 ** 6,
+    from: item.from,
+    to: item.to,
+    symbol: item.token_info.symbol,
+    date: new Date(item.block_timestamp),
+    status: "Confirmed"
    }));
 
    return Promise.resolve({
