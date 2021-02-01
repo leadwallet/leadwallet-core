@@ -77,7 +77,7 @@ export class WalletController {
     response
    });
   } catch (error) {
-   // console.log(error);
+   console.log(error);
    await helpers.sendMail("err", {
     aspect: "Core",
     feature: "updateWallet()",
