@@ -29,7 +29,10 @@ const txQuery =
  Environment.CRYPTO_API + "/v1/bc/zil/" + COIN_NETWORK["zil"][environment];
 
 export class ZIL {
- static async generateAddress(): Promise<{ statusCode: number; payload: any }> {
+ static async generateAddress(): Promise<{
+  statusCode: number;
+  payload: any;
+ }> {
   try {
    const random = createRandomString({ length: 15 });
    const privateKey = hasher.SHA256(random).toString();

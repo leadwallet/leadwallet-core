@@ -833,10 +833,10 @@ export function getExplorerLink(type: string, txHash: string): string {
    staging: "https://westend.subscan.io/extrinsic/" + txHash
   },
   xem: {
-   development: "https://chain.nem.ninja/#/transfer/" + txHash,
-   production: "https://chain.nem.ninja/#/transfer/" + txHash,
-   test: "https://chain.nem.ninja/#/transfer/" + txHash,
-   staging: "https://chain.nem.ninja/#/transfer/" + txHash
+   development: "http://chain.nem.ninja/#/transfer/" + txHash,
+   production: "http://chain.nem.ninja/#/transfer/" + txHash,
+   test: "http://chain.nem.ninja/#/transfer/" + txHash,
+   staging: "http://chain.nem.ninja/#/transfer/" + txHash
   }
  };
 

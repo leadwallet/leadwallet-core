@@ -9,16 +9,21 @@ const environment = process.env.NODE_ENV;
 const network = bitcoin.networks[COIN_NETWORK.btc[environment]];
 const blockCypherNetworks = {
  development: "test3",
- production: "main",
- test: "test3",
- staging: "test3"
+ production: "main"
 };
-const bcn = blockCypherNetworks[environment];
+const bcn = blockCypherNetworks[environment] || "test3";
 const EXPLORER = "https://api.blockcypher.com/v1/btc/" + bcn;
 const CRYPTOAPI =
  Environment.CRYPTO_API +
  "/v1/bc/btc/" +
  COIN_NETWORK["btc"][process.env.NODE_ENV];
+
+const nowNodes = {
+ development: "https://btc-testnet.nownodes.io",
+ production: "https://btc.nownodes.io"
+};
+
+const node = nowNodes[environment] || "https://btc-testnet.nownodes.io";
 
 export class BTC {
  static async createAddress(): Promise<{ payload: any; statusCode: number }> {
@@ -91,7 +96,6 @@ export class BTC {
     address = pBase58.address;
    // console.log("Address: " + payments.address);
    const txb = new bitcoin.Psbt({ network });
-
    // const feeValue = outputs.map(o => o.value)
    //  .concat(localFee.value)
    //  .reduce((prev, current) => prev + current);
@@ -119,65 +123,74 @@ export class BTC {
      txPrepareResponse.body.meta.error.message
     );
 
-   console.log("Transaction hex: " + txPrepareResponse.body.payload.hex);
+   // console.log("Transaction hex: " + txPrepareResponse.body.payload.hex);
 
-   const txDecoded = await rp.post(CRYPTOAPI + "/txs/decode", {
+   const txDecoded = await rp.post(node, {
     ...options,
+    headers: { "Content-Type": "application/json" },
     body: {
-     hex: txPrepareResponse.body.payload.hex
+     API_KEY: Environment.NOW_NODES_API_KEY,
+     jsonrpc: "2.0",
+     id: "leadwallet",
+     method: "decoderawtransaction",
+     params: [txPrepareResponse.body.payload.hex]
     }
    });
 
    if (txDecoded.statusCode >= 400)
-    throw new CustomError(
-     txDecoded.statusCode,
-     txDecoded.body.meta.error.message
-    );
+    throw new CustomError(txDecoded.statusCode, txDecoded.body.error);
 
-   const txs = txDecoded.body.payload;
+   const txs = txDecoded.body;
    console.log(JSON.stringify(txs));
-   console.log(txDecoded.body.payload.vin);
+   console.log(txs.vin);
 
-   const unspentTxResponse = await rp.get(
-    CRYPTOAPI + "/address/" + address + "/unspent-transactions",
-    {
-     ...options
+   // const unspentTxResponse = await rp.post(node, {
+   //  ...options,
+   //  headers: { "Content-Type": "application/json" },
+   //  body: {
+   //   API_KEY: Environment.NOW_NODES_API_KEY,
+   //   jsonrpc: "2.0",
+   //   id: "leadwallet",
+   //   method: "gettxout",
+   //   params: [txs.txid, txs.vout[0].n]
+   //  }
+   // });
+
+   // if (unspentTxResponse.statusCode >= 400)
+   //  throw new CustomError(
+   //   unspentTxResponse.statusCode,
+   //   unspentTxResponse.body.error
+   //  );
+
+   // const allUnspent = unspentTxResponse.body;
+   // const unspentTxs = unspentTxResponse.body;
+
+   // for (const unspent of allUnspent)
+   //  if (unspent.amount > unspentTxs.amount) unspentTxs = unspent;
+
+   // console.log(JSON.stringify(unspentTxs));
+   // console.log("All unspent", unspentTxResponse.body.payload);
+
+   const rawTxsResponse = await rp.post(node, {
+    ...options,
+    headers: { "Content-Type": "application/json" },
+    body: {
+     API_KEY: Environment.NOW_NODES_API_KEY,
+     jsonrpc: "2.0",
+     id: "leadwallet",
+     method: "getrawtransaction",
+     params: [txs.txid, true]
     }
-   );
-
-   if (unspentTxResponse.statusCode >= 400)
-    throw new CustomError(
-     unspentTxResponse.statusCode,
-     unspentTxResponse.body.meta.error.message
-    );
-
-   const allUnspent = unspentTxResponse.body.payload;
-   let unspentTxs = allUnspent[0];
-
-   for (const unspent of allUnspent)
-    if (unspent.amount > unspentTxs.amount) unspentTxs = unspent;
-
-   console.log(unspentTxs);
-   console.log("All unspent", unspentTxResponse.body.payload);
-
-   const rawTxsResponse = await rp.get(
-    CRYPTOAPI + "/txs/raw/txid/" + unspentTxs.txid,
-    {
-     ...options
-    }
-   );
+   });
 
    if (rawTxsResponse.statusCode >= 400)
-    throw new CustomError(
-     rawTxsResponse.statusCode,
-     rawTxsResponse.body.meta.error.message
-    );
+    throw new CustomError(rawTxsResponse.statusCode, rawTxsResponse.body.error);
 
-   const rawHex = rawTxsResponse.body.payload.hex;
+   const rawHex = rawTxsResponse.body.hex;
 
    txb.addInput({
-    hash: unspentTxs.txid,
-    index: unspentTxs.vout,
+    hash: txs.txid,
+    index: txs.vout[0].n,
     nonWitnessUtxo: Buffer.from(rawHex, "hex")
    });
 
@@ -213,20 +226,25 @@ export class BTC {
 
    // console.log("Tx Hex: " + hex);
 
-   const broadcastResponse = await rp.post(CRYPTOAPI + "/txs/send", {
+   const broadcastResponse = await rp.post(node, {
     ...options,
+    headers: { "Content-Type": "application/json" },
     body: {
-     hex
+     API_KEY: Environment.NOW_NODES_API_KEY,
+     jsonrpc: "2.0",
+     id: "leadwallet",
+     method: "sendrawtransaction",
+     params: [hex]
     }
    });
 
    if (broadcastResponse.statusCode >= 400)
     throw new CustomError(
      broadcastResponse.statusCode,
-     broadcastResponse.body.meta.error.message
+     broadcastResponse.body.error
     );
 
-   const txId = broadcastResponse.body.payload.txid;
+   const txId = broadcastResponse.body;
 
    return Promise.resolve({
     statusCode: 200,

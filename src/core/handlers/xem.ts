@@ -19,7 +19,10 @@ const opts = {
 const mainUrl: string = addresses[environment];
 
 export class XEM {
- static async generateAddress(): Promise<{ statusCode: number; payload: any }> {
+ static async generateAddress(): Promise<{
+  statusCode: number;
+  payload: any;
+ }> {
   try {
    const response = await rp.get(mainUrl + "/account/generate", { ...opts });
 

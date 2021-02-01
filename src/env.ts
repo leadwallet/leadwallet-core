@@ -7,6 +7,7 @@ export class Environment {
  static JWT_SECRET = process.env.JWT_SECRET;
  static CRYPTO_API = process.env.CRYPTO_API;
  static CRYPTO_API_KEY = process.env.CRYPTO_API_KEY;
+ static NOW_NODES_API_KEY = process.env.NOW_NODES_API_KEY;
  static MONGO_URI = {
   development: process.env.MONGO_MAIN_URI,
   test: process.env.MONGO_TEST_URI,
@@ -35,46 +36,11 @@ export class Environment {
   staging:
    process.env.TEST_TRONSCAN_URL || "https://shasta.tronscan.org/#/transaction"
  };
- static BLOCK_EXPLORER: string = "https://blockexplorer.one";
- static POLKA_URL = {
-  development: "wss://rpc.polkadot.io",
-  production: ""
- };
  static NEAR = {
   development: process.env.NEAR_TEST_API,
   production: process.env.NEAR_MAIN_API,
   test: process.env.NEAR_TEST_API,
   staging: process.env.NEAR_TEST_API
- };
- static HARMONY = {
-  development: process.env.HMY_TESTNET,
-  production: process.env.HMY_MAINNET,
-  test: process.env.HMY_TESTNET,
-  staging: process.env.HMY_TESTNET
- };
- static CELO = {
-  development: process.env.CELO_TEST_API,
-  production: process.env.CELO_MAIN_API,
-  test: process.env.CELO_TEST_API,
-  staging: process.env.CELO_TEST_API
- };
- static XRP = {
-  development: process.env.XRP_TEST_API,
-  production: process.env.XRP_MAIN_API,
-  test: process.env.XRP_TEST_API,
-  staging: process.env.XRP_TEST_API
- };
- static BNB = {
-  development: process.env.BNB_TEST_API,
-  production: process.env.BNB_MAIN_API,
-  test: process.env.BNB_TEST_API,
-  staging: process.env.BNB_TEST_API
- };
- static BSC = {
-  development: process.env.BSC_TEST_API,
-  production: process.env.BSC_MAIN_API,
-  test: process.env.BSC_TEST_API,
-  staging: process.env.BSC_TEST_API
  };
  static XTZ = {
   development: process.env.XTZ_TEST_API,

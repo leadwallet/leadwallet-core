@@ -1,4 +1,4 @@
-import { ERCToken } from "./token";
+import { ERCToken, TRCToken, CUsd } from "./token";
 
 export interface Wallet {
  publicKey: string;
@@ -36,6 +36,7 @@ export interface Wallet {
   address: string;
   balance: number;
   pk?: string;
+  tokens?: Array<TRCToken>;
  };
  dash?: {
   address: string;
@@ -76,6 +77,7 @@ export interface Wallet {
   address: string;
   pk: string;
   balance: number;
+  token: CUsd;
  };
  near?: {
   address: string;
