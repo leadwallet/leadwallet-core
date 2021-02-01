@@ -221,7 +221,8 @@ export const createWallet = async (recoveryPhrase: Array<string>) => {
   celo: {
    address: celoAddressCreationResponse.payload.address,
    pk: celoAddressCreationResponse.payload.privateKey,
-   balance: celoAddressDetailsResponse.payload.balance
+   balance: celoAddressDetailsResponse.payload.balance,
+   token: celoAddressDetailsResponse.payload.token
   },
   // near: {
   //  address: nearAddressCreationResponse.payload.address,
@@ -368,6 +369,8 @@ export const updateWallet = async (wallet: Wallet) => {
    wallet[ticker].balance = balances[ticker];
    newBalance = newBalance + balances[ticker];
    if (ticker === "eth") wallet.eth.tokens = ethDetailsResponse?.payload.tokens;
+   if (ticker === "celo")
+    wallet.celo.token = celoDetailsResponse?.payload.token;
   }
 
  // const removeTickers = ["bnb", "xtz", "xlm", "celo", "zil", "near"];
@@ -532,7 +535,8 @@ export const importWallet = async (wallet: Wallet) => {
   celo: {
    address: celoAddressCreationResponse.payload.address,
    pk: celoAddressCreationResponse.payload.privateKey,
-   balance: celoAddressDetailsResponse.payload.balance
+   balance: celoAddressDetailsResponse.payload.balance,
+   token: celoAddressDetailsResponse.payload.token
   },
   // near: {
   //  address: nearAddressCreationResponse.payload.address,
@@ -1031,6 +1035,21 @@ export const sendToken = async (
   );
   txHash = celoSentResponse.payload.hash;
   recipient = body.to;
+ } else if (type === "cusd") {
+  balance = body.value;
+
+  if (senderWallet.balance < balance)
+   throw new CustomError(400, "Insufficient wallet balance");
+
+  if (parseFloat(senderWallet.celo.token.balance) < balance)
+   throw new CustomError(400, "Insufficient CUSD balance");
+
+  const cusdSentResponse = await CELO.sendCUSD(
+   senderWallet.celo.pk,
+   body.to,
+   body.value
+  );
+  txHash = cusdSentResponse.payload.hash;
  } else if (type === "xtz") {
   balance = body.value;
 

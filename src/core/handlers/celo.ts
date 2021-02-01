@@ -2,6 +2,7 @@ import Web3 from "web3";
 import * as ContractKit from "@celo/contractkit";
 import rp from "request-promise";
 import { CUsd } from "../interfaces/token";
+import { options } from "./commons";
 
 const environment = process.env.NODE_ENV;
 
@@ -65,18 +66,24 @@ export class CELO {
     type: "ERC-20",
     symbol: "cUSD"
    };
-   const cusdImage = "";
+   // const cusdImage =
+   //  "https://assets.coingecko.com/coins/images/13161/large/icon-celo-dollar-color-1000-circle-cropped.png?1605771134";
+   const infoResponse = await rp.get(
+    "https://api.coingecko.com/api/v3/coins/celo-dollar",
+    { ...options, headers: { accept: "application/json" } }
+   );
+   const resp = infoResponse.body;
    const cusd = {
     ...token,
-    rate_in_usd: 0,
-    image: cusdImage
+    rate_in_usd: resp["market_data"]["current_price"]["usd"],
+    image: resp.image
    };
    return Promise.resolve({
     statusCode: 200,
     payload: {
      address,
      balance: balance.toNumber() / 10 ** 18,
-     cusd
+     token: cusd
     }
    });
   } catch (error) {
