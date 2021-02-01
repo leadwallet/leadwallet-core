@@ -285,10 +285,7 @@ export const updateWallet = async (wallet: Wallet) => {
   wallet.doge ? DOGE.getAddressDetails(wallet.doge.address) : null,
   wallet.ltc ? LTC.getAddressDetails(wallet.ltc.address) : null,
   wallet.trx
-   ? TRON.getAddressDetails(wallet.trx.address, [
-      ...wallet.trx.tokens,
-      ...(wallet.trx.tokens || [])
-     ])
+   ? TRON.getAddressDetails(wallet.trx.address, [...(wallet.trx.tokens || [])])
    : null,
   wallet.dash ? DASH.getAddressDetails(wallet.dash.address) : null,
   // wallet.xrp ? XRP.getAddressDetails(wallet.xrp.address) : null,

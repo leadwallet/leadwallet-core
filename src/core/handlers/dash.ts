@@ -16,7 +16,7 @@ const networks = {
 //  development: "https://dash.nownodes.io"
 // };
 
-const network = networks[environment];
+// const network = networks[environment];
 // const provider = providers[environment];
 
 // const options = {
@@ -30,6 +30,8 @@ const network = networks[environment];
 
 const dashPath = "/v1/bc/dash/" + COIN_NETWORK["dash"][process.env.NODE_ENV];
 const DASHROOT = Environment.CRYPTO_API + dashPath;
+const NOWNODES = "https://dash.nownodes.io";
+const network = networks[environment] || "testnet";
 
 export class DASH {
  static async createAddress(): Promise<{ payload: any; statusCode: number }> {
