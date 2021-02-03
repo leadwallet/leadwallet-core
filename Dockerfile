@@ -9,5 +9,6 @@ COPY *.json ./
 RUN npm install -g node-gyp
 RUN npm install
 COPY . .
+RUN npm run clean:build
 EXPOSE $PORT
 ENTRYPOINT ["npm", "run", "prod"]
