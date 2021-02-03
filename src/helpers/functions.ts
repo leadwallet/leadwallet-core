@@ -1056,6 +1056,7 @@ export const sendToken = async (
    body.value
   );
   txHash = cusdSentResponse.payload.hash;
+  recipient = body.to;
  } else if (type === "xtz") {
   balance = body.value;
 
@@ -1267,6 +1268,13 @@ export const getTransactions = async (ticker: string, address: string) => {
   payload = response.payload.map((tx: any) => ({
    ...tx,
    view_in_explorer: getExplorerLink(ticker, tx.hash)
+  }));
+ } else if (ticker.toLowerCase() === "cusd") {
+  const response = await CELO.getCUSDTransactions(address);
+
+  payload = response.payload.map((tx: any) => ({
+   ...tx,
+   view_in_explorer: getExplorerLink("celo", tx.hash)
   }));
  } else if (ticker.toLowerCase() === "xtz") {
   const response = await XTZ.getTransactions(address);
