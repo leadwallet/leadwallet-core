@@ -64,7 +64,8 @@ export class CELO {
    const token: CUsd = {
     balance: (cUSDBalance.toNumber() / 10 ** 18).toString(),
     type: "ERC-20",
-    symbol: "cUSD"
+    symbol: "cUSD",
+    name: "Celo Dollar"
    };
    // const cusdImage =
    //  "https://assets.coingecko.com/coins/images/13161/large/icon-celo-dollar-color-1000-circle-cropped.png?1605771134";
