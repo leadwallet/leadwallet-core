@@ -23,4 +23,5 @@ export interface CUsd {
  type: string;
  balance: string;
  rate_in_usd?: number;
+ name: string;
 }
