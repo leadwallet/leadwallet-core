@@ -99,7 +99,16 @@ export const createWallet = async (recoveryPhrase: Array<string>) => {
 
  const allDetailsPromises = [
   BTC.getAddressDetails(btcAddressCreationResponse.payload.address),
-  ETH.getAddressDetails(ethAddressCreationResponse.payload.address),
+  ETH.getAddressDetails(ethAddressCreationResponse.payload.address, [
+   {
+    symbol: "LEAD",
+    decimals: 18,
+    contract: "0x1dd80016e3d4ae146ee2ebb484e8edd92dacc4ce",
+    name: "Lead Token",
+    type: "ERC-20",
+    balance: "0"
+   }
+  ]),
   DOGE.getAddressDetails(dogeAddressCreationResponse.payload.address),
   LTC.getAddressDetails(ltcAddressCreationResponse.payload.address),
   DASH.getAddressDetails(dashAddressCreationResponse.payload.address),
