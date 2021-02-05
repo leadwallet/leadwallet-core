@@ -125,72 +125,63 @@ export class BTC {
 
    // console.log("Transaction hex: " + txPrepareResponse.body.payload.hex);
 
-   const txDecoded = await rp.post(node, {
+   const txDecoded = await rp.post(CRYPTOAPI + "/txs/decode", {
     ...options,
-    headers: { "Content-Type": "application/json" },
     body: {
-     API_KEY: Environment.NOW_NODES_API_KEY,
-     jsonrpc: "2.0",
-     id: "leadwallet",
-     method: "decoderawtransaction",
-     params: [txPrepareResponse.body.payload.hex]
+     hex: txPrepareResponse.body.payload.hex
     }
    });
 
    if (txDecoded.statusCode >= 400)
-    throw new CustomError(txDecoded.statusCode, txDecoded.body.error);
+    throw new CustomError(
+     txDecoded.statusCode,
+     txDecoded.body.meta.error.message
+    );
 
-   const txs = txDecoded.body;
-   console.log(JSON.stringify(txs));
-   console.log(txs.vin);
+   const txs = txDecoded.body.payload;
+   // console.log(JSON.stringify(txs));
+   // console.log(txDecoded.body.payload.vin);
 
-   // const unspentTxResponse = await rp.post(node, {
-   //  ...options,
-   //  headers: { "Content-Type": "application/json" },
-   //  body: {
-   //   API_KEY: Environment.NOW_NODES_API_KEY,
-   //   jsonrpc: "2.0",
-   //   id: "leadwallet",
-   //   method: "gettxout",
-   //   params: [txs.txid, txs.vout[0].n]
-   //  }
-   // });
+   const unspentTxResponse = await rp.get(
+    CRYPTOAPI + "/address/" + address + "/unspent-transactions",
+    {
+     ...options
+    }
+   );
 
-   // if (unspentTxResponse.statusCode >= 400)
-   //  throw new CustomError(
-   //   unspentTxResponse.statusCode,
-   //   unspentTxResponse.body.error
-   //  );
+   if (unspentTxResponse.statusCode >= 400)
+    throw new CustomError(
+     unspentTxResponse.statusCode,
+     unspentTxResponse.body.meta.error.message
+    );
 
-   // const allUnspent = unspentTxResponse.body;
-   // const unspentTxs = unspentTxResponse.body;
+   const allUnspent = unspentTxResponse.body.payload;
+   let unspentTxs = allUnspent[0];
 
-   // for (const unspent of allUnspent)
-   //  if (unspent.amount > unspentTxs.amount) unspentTxs = unspent;
+   for (const unspent of allUnspent)
+    if (unspent.amount > unspentTxs.amount) unspentTxs = unspent;
 
-   // console.log(JSON.stringify(unspentTxs));
+   // console.log(unspentTxs);
    // console.log("All unspent", unspentTxResponse.body.payload);
 
-   const rawTxsResponse = await rp.post(node, {
-    ...options,
-    headers: { "Content-Type": "application/json" },
-    body: {
-     API_KEY: Environment.NOW_NODES_API_KEY,
-     jsonrpc: "2.0",
-     id: "leadwallet",
-     method: "getrawtransaction",
-     params: [txs.txid, true]
+   const rawTxsResponse = await rp.get(
+    CRYPTOAPI + "/txs/raw/txid/" + unspentTxs.txid,
+    {
+     ...options
     }
-   });
+   );
 
    if (rawTxsResponse.statusCode >= 400)
-    throw new CustomError(rawTxsResponse.statusCode, rawTxsResponse.body.error);
+    throw new CustomError(
+     rawTxsResponse.statusCode,
+     rawTxsResponse.body.meta.error.message
+    );
 
-   const rawHex = rawTxsResponse.body.hex;
+   const rawHex = rawTxsResponse.body.payload.hex;
 
    txb.addInput({
-    hash: txs.txid,
-    index: txs.vout[0].n,
+    hash: unspentTxs.txid,
+    index: unspentTxs.vout,
     nonWitnessUtxo: Buffer.from(rawHex, "hex")
    });
 
@@ -226,25 +217,20 @@ export class BTC {
 
    // console.log("Tx Hex: " + hex);
 
-   const broadcastResponse = await rp.post(node, {
+   const broadcastResponse = await rp.post(CRYPTOAPI + "/txs/send", {
     ...options,
-    headers: { "Content-Type": "application/json" },
     body: {
-     API_KEY: Environment.NOW_NODES_API_KEY,
-     jsonrpc: "2.0",
-     id: "leadwallet",
-     method: "sendrawtransaction",
-     params: [hex]
+     hex
     }
    });
 
    if (broadcastResponse.statusCode >= 400)
     throw new CustomError(
      broadcastResponse.statusCode,
-     broadcastResponse.body.error
+     broadcastResponse.body.meta.error.message
     );
 
-   const txId = broadcastResponse.body;
+   const txId = broadcastResponse.body.payload.txid;
 
    return Promise.resolve({
     statusCode: 200,
