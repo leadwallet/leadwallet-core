@@ -101,7 +101,11 @@ export class TRON {
     const price = infoResponse.body["market_data"]["current_price"]["usd"];
     const image = res.body.data[0].tokenInfo?.tokenLogo;
     const balanceInTrx = res.body.data[0].balance / 10 ** 6;
-    tkz.push({ ...tokenDetail, image, rate_in_usd: balanceInTrx * price });
+    tkz.push({
+     ...tokenDetail,
+     image: { thumb: image, small: image, large: image },
+     rate_in_usd: balanceInTrx * price
+    });
    }
    // console.log(balance);
    return Promise.resolve({
