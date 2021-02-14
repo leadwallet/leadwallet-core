@@ -581,6 +581,13 @@ export const importWallet = async (wallet: Wallet) => {
   if (!wallet[ticker]) {
    wallet[ticker] = coins[ticker];
    newBalance = newBalance + coins[ticker].balance;
+  } else {
+   if (ticker === "trx") {
+    const trxDetail = await TRON.getAddressDetails(wallet.trx.address, [
+     ...(wallet.trx.tokens || [])
+    ]);
+    wallet.trx.tokens = trxDetail.payload.tokens;
+   }
   }
 
  wallet.balance = wallet.balance + newBalance;
@@ -1776,6 +1783,13 @@ export const importByPrivateKey = async (wallet: Wallet) => {
   if (!wallet[ticker]) {
    wallet[ticker] = coins[ticker];
    newBalance = newBalance + coins[ticker].balance;
+  } else {
+   if (ticker === "trx") {
+    const trxDetail = await TRON.getAddressDetails(wallet.trx.address, [
+     ...(wallet.trx.tokens || [])
+    ]);
+    wallet.trx.tokens = trxDetail.payload.tokens;
+   }
   }
 
  wallet.balance = wallet.balance + newBalance;
