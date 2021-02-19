@@ -616,7 +616,8 @@ export const sendToken = async (
  let recipient: string = "";
  if (type === "btc") {
   // Increment balance for every input
-  for (const i of body.inputs) balance = balance + i.value;
+  // for (const i of body.inputs) balance = balance + i.value;
+  balance = balance + body.amount;
 
   // Throw error if sender's balance is less than balance to be sent
   if (senderWallet.balance < balance)
@@ -628,8 +629,8 @@ export const sendToken = async (
 
   // Send BTC
   const btcSentResponse = await BTC.sendToken(
-   body.inputs,
-   body.outputs,
+   [{ address: senderWallet.btc.address, value: body.amount }],
+   [{ address: body.to, value: body.amount }],
    {
     address: senderWallet.btc.address,
     value: parseFloat(Number(body.fee).toFixed(8))
@@ -641,10 +642,10 @@ export const sendToken = async (
   senderWallet.btc.balance = senderWallet.btc.balance - balance;
   txHash = btcSentResponse.payload.txId;
   txId = btcSentResponse.payload.txId;
-  recipient = body.outputs[0].address;
+  recipient = body.to;
  } else if (type === "eth") {
   // Increment balance
-  balance = balance + body.value;
+  balance = balance + body.amount;
 
   // Throw error if balance is more than sender's wallet balance
   if (senderWallet.balance < balance)
@@ -660,7 +661,13 @@ export const sendToken = async (
   //   wallets = [...wallets, w];
 
   // Send ETH
-  const ethSentResponse = await ETH.sendToken(senderWallet.eth.pk, body);
+  const ethSentResponse = await ETH.sendToken(senderWallet.eth.pk, {
+   toAddress: body.to,
+   gasPrice: body.fee,
+   gasLimit: body.gas,
+   value: body.amount,
+   nonce: body.nonce
+  });
 
   // Throw error for 4XX or 5XX status code ranges
   if (ethSentResponse.statusCode >= 400) {
@@ -687,11 +694,11 @@ export const sendToken = async (
   // Update sender's wallet eth balance
   senderWallet.eth.balance = senderWallet.eth.balance - balance;
   txHash = ethSentResponse.payload.hex;
-  recipient = body.toAddress;
+  recipient = body.to;
  } else if (type === "doge") {
   // Increment balance
-  for (const i of body.inputs) balance = balance + i.value;
-
+  // for (const i of body.inputs) balance = balance + i.value;
+  balance = balance + body.amount;
   // Throw error if sender's wallet balance is less than specified balance
   if (senderWallet.balance < balance)
    throw new CustomError(400, "Wallet balance is not sufficient");
@@ -707,9 +714,13 @@ export const sendToken = async (
   //    wallets = [...wallets, w];
 
   // Send DOGE
-  const dogeSentResponse = await DOGE.sendToken(body.inputs, body.outputs, {
-   value: parseFloat(Number(body.fee.value).toFixed(8))
-  });
+  const dogeSentResponse = await DOGE.sendToken(
+   [{ address: senderWallet.doge.address, value: body.amount }],
+   [{ address: body.to, value: body.amount }],
+   {
+    value: parseFloat(Number(body.fee).toFixed(8))
+   }
+  );
 
   // Throw error if status code is within 4XX and 5XX ranges
   if (dogeSentResponse.statusCode >= 400)
@@ -762,10 +773,11 @@ export const sendToken = async (
   // Update sender's wallet doge balance
   senderWallet.doge.balance = senderWallet.doge.balance - balance;
   txHash = broadcastTransactionResponse.payload.txid;
-  recipient = body.outputs[0].address;
+  recipient = body.to;
  } else if (type === "ltc") {
   // Increment balance
-  for (const i of body.inputs) balance = balance + i.value;
+  // for (const i of body.inputs) balance = balance + i.value;
+  balance = balance + body.amount;
 
   // Throw error if sender's balance is less than  specified balance
   if (senderWallet.balance < balance)
@@ -782,9 +794,13 @@ export const sendToken = async (
   //    wallets = [...wallets, w];
 
   // Send LTC
-  const ltcSentResponse = await LTC.sendToken(body.inputs, body.outputs, {
-   value: parseFloat(Number(body.fee.value).toFixed(8))
-  });
+  const ltcSentResponse = await LTC.sendToken(
+   [{ address: senderWallet.ltc.address, value: body.amount }],
+   [{ address: body.to, value: body.amount }],
+   {
+    value: parseFloat(Number(body.fee).toFixed(8))
+   }
+  );
 
   console.log(ltcSentResponse);
 
@@ -839,7 +855,7 @@ export const sendToken = async (
   // Update sender wallet's LTC balance
   senderWallet.ltc.balance = senderWallet.ltc.balance - balance;
   txHash = broadcastTransactionResponse.payload.txid;
-  recipient = body.outputs[0].address;
+  recipient = body.to;
  } else if (type === "trx") {
   balance = balance + body.amount;
 
@@ -900,7 +916,8 @@ export const sendToken = async (
   recipient = body.to;
  } else if (type === "dash") {
   // Increment balance
-  for (const i of body.inputs) balance = balance + i.value;
+  // for (const i of body.inputs) balance = balance + i.value;
+  balance = balance + body.amount;
 
   // Throw error if sender's balance is less than  specified balance
   if (senderWallet.balance < balance)
@@ -917,9 +934,13 @@ export const sendToken = async (
   //    wallets = [...wallets, w];
 
   // Send LTC
-  const dashSentResponse = await DASH.sendToken(body.inputs, body.outputs, {
-   value: parseFloat(Number(body.fee.value).toFixed(8))
-  });
+  const dashSentResponse = await DASH.sendToken(
+   [{ address: senderWallet.dash.address, value: body.amount }],
+   [{ address: body.to, value: body.amount }],
+   {
+    value: parseFloat(Number(body.fee).toFixed(8))
+   }
+  );
 
   // Throw error if status code is within 4XX and 5XX
   if (dashSentResponse.statusCode >= 400)
@@ -972,9 +993,9 @@ export const sendToken = async (
   // Update sender wallet's LTC balance
   senderWallet.dash.balance = senderWallet.dash.balance - balance;
   txHash = broadcastTransactionResponse.payload.txid;
-  recipient = body.outputs[0].address;
+  recipient = body.to;
  } else if (type === "bnb") {
-  balance = body.value;
+  balance = balance + body.amount;
 
   if (senderWallet.balance < balance)
    throw new CustomError(400, "Insufficient wallet balance");
@@ -984,7 +1005,7 @@ export const sendToken = async (
 
   const bnbSentResponse = await BNB.sendToken(
    body.to,
-   body.value,
+   body.amount,
    senderWallet.bnb.pk,
    body.nonce
   );
@@ -992,7 +1013,7 @@ export const sendToken = async (
   txHash = bnbSentResponse.payload.hash;
   recipient = body.to;
  } else if (type === "dot") {
-  balance = body.value;
+  balance = balance + body.amount;
 
   if (senderWallet.balance < balance)
    throw new CustomError(400, "Insufficient wallet balance");
@@ -1003,12 +1024,12 @@ export const sendToken = async (
   const dotSentResponse = await DOT.sendToken(
    senderWallet.dot.pk,
    body.to,
-   body.value
+   body.amount
   );
 
   txHash = dotSentResponse.payload.hash;
  } else if (type === "ksm") {
-  balance = body.value;
+  balance = balance + body.amount;
 
   if (senderWallet.balance < balance)
    throw new CustomError(400, "Insufficient wallet balance");
@@ -1019,13 +1040,13 @@ export const sendToken = async (
   const ksmSentResponse = await KSM.sendToken(
    senderWallet.ksm.pk,
    body.to,
-   body.value
+   body.amount
   );
 
   txHash = ksmSentResponse.payload.hash;
   recipient = body.to;
  } else if (type === "xlm") {
-  balance = body.value;
+  balance = balance + body.amount;
 
   if (senderWallet.balance < balance)
    throw new CustomError(400, "Insufficient wallet balance");
@@ -1036,13 +1057,13 @@ export const sendToken = async (
   const xlmSentResponse = await XLM.sendToken(
    senderWallet.xlm.pk,
    body.to,
-   body.value,
+   body.amount,
    body.memo
   );
   txHash = xlmSentResponse.payload.hash;
   recipient = body.to;
  } else if (type === "celo") {
-  balance = body.value;
+  balance = balance + body.amount;
 
   if (senderWallet.balance < balance)
    throw new CustomError(400, "Insufficient wallet balance");
@@ -1053,12 +1074,12 @@ export const sendToken = async (
   const celoSentResponse = await CELO.sendToken(
    senderWallet.celo.pk,
    body.to,
-   body.value
+   body.amount
   );
   txHash = celoSentResponse.payload.hash;
   recipient = body.to;
  } else if (type === "cusd") {
-  balance = body.value;
+  balance = balance + body.amount;
 
   if (senderWallet.balance < balance)
    throw new CustomError(400, "Insufficient wallet balance");
@@ -1069,12 +1090,12 @@ export const sendToken = async (
   const cusdSentResponse = await CELO.sendCUSD(
    senderWallet.celo.pk,
    body.to,
-   body.value
+   body.amount
   );
   txHash = cusdSentResponse.payload.hash;
   recipient = body.to;
  } else if (type === "xtz") {
-  balance = body.value;
+  balance = balance + body.amount;
 
   if (senderWallet.balance < balance)
    throw new CustomError(400, "Insufficient wallet balance");
@@ -1086,14 +1107,14 @@ export const sendToken = async (
    senderWallet.privateKey,
    senderWallet.publicKey,
    body.to,
-   body.value,
+   body.amount,
    senderWallet.xtz.pk,
    0.02 * body.value
   );
   txHash = xtzSentResponse.payload.hash;
   recipient = body.to;
  } else if (type === "zil") {
-  balance = body.value;
+  balance = balance + body.amount;
 
   if (senderWallet.balance < balance)
    throw new CustomError(400, "Insufficient wallet balance");
@@ -1104,12 +1125,12 @@ export const sendToken = async (
   const zilSentResponse = await ZIL.sendToken(
    senderWallet.zil.pk,
    body.to,
-   body.value
+   body.amount
   );
   txHash = zilSentResponse.payload.hash;
   recipient = body.to;
  } else if (type === "xem") {
-  balance = body.value;
+  balance = balance + body.amount;
 
   if (senderWallet.balance < balance)
    throw new CustomError(400, "Insufficeint wallet balance");
@@ -1120,7 +1141,7 @@ export const sendToken = async (
   const xemSentResponse = await XEM.sendToken(
    senderWallet.xem.pk,
    body.to,
-   body.value
+   body.amount
   );
   txHash = xemSentResponse.payload.hash;
   recipient = body.to;

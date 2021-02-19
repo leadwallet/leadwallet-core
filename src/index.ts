@@ -14,7 +14,9 @@ app.listen(port, async () => {
   Environment.MONGO_URI[process.env.NODE_ENV],
   {
    useNewUrlParser: true,
-   useFindAndModify: false
+   useFindAndModify: false,
+   useUnifiedTopology: true,
+   useCreateIndex: true
   }
  );
  if (mongo) console.log("Connected to mongodb");
