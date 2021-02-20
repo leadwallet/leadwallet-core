@@ -16,7 +16,8 @@ app.listen(port, async () => {
    useNewUrlParser: true,
    useFindAndModify: false,
    useUnifiedTopology: true,
-   useCreateIndex: true
+   useCreateIndex: true,
+   bufferCommands: false
   }
  );
  if (mongo) console.log("Connected to mongodb");
