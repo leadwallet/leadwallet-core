@@ -5,7 +5,7 @@ const environment = process.env.NODE_ENV;
 
 const addresses = {
  development: "http://localhost:8500",
- production: "https://leadwallet-nem-server.herokuapp.com",
+ production: "https://leadwallet-nem-server-cliwa3gezq-uc.a.run.app",
  test: "http://localhost:8500",
  staging: "http://localhost:8500"
 };
