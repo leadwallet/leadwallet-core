@@ -1450,9 +1450,9 @@ export const transferERC20Tokens = async (wallet: Wallet, body: any) => {
   body.to,
   body.contract,
   wallet.eth.pk,
-  body.tokens,
-  body.gasPrice,
-  body.gasLimit
+  body.amount,
+  body.fee,
+  body.gas
  );
 
  if (transferTokenResponse.statusCode >= 400)
@@ -1522,9 +1522,9 @@ export const transferERC721Tokens = async (wallet: Wallet, body: any) => {
   body.to,
   body.contract,
   wallet.eth.pk,
-  body.tokens,
-  body.gasPrice,
-  body.gasLimit
+  body.amount,
+  body.fee,
+  body.gas
  );
 
  if (transferTokenResponse.statusCode >= 400)
