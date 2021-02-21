@@ -19,7 +19,6 @@ app.listen(port, async () => {
    useCreateIndex: true,
    connectTimeoutMS: 3600000,
    socketTimeoutMS: 3600000,
-   bufferCommands: false,
    socketOptions: {
     keepAlive: true
    }
