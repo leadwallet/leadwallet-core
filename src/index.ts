@@ -18,8 +18,7 @@ app.listen(port, async () => {
    useCreateIndex: true,
    connectTimeoutMS: 3600000,
    socketTimeoutMS: 3600000,
-   serverSelectionTimeoutMS: 360000,
-   bufferCommands: false
+   serverSelectionTimeoutMS: 360000
   }
  );
  if (mongo) console.log("Connected to mongodb");
