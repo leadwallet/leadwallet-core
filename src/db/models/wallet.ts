@@ -76,7 +76,7 @@ export class WalletModel {
  }
 
  async updateWallet(privateKey: string, newWallet: Wallet): Promise<Wallet> {
-  const allWallets = await this.model.find();
+  // const allWallets = await this.model.find();
   let w: Wallet = null;
   const updatedWallet = (await this.model.findOneAndUpdate(
    {
