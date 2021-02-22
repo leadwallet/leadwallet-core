@@ -48,9 +48,11 @@ export class WalletModel {
   const encWallet: mongoose.Document & {
    encryptedPrivateKey: string;
    encryptedWallet: string;
-  } = (await this.model.findOne({
-   encryptedPrivateKey: encPrivateKey
-  })) as mongoose.Document & {
+  } = (await this.model
+   .findOne({
+    encryptedPrivateKey: encPrivateKey
+   })
+   .lean()) as mongoose.Document & {
    encryptedPrivateKey: string;
    encryptedWallet: string;
   };
@@ -64,7 +66,7 @@ export class WalletModel {
 
  async findByPrivateKey(privateKey: string): Promise<Wallet> {
   let wallet: Wallet = null;
-  const allWallets = (await this.model.find()) as any;
+  const allWallets = (await this.model.find().lean()) as any;
 
   for (const doc of allWallets) {
    const pk = Tokenizers.decryptPrivateKey(doc.encryptedPrivateKey);
@@ -78,20 +80,22 @@ export class WalletModel {
  async updateWallet(privateKey: string, newWallet: Wallet): Promise<Wallet> {
   // const allWallets = await this.model.find();
   let w: Wallet = null;
-  const updatedWallet = (await this.model.findOneAndUpdate(
-   {
-    encryptedPrivateKey: Tokenizers.encryptPrivateKey(
-     privateKey,
-     newWallet.publicKey
-    )
-   },
-   {
-    encryptedWallet: Tokenizers.encryptWallet(newWallet)
-   },
-   {
-    new: true
-   }
-  )) as mongoose.Document & {
+  const updatedWallet = (await this.model
+   .findOneAndUpdate(
+    {
+     encryptedPrivateKey: Tokenizers.encryptPrivateKey(
+      privateKey,
+      newWallet.publicKey
+     )
+    },
+    {
+     encryptedWallet: Tokenizers.encryptWallet(newWallet)
+    },
+    {
+     new: true
+    }
+   )
+   .lean()) as mongoose.Document & {
    encryptedWallet: string;
    encryptedPrivateKey: string;
   };
