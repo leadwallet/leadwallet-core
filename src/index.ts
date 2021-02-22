@@ -15,13 +15,7 @@ app.listen(port, async () => {
   {
    useNewUrlParser: true,
    useFindAndModify: false,
-   useUnifiedTopology: true,
-   useCreateIndex: true,
-   connectTimeoutMS: 3600000,
-   socketTimeoutMS: 3600000,
-   socketOptions: {
-    keepAlive: true
-   }
+   useCreateIndex: true
   }
  );
  if (mongo) console.log("Connected to mongodb");

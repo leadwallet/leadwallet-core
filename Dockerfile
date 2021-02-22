@@ -4,6 +4,8 @@ RUN curl --silent --location https://deb.nodesource.com/setup_12.x | sudo bash -
 RUN apt-get install -y nodejs
 RUN apt-get install -y build-essential
 RUN apt-get install -y git
+RUN rm -rf node_modules
+RUN rm -rf *.json
 COPY src ./src
 COPY *.json ./
 RUN npm install -g node-gyp
