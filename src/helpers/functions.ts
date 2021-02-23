@@ -616,8 +616,8 @@ export const sendToken = async (
  let recipient: string = "";
  if (type === "btc") {
   // Increment balance for every input
-  // for (const i of body.inputs) balance = balance + i.value;
-  balance = balance + body.amount;
+  for (const i of body.inputs) balance = balance + i.value;
+  // balance = balance + body.amount;
 
   // Throw error if sender's balance is less than balance to be sent
   if (senderWallet.balance < balance)
@@ -629,8 +629,8 @@ export const sendToken = async (
 
   // Send BTC
   const btcSentResponse = await BTC.sendToken(
-   [{ address: senderWallet.btc.address, value: body.amount }],
-   [{ address: body.to, value: body.amount }],
+   body.inputs,
+   body.outputs,
    {
     address: senderWallet.btc.address,
     value: parseFloat(Number(body.fee).toFixed(8))
@@ -642,10 +642,10 @@ export const sendToken = async (
   senderWallet.btc.balance = senderWallet.btc.balance - balance;
   txHash = btcSentResponse.payload.txId;
   txId = btcSentResponse.payload.txId;
-  recipient = body.to;
+  recipient = body.outputs[0].address;
  } else if (type === "eth") {
   // Increment balance
-  balance = balance + body.amount;
+  balance = balance + body.value;
 
   // Throw error if balance is more than sender's wallet balance
   if (senderWallet.balance < balance)
@@ -661,13 +661,7 @@ export const sendToken = async (
   //   wallets = [...wallets, w];
 
   // Send ETH
-  const ethSentResponse = await ETH.sendToken(senderWallet.eth.pk, {
-   toAddress: body.to,
-   gasPrice: body.fee,
-   gasLimit: body.gas,
-   value: body.amount,
-   nonce: body.nonce
-  });
+  const ethSentResponse = await ETH.sendToken(senderWallet.eth.pk, body);
 
   // Throw error for 4XX or 5XX status code ranges
   if (ethSentResponse.statusCode >= 400) {
@@ -694,11 +688,11 @@ export const sendToken = async (
   // Update sender's wallet eth balance
   senderWallet.eth.balance = senderWallet.eth.balance - balance;
   txHash = ethSentResponse.payload.hex;
-  recipient = body.to;
+  recipient = body.toAddress;
  } else if (type === "doge") {
   // Increment balance
-  // for (const i of body.inputs) balance = balance + i.value;
-  balance = balance + body.amount;
+  for (const i of body.inputs) balance = balance + i.value;
+  // balance = balance + body.amount;
   // Throw error if sender's wallet balance is less than specified balance
   if (senderWallet.balance < balance)
    throw new CustomError(400, "Wallet balance is not sufficient");
@@ -715,10 +709,10 @@ export const sendToken = async (
 
   // Send DOGE
   const dogeSentResponse = await DOGE.sendToken(
-   [{ address: senderWallet.doge.address, value: body.amount }],
-   [{ address: body.to, value: body.amount }],
+   body.inputs,
+   body.outputs,
    {
-    value: parseFloat(Number(body.fee).toFixed(8))
+    value: parseFloat(Number(body.fee.value).toFixed(8))
    }
   );
 
@@ -773,11 +767,11 @@ export const sendToken = async (
   // Update sender's wallet doge balance
   senderWallet.doge.balance = senderWallet.doge.balance - balance;
   txHash = broadcastTransactionResponse.payload.txid;
-  recipient = body.to;
+  recipient = body.outputs[0].address;
  } else if (type === "ltc") {
   // Increment balance
-  // for (const i of body.inputs) balance = balance + i.value;
-  balance = balance + body.amount;
+  for (const i of body.inputs) balance = balance + i.value;
+  // balance = balance + body.amount;
 
   // Throw error if sender's balance is less than  specified balance
   if (senderWallet.balance < balance)
@@ -795,10 +789,10 @@ export const sendToken = async (
 
   // Send LTC
   const ltcSentResponse = await LTC.sendToken(
-   [{ address: senderWallet.ltc.address, value: body.amount }],
-   [{ address: body.to, value: body.amount }],
+   body.inputs,
+   body.outputs,
    {
-    value: parseFloat(Number(body.fee).toFixed(8))
+    value: parseFloat(Number(body.fee.value).toFixed(8))
    }
   );
 
@@ -855,7 +849,7 @@ export const sendToken = async (
   // Update sender wallet's LTC balance
   senderWallet.ltc.balance = senderWallet.ltc.balance - balance;
   txHash = broadcastTransactionResponse.payload.txid;
-  recipient = body.to;
+  recipient = body.outputs[0].address;
  } else if (type === "trx") {
   balance = balance + body.amount;
 
@@ -916,8 +910,8 @@ export const sendToken = async (
   recipient = body.to;
  } else if (type === "dash") {
   // Increment balance
-  // for (const i of body.inputs) balance = balance + i.value;
-  balance = balance + body.amount;
+  for (const i of body.inputs) balance = balance + i.value;
+  // balance = balance + body.amount;
 
   // Throw error if sender's balance is less than  specified balance
   if (senderWallet.balance < balance)
@@ -933,12 +927,12 @@ export const sendToken = async (
   //   if (w.dash.address === o.address)
   //    wallets = [...wallets, w];
 
-  // Send LTC
+  // Send DASH
   const dashSentResponse = await DASH.sendToken(
-   [{ address: senderWallet.dash.address, value: body.amount }],
-   [{ address: body.to, value: body.amount }],
+   body.inputs,
+   body.outputs,
    {
-    value: parseFloat(Number(body.fee).toFixed(8))
+    value: parseFloat(Number(body.fee.value).toFixed(8))
    }
   );
 
@@ -993,9 +987,9 @@ export const sendToken = async (
   // Update sender wallet's LTC balance
   senderWallet.dash.balance = senderWallet.dash.balance - balance;
   txHash = broadcastTransactionResponse.payload.txid;
-  recipient = body.to;
+  recipient = body.outputs[0].address;
  } else if (type === "bnb") {
-  balance = balance + body.amount;
+  balance = body.value;
 
   if (senderWallet.balance < balance)
    throw new CustomError(400, "Insufficient wallet balance");
@@ -1005,7 +999,7 @@ export const sendToken = async (
 
   const bnbSentResponse = await BNB.sendToken(
    body.to,
-   body.amount,
+   body.value,
    senderWallet.bnb.pk,
    body.nonce
   );
@@ -1013,7 +1007,7 @@ export const sendToken = async (
   txHash = bnbSentResponse.payload.hash;
   recipient = body.to;
  } else if (type === "dot") {
-  balance = balance + body.amount;
+  balance = body.value;
 
   if (senderWallet.balance < balance)
    throw new CustomError(400, "Insufficient wallet balance");
@@ -1024,12 +1018,13 @@ export const sendToken = async (
   const dotSentResponse = await DOT.sendToken(
    senderWallet.dot.pk,
    body.to,
-   body.amount
+   body.value
   );
 
   txHash = dotSentResponse.payload.hash;
+  recipient = body.to;
  } else if (type === "ksm") {
-  balance = balance + body.amount;
+  balance = body.value;
 
   if (senderWallet.balance < balance)
    throw new CustomError(400, "Insufficient wallet balance");
@@ -1046,7 +1041,7 @@ export const sendToken = async (
   txHash = ksmSentResponse.payload.hash;
   recipient = body.to;
  } else if (type === "xlm") {
-  balance = balance + body.amount;
+  balance = body.value;
 
   if (senderWallet.balance < balance)
    throw new CustomError(400, "Insufficient wallet balance");
@@ -1057,13 +1052,13 @@ export const sendToken = async (
   const xlmSentResponse = await XLM.sendToken(
    senderWallet.xlm.pk,
    body.to,
-   body.amount,
+   body.value,
    body.memo
   );
   txHash = xlmSentResponse.payload.hash;
   recipient = body.to;
  } else if (type === "celo") {
-  balance = balance + body.amount;
+  balance = body.value;
 
   if (senderWallet.balance < balance)
    throw new CustomError(400, "Insufficient wallet balance");
@@ -1074,12 +1069,12 @@ export const sendToken = async (
   const celoSentResponse = await CELO.sendToken(
    senderWallet.celo.pk,
    body.to,
-   body.amount
+   body.value
   );
   txHash = celoSentResponse.payload.hash;
   recipient = body.to;
  } else if (type === "cusd") {
-  balance = balance + body.amount;
+  balance = body.value;
 
   if (senderWallet.balance < balance)
    throw new CustomError(400, "Insufficient wallet balance");
@@ -1090,12 +1085,12 @@ export const sendToken = async (
   const cusdSentResponse = await CELO.sendCUSD(
    senderWallet.celo.pk,
    body.to,
-   body.amount
+   body.value
   );
   txHash = cusdSentResponse.payload.hash;
   recipient = body.to;
  } else if (type === "xtz") {
-  balance = balance + body.amount;
+  balance = body.value;
 
   if (senderWallet.balance < balance)
    throw new CustomError(400, "Insufficient wallet balance");
@@ -1107,14 +1102,14 @@ export const sendToken = async (
    senderWallet.privateKey,
    senderWallet.publicKey,
    body.to,
-   body.amount,
+   body.value,
    senderWallet.xtz.pk,
    0.02 * body.value
   );
   txHash = xtzSentResponse.payload.hash;
   recipient = body.to;
  } else if (type === "zil") {
-  balance = balance + body.amount;
+  balance = body.value;
 
   if (senderWallet.balance < balance)
    throw new CustomError(400, "Insufficient wallet balance");
@@ -1125,15 +1120,15 @@ export const sendToken = async (
   const zilSentResponse = await ZIL.sendToken(
    senderWallet.zil.pk,
    body.to,
-   body.amount
+   body.value
   );
   txHash = zilSentResponse.payload.hash;
   recipient = body.to;
  } else if (type === "xem") {
-  balance = balance + body.amount;
+  balance = body.value;
 
   if (senderWallet.balance < balance)
-   throw new CustomError(400, "Insufficeint wallet balance");
+   throw new CustomError(400, "Insufficient wallet balance");
 
   if (senderWallet.xem.balance < balance)
    throw new CustomError(400, "Insufficient XEM balance");
@@ -1141,7 +1136,7 @@ export const sendToken = async (
   const xemSentResponse = await XEM.sendToken(
    senderWallet.xem.pk,
    body.to,
-   body.amount
+   body.value
   );
   txHash = xemSentResponse.payload.hash;
   recipient = body.to;
@@ -1450,9 +1445,9 @@ export const transferERC20Tokens = async (wallet: Wallet, body: any) => {
   body.to,
   body.contract,
   wallet.eth.pk,
-  body.amount,
-  body.fee,
-  body.gas
+  body.tokens,
+  body.gasPrice,
+  body.gasLimit
  );
 
  if (transferTokenResponse.statusCode >= 400)
@@ -1522,9 +1517,9 @@ export const transferERC721Tokens = async (wallet: Wallet, body: any) => {
   body.to,
   body.contract,
   wallet.eth.pk,
-  body.amount,
-  body.fee,
-  body.gas
+  body.tokens,
+  body.gasPrice,
+  body.gasLimit
  );
 
  if (transferTokenResponse.statusCode >= 400)
