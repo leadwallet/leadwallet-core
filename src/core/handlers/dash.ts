@@ -30,7 +30,7 @@ const networks = {
 
 const dashPath = "/v1/bc/dash/" + COIN_NETWORK["dash"][process.env.NODE_ENV];
 const DASHROOT = Environment.CRYPTO_API + dashPath;
-const NOWNODES = "https://dash.nownodes.io";
+// const NOWNODES = "https://dash.nownodes.io";
 const network = networks[environment] || "testnet";
 
 export class DASH {
@@ -61,9 +61,7 @@ export class DASH {
 
       return Promise.resolve({
         statusCode: 200,
-        payload: {
-          balance: parseFloat(response.body.balance) / 10 ** 8
-        }
+        payload: response.body.payload
       });
     } catch (error) {
       return Promise.resolve({
