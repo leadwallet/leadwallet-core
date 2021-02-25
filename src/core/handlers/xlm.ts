@@ -119,7 +119,7 @@ export class XLM {
         }
       });
     } catch (error) {
-      console.log(error);
+      // console.log(error);
       return Promise.reject(new Error(error.message));
     }
   }
