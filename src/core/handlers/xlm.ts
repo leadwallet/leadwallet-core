@@ -104,7 +104,7 @@ export class XLM {
           memoId
             ? Stellar.Memo.text(memoId)
             : Stellar.Memo.text(
-                "Lead-Memo-" + Date.now() + "-" + randomString({ length: 10 })
+                "Lead-Memo-" + "-" + randomString({ length: 10 })
               )
         )
         .addOperation(operation)
