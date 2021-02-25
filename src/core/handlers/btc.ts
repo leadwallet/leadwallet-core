@@ -50,19 +50,16 @@ export class BTC {
     address: string
   ): Promise<{ payload: any; statusCode: number }> {
     try {
-      const response = await rp.get(EXPLORER + "/addrs/" + address, {
+      const response = await rp.get(CRYPTOAPI + "/address/" + address, {
         ...options
       });
 
       if (response.statusCode >= 400)
-        throw new CustomError(response.statusCode, response.body);
+        throw new CustomError(response.statusCode, response.body.meta.error.message);
       // console.log(response.body);
       return Promise.resolve({
         statusCode: 200,
-        payload: {
-          address: response.body.address,
-          balance: response.body.final_balance / (100 * 10 ** 6)
-        }
+        payload: response.body.payload
       });
     } catch (error) {
       return Promise.resolve({
