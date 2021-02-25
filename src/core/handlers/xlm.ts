@@ -93,7 +93,7 @@ export class XLM {
       // const fee = await xlm.fetchBaseFee();
       // console.log("XLM Base Fee, ======= ", fee);
       const txBuilder = new Stellar.TransactionBuilder(source, {
-        fee: (0.02 * amount).toString(),
+        fee: "1",
         networkPassphrase: Stellar.Networks[network]
       });
       const operation = Stellar.Operation.payment({
