@@ -103,9 +103,7 @@ export class XLM {
         .addMemo(
           memoId
             ? Stellar.Memo.text(memoId)
-            : Stellar.Memo.text(
-                "Lead-Memo-" + "-" + randomString({ length: 10 })
-              )
+            : Stellar.Memo.text(randomString({ length: 10 }))
         )
         .addOperation(operation)
         .setTimeout(60 * 20)
@@ -119,6 +117,7 @@ export class XLM {
         }
       });
     } catch (error) {
+      console.log(error);
       return Promise.reject(new Error(error.message));
     }
   }
