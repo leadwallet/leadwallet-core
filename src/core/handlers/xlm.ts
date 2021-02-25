@@ -90,10 +90,10 @@ export class XLM {
       const pair = Stellar.Keypair.fromSecret(secret);
       // const destination = await xlm.loadAccount(to);
       const source = await xlm.loadAccount(pair.publicKey());
-      const fee = await xlm.fetchBaseFee();
-      console.log("XLM Base Fee, ======= ", fee);
+      // const fee = await xlm.fetchBaseFee();
+      // console.log("XLM Base Fee, ======= ", fee);
       const txBuilder = new Stellar.TransactionBuilder(source, {
-        fee: fee.toString(),
+        fee: (0.02 * amount).toString(),
         networkPassphrase: Stellar.Networks[network]
       });
       const operation = Stellar.Operation.payment({
