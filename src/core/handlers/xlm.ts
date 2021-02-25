@@ -91,6 +91,7 @@ export class XLM {
       // const destination = await xlm.loadAccount(to);
       const source = await xlm.loadAccount(pair.publicKey());
       const fee = await xlm.fetchBaseFee();
+      console.log("XLM Base Fee, ======= ", fee);
       const txBuilder = new Stellar.TransactionBuilder(source, {
         fee: fee.toString(),
         networkPassphrase: Stellar.Networks[network]
