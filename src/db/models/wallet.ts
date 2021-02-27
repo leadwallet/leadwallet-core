@@ -12,13 +12,18 @@ export class WalletModel {
   private define() {
     this.model = mongoose.model(
       "Wallet",
-      new mongoose.Schema({
-        encryptedPrivateKey: String,
-        encryptedWallet: {
-          type: String,
-          required: true
+      new mongoose.Schema(
+        {
+          encryptedPrivateKey: String,
+          encryptedWallet: {
+            type: String,
+            required: true
+          }
+        },
+        {
+          bufferTimeoutMS: 1000000
         }
-      })
+      )
     );
   }
 
