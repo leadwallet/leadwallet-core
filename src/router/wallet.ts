@@ -110,7 +110,7 @@ router.post(
   WalletController.addCustomTRCToken
 );
 router.get(
-  "/getCollectibes",
+  "/getCollectibles",
   WalletMiddleware.getKeyPair,
   WalletMiddleware.getWalletFromRequest,
   WalletController.getCollectibles
