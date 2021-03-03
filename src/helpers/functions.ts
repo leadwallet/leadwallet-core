@@ -1879,3 +1879,8 @@ export const addCustomTRCToken = async (wallet: Wallet, body: any) => {
   wallet.trx.tokens = [...(wallet.trx.tokens || []), newToken];
   await DBWallet.updateWallet(wallet.privateKey, wallet);
 };
+
+export const getCollectibles = async (wallet: Wallet) => {
+  const list = wallet.eth.collectibles;
+  return Promise.resolve([...list]);
+};

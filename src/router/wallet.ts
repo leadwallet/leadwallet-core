@@ -109,6 +109,12 @@ router.post(
   WalletMiddleware.getWalletFromRequest,
   WalletController.addCustomTRCToken
 );
+router.get(
+  "/getCollectibes",
+  WalletMiddleware.getKeyPair,
+  WalletMiddleware.getWalletFromRequest,
+  WalletController.getCollectibles
+);
 // router.get(
 //  "/price/erc20/:contract",
 //  WalletController.getErc20Price

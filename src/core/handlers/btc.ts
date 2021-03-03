@@ -55,7 +55,10 @@ export class BTC {
       });
 
       if (response.statusCode >= 400)
-        throw new CustomError(response.statusCode, response.body.meta.error.message);
+        throw new CustomError(
+          response.statusCode,
+          response.body.meta.error.message
+        );
       // console.log(response.body);
       return Promise.resolve({
         statusCode: 200,

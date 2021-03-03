@@ -90,6 +90,8 @@ export class XLM {
       const pair = Stellar.Keypair.fromSecret(secret);
       // const destination = await xlm.loadAccount(to);
       const source = await xlm.loadAccount(pair.publicKey());
+      // const fee = await xlm.fetchBaseFee();
+      // console.log("XLM Base Fee, ======= ", fee);
       const txBuilder = new Stellar.TransactionBuilder(source, {
         fee: Stellar.BASE_FEE,
         networkPassphrase: Stellar.Networks[network]
@@ -103,9 +105,7 @@ export class XLM {
         .addMemo(
           memoId
             ? Stellar.Memo.text(memoId)
-            : Stellar.Memo.text(
-                "Lead-Memo-" + Date.now() + "-" + randomString({ length: 10 })
-              )
+            : Stellar.Memo.text(randomString({ length: 10 }))
         )
         .addOperation(operation)
         .setTimeout(60 * 20)
@@ -119,6 +119,7 @@ export class XLM {
         }
       });
     } catch (error) {
+      // console.log(error);
       return Promise.reject(new Error(error.message));
     }
   }
