@@ -609,4 +609,25 @@ export class WalletController {
       res.status(500).send(error.message);
     }
   }
+
+  static async getCollectibles(
+    req: express.Request & { wallet: Wallet },
+    res: express.Response
+  ): Promise<any> {
+    try {
+      const list = await helpers.getCollectibles(req.wallet);
+      res.status(200).json({
+        statusCode: 200,
+        response: list
+      });
+    } catch (error) {
+      await helpers.sendMail("err", {
+        aspect: "Core",
+        feature: "getCollectibles()",
+        endpoint: req.path,
+        exact: error.message
+      });
+      res.status(500).send(error.message);
+    }
+  }
 }
