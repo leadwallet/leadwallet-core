@@ -1,6 +1,7 @@
 import { Environment } from "../../env";
 import syncReq from "sync-request";
 import { ALL_ERC20_TOKENS } from "../resources/erc20tokens";
+import { ALL_TRC_10_TOKENS } from "../resources/trc10tokens";
 const COINGECKO_COINS_ROOT = "https://api.coingecko.com/api/v3/coins";
 export const options = {
   simple: false,
@@ -768,8 +769,18 @@ function createSymbolToContractAddressMapping() {
   }
   return symbolToContractAddressMap;
 }
+
+function trc10SymbolToAddressMapping() {
+  let symbolToAddressMap = new Map<string, string>();
+  for (const item of ALL_TRC_10_TOKENS)
+    symbolToAddressMap.set(item.symbol, item.address);
+
+  return symbolToAddressMap;
+}
+
 export const [SYMBOL_ID_MAPPING, ID_SYMBOL_MAPPING] = createSymbolToIdMapping();
 export const SYMBOL_TO_CONTRACT_ADDRESS_MAP = createSymbolToContractAddressMapping();
+export const TRC_10_TO_CONTRACT_ADDRESS_MAP = trc10SymbolToAddressMapping();
 
 export function getExplorerLink(type: string, txHash: string): string {
   const explorer1 = COIN_NETWORK[type]
