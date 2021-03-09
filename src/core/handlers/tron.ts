@@ -75,14 +75,16 @@ export class TRON {
 
       tkData = [
         ...tkData,
-        ...tokens.map(token => ({
-          contract: token.contract,
-          symbol: token.symbol,
-          name: token.name,
-          decimal: token.decimals,
-          type: token.type,
-          balance: token.balance
-        }))
+        ...tokens
+          .filter(tk => !tkData.map(t => t.contract).includes(tk.contract))
+          .map(token => ({
+            contract: token.contract,
+            symbol: token.symbol,
+            name: token.name,
+            decimal: token.decimals,
+            type: token.type,
+            balance: token.balance
+          }))
       ];
 
       for (const tokenDetail of tkData) {
