@@ -312,10 +312,25 @@ export const ALL_TRC_10_TOKENS: Array<any> = [
     total_supply: 80000000000000,
     owner_address: "418bcecaf124620c5e170efe1c11f80c1e4bf1f570",
     end_time: 1614747600000
+  },
+  {
+    precision: 6,
+    num: 1000000,
+    description: "Official token of BitTorrent protocol.",
+    id: 1002000,
+    abbr: "BTT",
+    url: "https://www.bittorrent.com",
+    name: "BitTorrent",
+    vote_score: 0,
+    start_time: 1614661200000,
+    trx_num: 1000000,
+    total_supply: 990000000000,
+    owner_address: "411fa79481580306fccb60229d8ed9362aefe38859",
+    end_time: 1584478062000
   }
 ].map(item => ({
   address: item.id.toString(),
-  symbol: item.abbr,
+  symbol: item.abbr.toLowerCase(),
   decimal: item.precision,
   type: "default"
 }));

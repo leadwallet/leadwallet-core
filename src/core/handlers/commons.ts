@@ -613,6 +613,11 @@ export const CURRENT_ERC20_TOKENS = [
   "face",
   "next"
 ];
+
+export const CURRENT_TRC_10_TOKENS: Array<string> = ALL_TRC_10_TOKENS.map(
+  t => t.symbol
+);
+
 // CURRENT_COINS is the list of supported coins as of now
 export const CURRENT_COINS: Array<string> = [
   "btc",

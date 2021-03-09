@@ -544,6 +544,27 @@ export class WalletController {
     }
   }
 
+  static async getSupportedTRC10Tokens(
+    req: express.Request,
+    res: express.Response
+  ): Promise<any> {
+    try {
+      const response = await helpers.getSupportedTRC10Tokens();
+      res.status(200).json({
+        statusCode: 200,
+        response
+      });
+    } catch (error) {
+      await helpers.sendMail("err", {
+        aspect: "Core",
+        feature: "getSupportedTRC10Tokens()",
+        endpoint: req.path,
+        exact: error.message
+      });
+      res.status(error.code || 500).send(error.message);
+    }
+  }
+
   static async addCustomERC20Token(
     req: express.Request & { wallet: Wallet },
     res: express.Response
