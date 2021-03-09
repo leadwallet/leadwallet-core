@@ -115,6 +115,10 @@ router.get(
   WalletMiddleware.getWalletFromRequest,
   WalletController.getCollectibles
 );
+router.get(
+  "/supported_trc_10_tokens",
+  WalletController.getSupportedTRC10Tokens
+);
 // router.get(
 //  "/price/erc20/:contract",
 //  WalletController.getErc20Price
