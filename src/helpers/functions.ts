@@ -25,8 +25,10 @@ import { TransactionService } from "../core/handlers/transaction_handler";
 import {
   CRYPTO_API_COINS,
   CURRENT_ERC20_TOKENS,
+  CURRENT_TRC_10_TOKENS,
   getExplorerLink,
-  SYMBOL_TO_CONTRACT_ADDRESS_MAP
+  SYMBOL_TO_CONTRACT_ADDRESS_MAP,
+  TRC_10_TO_CONTRACT_ADDRESS_MAP
 } from "../core/handlers/commons";
 import { WalletAdaptor } from "../core/utils/wallet_adaptor";
 import { CurrencyConverter } from "../core/utils/currency_converter";
@@ -1829,8 +1831,22 @@ export const getSupportedERC20Tokens = async () => {
   for (const symbol of CURRENT_ERC20_TOKENS) {
     if (SYMBOL_TO_CONTRACT_ADDRESS_MAP.has(symbol)) {
       responseArray.push({
-        symbol: symbol,
+        symbol,
         contractAddress: SYMBOL_TO_CONTRACT_ADDRESS_MAP.get(symbol)
+      });
+    }
+  }
+
+  return Promise.resolve(responseArray);
+};
+
+export const getSupportedTRC10Tokens = async () => {
+  const responseArray: Array<any> = [];
+  for (const symbol of CURRENT_TRC_10_TOKENS) {
+    if (TRC_10_TO_CONTRACT_ADDRESS_MAP.has(symbol)) {
+      responseArray.push({
+        symbol,
+        contractAddress: TRC_10_TO_CONTRACT_ADDRESS_MAP.get(symbol)
       });
     }
   }
