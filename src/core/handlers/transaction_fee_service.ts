@@ -1,4 +1,5 @@
 import rp from "request-promise";
+import * as Stellar from "stellar-sdk";
 import { Environment } from "../../env";
 import { CRYPTO_API_COINS, options, COIN_NETWORK } from "./commons";
 import { CustomError } from "../../custom";
@@ -80,16 +81,20 @@ export class TransactionFeeService {
         );
         return Promise.resolve(nonEthFee);
       }
+    } else if (ticker === "xlm") {
+      return Promise.resolve({
+        standard_fee: parseInt(Stellar.BASE_FEE) * Math.pow(10, -7)
+      });
     } else {
       // Currently tron incurs 0 transaction fee
       // this could change with inclusion of other crypto currency
       return Promise.resolve({
-        min_fee: 0,
-        avg_fee: 0,
-        max_fee: 0,
-        slow_fee: 0,
-        standard_fee: 0,
-        fast_fee: 0,
+        min_fee: "not_applicable",
+        avg_fee: "not_applicable",
+        max_fee: "not_applicable",
+        slow_fee: "not_applicable",
+        standard_fee: "not_applicable",
+        fast_fee: "not_applicable",
         unit: ticker
       });
     }
