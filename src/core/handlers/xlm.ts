@@ -84,7 +84,8 @@ export class XLM {
     secret: string,
     to: string,
     amount: number,
-    memoId?: string
+    memoId?: string,
+    fee?: number
   ): Promise<{ statusCode: number; payload: any }> {
     try {
       const pair = Stellar.Keypair.fromSecret(secret);
@@ -93,7 +94,7 @@ export class XLM {
       // const fee = await xlm.fetchBaseFee();
       // console.log("XLM Base Fee, ======= ", fee);
       const txBuilder = new Stellar.TransactionBuilder(source, {
-        fee: Stellar.BASE_FEE,
+        fee: fee ? Math.pow(fee, 7).toString() : Stellar.BASE_FEE,
         networkPassphrase: Stellar.Networks[network]
       });
       const operation = Stellar.Operation.payment({

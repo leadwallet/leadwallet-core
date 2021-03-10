@@ -1049,7 +1049,8 @@ export const sendToken = async (
       senderWallet.xlm.pk,
       body.to,
       body.value,
-      body.memo
+      body.memo,
+      body.fee
     );
     txHash = xlmSentResponse.payload.hash;
     recipient = body.to;
