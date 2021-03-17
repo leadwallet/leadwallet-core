@@ -587,6 +587,9 @@ export const importWallet = async (wallet: Wallet) => {
       wallet[ticker] = coins[ticker];
       newBalance = newBalance + coins[ticker].balance;
     } else {
+      if (ticker === "btc") {
+        wallet.btc.pk = wallet.btc.wif;
+      }
       if (ticker === "trx") {
         const trxDetail = await TRON.getAddressDetails(wallet.trx.address, [
           ...(wallet.trx.tokens || [])
@@ -1803,6 +1806,9 @@ export const importByPrivateKey = async (wallet: Wallet) => {
       wallet[ticker] = coins[ticker];
       newBalance = newBalance + coins[ticker].balance;
     } else {
+      if (ticker === "btc") {
+        wallet.btc.pk = wallet.btc.wif;
+      }
       if (ticker === "trx") {
         const trxDetail = await TRON.getAddressDetails(wallet.trx.address, [
           ...(wallet.trx.tokens || [])

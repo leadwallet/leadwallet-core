@@ -286,7 +286,7 @@ export class BTC {
         statusCode: 200,
         payload: {
           address,
-          privateKey: keyPair.privateKey.toString("hex"),
+          privateKey: keyPair.toWIF(),
           wif: keyPair.toWIF()
         }
       });
