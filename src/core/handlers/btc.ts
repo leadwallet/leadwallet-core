@@ -38,7 +38,7 @@ export class BTC {
         payload: {
           address,
           wif: keypair.toWIF(),
-          privateKey: keypair.privateKey.toString("hex")
+          privateKey: keypair.toWIF()
         }
       });
     } catch (error) {
