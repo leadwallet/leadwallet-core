@@ -109,6 +109,22 @@ export const createWallet = async (recoveryPhrase: Array<string>) => {
         name: "Lead Token",
         type: "ERC-20",
         balance: "0"
+      },
+      {
+        symbol: "DAO",
+        decimals: 18,
+        contract: "0x0f51bb10119727a7e5ea3538074fb341f56b09ad",
+        name: "DAO Maker",
+        type: "ERC-20",
+        balance: "0"
+      },
+      {
+        symbol: "FUSE",
+        decimals: 18,
+        contract: "0x970b9bb2c0444f5e81e9d0efb84c8ccdcdcaf84d",
+        name: "Fuse",
+        type: "ERC-20",
+        balance: "0"
       }
     ]),
     DOGE.getAddressDetails(dogeAddressCreationResponse.payload.address),
