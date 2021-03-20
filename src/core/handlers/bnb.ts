@@ -1,5 +1,6 @@
 import Web3 from "web3";
 import rp from "request-promise";
+import { BEPToken } from "../interfaces/token";
 
 const environment = process.env.NODE_ENV;
 
@@ -47,7 +48,8 @@ export class BNB {
   }
 
   static async getAddressDetails(
-    address: string
+    address: string,
+    tokens: Array<BEPToken> = []
   ): Promise<{ statusCode: number; payload: any }> {
     try {
       // console.log("=========" + address)
@@ -90,6 +92,45 @@ export class BNB {
         gasPrice,
         gas,
         value: value * 10 ** 18,
+        nonce
+      });
+      const broadcastTx = await web3.eth.sendSignedTransaction(
+        signedTx.rawTransaction
+      );
+      return Promise.resolve({
+        statusCode: 200,
+        payload: {
+          hash: broadcastTx.transactionHash
+        }
+      });
+    } catch (error) {
+      return Promise.reject(new Error(error.message));
+    }
+  }
+
+  static async sendBEP20(
+    pk: string,
+    from: string,
+    to: string,
+    amount: number,
+    contractAddress: string
+  ) {
+    try {
+      const account = web3.eth.accounts.privateKeyToAccount(pk);
+      const nonce = await web3.eth.getTransactionCount(account.address);
+      const contract = new web3.eth.Contract(null, contractAddress, { from });
+      const data = await contract.methods
+        .transfer(to, web3.utils.toWei(amount.toString(), "ether"))
+        .encodeABI();
+      const gasPrice = await web3.eth.getGasPrice();
+      const gasLimit = 210000;
+      const signedTx = await account.signTransaction({
+        from,
+        gasPrice: web3.utils.toHex(gasPrice),
+        gas: web3.utils.toHex(gasLimit),
+        to: contractAddress,
+        value: "0x0",
+        data,
         nonce
       });
       const broadcastTx = await web3.eth.sendSignedTransaction(
