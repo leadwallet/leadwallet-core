@@ -29,23 +29,23 @@ const SCAN = {
 const SCAN_API = SCAN[environment];
 
 export class BNB {
-  static async generateAddress(
-    mnemonic: string
-  ): Promise<{ statusCode: number; payload: any }> {
-    try {
-      const account = web3.eth.accounts.create(mnemonic);
-      // console.log("======== " + account.address);
-      return Promise.resolve({
-        statusCode: 200,
-        payload: {
-          address: account.address,
-          privateKey: account.privateKey
-        }
-      });
-    } catch (error) {
-      return Promise.reject(new Error(error.message));
-    }
-  }
+  // static async generateAddress(
+  //   mnemonic: string
+  // ): Promise<{ statusCode: number; payload: any }> {
+  //   try {
+  //     const account = web3.eth.accounts.create(mnemonic);
+  //     // console.log("======== " + account.address);
+  //     return Promise.resolve({
+  //       statusCode: 200,
+  //       payload: {
+  //         address: account.address,
+  //         privateKey: account.privateKey
+  //       }
+  //     });
+  //   } catch (error) {
+  //     return Promise.reject(new Error(error.message));
+  //   }
+  // }
 
   static async getAddressDetails(
     address: string,
@@ -54,12 +54,38 @@ export class BNB {
     try {
       // console.log("=========" + address)
       const balance = await web3.eth.getBalance(address);
+      const tks: Set<any> = new Set();
+
+      for (const token of tokens) {
+        const contract = new web3.eth.Contract(null, token.contract);
+        const balance = await contract.methods.balanceOf(address).call();
+        tks.add({
+          ...token,
+          rate_in_usd: 0,
+          balance: parseFloat(balance) / Math.pow(10, 18),
+          image: {
+            small:
+              token.symbol.toLowerCase() === "lead"
+                ? "https://assets.coingecko.com/coins/images/12384/small/lead.jpg?1599491466"
+                : "https://mk0asiacryptotopf9lu.kinstacdn.com/wp-content/uploads/2020/08/image-55.png",
+            thumb:
+              token.symbol.toLowerCase() === "lead"
+                ? "https://assets.coingecko.com/coins/images/12384/thumb/lead.jpg?1599491466"
+                : "https://mk0asiacryptotopf9lu.kinstacdn.com/wp-content/uploads/2020/08/image-55.png",
+            large:
+              token.symbol.toLowerCase() === "lead"
+                ? "https://assets.coingecko.com/coins/images/12384/large/lead.jpg?1599491466"
+                : "https://mk0asiacryptotopf9lu.kinstacdn.com/wp-content/uploads/2020/08/image-55.png"
+          }
+        });
+      }
       // console.log(balance);
       // console.log(JSON.stringify(balance));
       return Promise.resolve({
         statusCode: 200,
         payload: {
-          balance: parseFloat(balance) / 10 ** 18
+          balance: parseFloat(balance) / 10 ** 18,
+          tokens: Array.from(tks)
         }
       });
     } catch (error) {

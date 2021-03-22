@@ -33,7 +33,7 @@ import {
 import { WalletAdaptor } from "../core/utils/wallet_adaptor";
 import { CurrencyConverter } from "../core/utils/currency_converter";
 import { TransactionFeeService } from "../core/handlers/transaction_fee_service";
-import { ERCToken, TRCToken } from "../core/interfaces/token";
+import { ERCToken, TRCToken, BEPToken } from "../core/interfaces/token";
 import { sendMail } from "./mail";
 
 const { DBWallet } = db;
@@ -69,7 +69,7 @@ export const createWallet = async (recoveryPhrase: Array<string>) => {
     DASH.createAddress(),
     TRON.generateAddress(),
     // XRP.generateAddress(),
-    BNB.generateAddress(keyPair.privateKey),
+    // BNB.generateAddress(keyPair.privateKey),
     DOT.generateAddress(keyPair.publicKey),
     XTZ.generateAddress(keyPair.privateKey),
     XLM.generateAddress(),
@@ -88,7 +88,7 @@ export const createWallet = async (recoveryPhrase: Array<string>) => {
     dashAddressCreationResponse,
     tronAddressCreationResponse,
     // xrpAddressCreationResponse,
-    bnbAddressCreationResponse,
+    // bnbAddressCreationResponse,
     dotAddressCreationResponse,
     xtzAddressCreationResponse,
     xlmAddressCreationResponse,
@@ -132,7 +132,16 @@ export const createWallet = async (recoveryPhrase: Array<string>) => {
     DASH.getAddressDetails(dashAddressCreationResponse.payload.address),
     TRON.getAddressDetails(tronAddressCreationResponse.payload.base58),
     // XRP.getAddressDetails(xrpAddressCreationResponse.payload.address),
-    BNB.getAddressDetails(bnbAddressCreationResponse.payload.address),
+    BNB.getAddressDetails(ethAddressCreationResponse.payload.address, [
+      {
+        contract: "0x2ed9e96edd11a1ff5163599a66fb6f1c77fa9c66",
+        symbol: "LEAD",
+        name: "Lead on BSC (BEP20)",
+        decimals: 18,
+        type: "BEP20",
+        balance: "0"
+      }
+    ]),
     DOT.getAddressDetails(dotAddressCreationResponse.payload.address),
     XTZ.getAddressDetails(xtzAddressCreationResponse.payload.address),
     XLM.getAddressDetails(xlmAddressCreationResponse.payload.address),
@@ -226,9 +235,10 @@ export const createWallet = async (recoveryPhrase: Array<string>) => {
     //  balance: xrpAddressDetailsResponse.payload.balance
     // },
     bnb: {
-      address: bnbAddressCreationResponse.payload.address,
-      pk: bnbAddressCreationResponse.payload.privateKey,
-      balance: bnbAddressDetailsResponse.payload.balance
+      address: ethAddressCreationResponse.payload.address,
+      pk: ethAddressCreationResponse.payload.privateKey,
+      balance: bnbAddressDetailsResponse.payload.balance,
+      tokens: bnbAddressDetailsResponse.payload.tokens
     },
     dot: {
       address: dotAddressCreationResponse.payload.address,
@@ -318,7 +328,11 @@ export const updateWallet = async (wallet: Wallet) => {
       : null,
     wallet.dash ? DASH.getAddressDetails(wallet.dash.address) : null,
     // wallet.xrp ? XRP.getAddressDetails(wallet.xrp.address) : null,
-    wallet.bnb ? BNB.getAddressDetails(wallet.bnb.address) : null,
+    wallet.bnb
+      ? BNB.getAddressDetails(wallet.bnb.address, [
+          ...(wallet.bnb.tokens || [])
+        ])
+      : null,
     wallet.dot ? DOT.getAddressDetails(wallet.dot.address) : null,
     wallet.xtz ? XTZ.getAddressDetails(wallet.xtz.address) : null,
     wallet.xlm ? XLM.getAddressDetails(wallet.xlm.address) : null,
@@ -406,6 +420,8 @@ export const updateWallet = async (wallet: Wallet) => {
         wallet.celo.token = celoDetailsResponse?.payload.token;
       if (ticker === "trx")
         wallet.trx.tokens = tronDetailsResponse?.payload.tokens;
+      if (ticker === "bnb")
+        wallet.bnb.tokens = bnbDetailsResponse?.payload.tokens;
     }
 
   // const removeTickers = ["bnb", "xtz", "xlm", "celo", "zil", "near"];
@@ -447,7 +463,7 @@ export const importWallet = async (wallet: Wallet) => {
     LTC.createAddress(),
     DASH.createAddress(),
     TRON.generateAddress(),
-    BNB.generateAddress(wallet.privateKey),
+    // BNB.generateAddress(wallet.privateKey),
     DOT.generateAddress(wallet.publicKey),
     XTZ.generateAddress(wallet.privateKey),
     XLM.generateAddress(),
@@ -465,7 +481,7 @@ export const importWallet = async (wallet: Wallet) => {
     ltcAddressCreationResponse,
     dashAddressCreationResponse,
     tronAddressCreationResponse,
-    bnbAddressCreationResponse,
+    // bnbAddressCreationResponse,
     dotAddressCreationResponse,
     xtzAddressCreationResponse,
     xlmAddressCreationResponse,
@@ -483,7 +499,7 @@ export const importWallet = async (wallet: Wallet) => {
     LTC.getAddressDetails(ltcAddressCreationResponse.payload.address),
     DASH.getAddressDetails(dashAddressCreationResponse.payload.address),
     TRON.getAddressDetails(tronAddressCreationResponse.payload.base58),
-    BNB.getAddressDetails(bnbAddressCreationResponse.payload.address),
+    BNB.getAddressDetails(ethAddressCreationResponse.payload.address),
     DOT.getAddressDetails(dotAddressCreationResponse.payload.address),
     XTZ.getAddressDetails(xtzAddressCreationResponse.payload.address),
     XLM.getAddressDetails(xlmAddressCreationResponse.payload.address),
@@ -548,9 +564,10 @@ export const importWallet = async (wallet: Wallet) => {
       balance: parseFloat(dashAddressDetailsResponse.payload.balance)
     },
     bnb: {
-      address: bnbAddressCreationResponse.payload.address,
-      pk: bnbAddressCreationResponse.payload.privateKey,
-      balance: bnbAddressDetailsResponse.payload.balance
+      address: ethAddressCreationResponse.payload.address,
+      pk: ethAddressCreationResponse.payload.privateKey,
+      balance: bnbAddressDetailsResponse.payload.balance,
+      tokens: bnbAddressDetailsResponse.payload.tokens
     },
     dot: {
       address: dotAddressCreationResponse.payload.address,
@@ -603,9 +620,9 @@ export const importWallet = async (wallet: Wallet) => {
       wallet[ticker] = coins[ticker];
       newBalance = newBalance + coins[ticker].balance;
     } else {
-      if (ticker === "btc") {
-        wallet.btc.pk = wallet.btc.wif;
-      }
+      // if (ticker === "btc") {
+      //   wallet.btc.pk = wallet.btc.wif;
+      // }
       if (ticker === "trx") {
         const trxDetail = await TRON.getAddressDetails(wallet.trx.address, [
           ...(wallet.trx.tokens || [])
@@ -1666,7 +1683,7 @@ export const importByPrivateKey = async (wallet: Wallet) => {
     LTC.createAddress(),
     DASH.createAddress(),
     TRON.generateAddress(),
-    BNB.generateAddress(wallet.privateKey),
+    // BNB.generateAddress(wallet.privateKey),
     DOT.generateAddress(wallet.publicKey),
     XTZ.generateAddress(wallet.privateKey),
     XLM.generateAddress(),
@@ -1684,7 +1701,7 @@ export const importByPrivateKey = async (wallet: Wallet) => {
     ltcAddressCreationResponse,
     dashAddressCreationResponse,
     tronAddressCreationResponse,
-    bnbAddressCreationResponse,
+    // bnbAddressCreationResponse,
     dotAddressCreationResponse,
     xtzAddressCreationResponse,
     xlmAddressCreationResponse,
@@ -1702,7 +1719,7 @@ export const importByPrivateKey = async (wallet: Wallet) => {
     LTC.getAddressDetails(ltcAddressCreationResponse.payload.address),
     DASH.getAddressDetails(dashAddressCreationResponse.payload.address),
     TRON.getAddressDetails(tronAddressCreationResponse.payload.base58),
-    BNB.getAddressDetails(bnbAddressCreationResponse.payload.address),
+    BNB.getAddressDetails(ethAddressCreationResponse.payload.address),
     DOT.getAddressDetails(dotAddressCreationResponse.payload.address),
     XTZ.getAddressDetails(xtzAddressCreationResponse.payload.address),
     XLM.getAddressDetails(xlmAddressCreationResponse.payload.address),
@@ -1767,9 +1784,10 @@ export const importByPrivateKey = async (wallet: Wallet) => {
       balance: parseFloat(dashAddressDetailsResponse.payload.balance)
     },
     bnb: {
-      address: bnbAddressCreationResponse.payload.address,
-      pk: bnbAddressCreationResponse.payload.privateKey,
-      balance: bnbAddressDetailsResponse.payload.balance
+      address: ethAddressCreationResponse.payload.address,
+      pk: ethAddressCreationResponse.payload.privateKey,
+      balance: bnbAddressDetailsResponse.payload.balance,
+      tokens: bnbAddressDetailsResponse.payload.tokens
     },
     dot: {
       address: dotAddressCreationResponse.payload.address,
@@ -1916,6 +1934,21 @@ export const addCustomTRCToken = async (wallet: Wallet, body: any) => {
     balance: "0"
   };
   wallet.trx.tokens = [...(wallet.trx.tokens || []), newToken];
+  await DBWallet.updateWallet(wallet.privateKey, wallet);
+};
+
+export const addCustomBEP20Token = async (wallet: Wallet, body: any) => {
+  const newToken: BEPToken = {
+    contract: body.contract,
+    symbol: body.symbol,
+    name: body.name,
+    decimals: body.decimals,
+    type: "BEP20",
+    balance: "0"
+  };
+  wallet.bnb.tokens = wallet.bnb.tokens
+    ? [...wallet.bnb.tokens, newToken]
+    : [newToken];
   await DBWallet.updateWallet(wallet.privateKey, wallet);
 };
 
