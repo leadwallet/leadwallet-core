@@ -1580,6 +1580,32 @@ export const transferERC721Tokens = async (wallet: Wallet, body: any) => {
   });
 };
 
+export const transferBEP20Tokens = async (wallet: Wallet, body: any) => {
+ const transferTokenResponse = await BNB.sendBEP20(wallet.bnb.pk, body.from, body.to, body.amont, body.contract);
+
+ if (transferTokenResponse.statusCode >= 400)
+   throw new CustomError(
+     transferTokenResponse.statusCode,
+     transferTokenResponse.payload ||
+       errorCodes[transferTokenResponse.statusCode]
+   );
+
+ const mail = await sendMail("analytics", {
+   coin: "bep20",
+   hash: transferTokenResponse.payload.hex,
+   sender: wallet.bnb.address,
+   recipient: body.to
+ });
+
+ console.log(JSON.stringify(mail));
+
+ return Promise.resolve({
+   message: "Successfully transferred token.",
+   txHash: transferTokenResponse.payload.hex,
+   view_in_explorer: getExplorerLink("bnb", transferTokenResponse.payload.hex)
+ });
+};
+
 export const getEthTransactionDetails = async (wallet: Wallet, params: any) => {
   const txn = await ETH.getTransactionDetails(
     params.txHash,

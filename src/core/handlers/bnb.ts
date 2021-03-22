@@ -140,7 +140,7 @@ export class BNB {
     to: string,
     amount: number,
     contractAddress: string
-  ) {
+  ): Promise<{statusCode: number; payload: any}> {
     try {
       const account = web3.eth.accounts.privateKeyToAccount(pk);
       const nonce = await web3.eth.getTransactionCount(account.address);
@@ -165,7 +165,7 @@ export class BNB {
       return Promise.resolve({
         statusCode: 200,
         payload: {
-          hash: broadcastTx.transactionHash
+          hex: broadcastTx.transactionHash
         }
       });
     } catch (error) {
