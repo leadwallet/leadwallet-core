@@ -14,6 +14,229 @@ const bsc = {
   staging: bsc_testnet
 };
 
+const bep20ABI: any = [
+  {
+    constant: true,
+    inputs: [],
+    name: "name",
+    outputs: [
+      {
+        name: "",
+        type: "string"
+      }
+    ],
+    payable: false,
+    stateMutability: "view",
+    type: "function"
+  },
+  {
+    constant: false,
+    inputs: [
+      {
+        name: "_spender",
+        type: "address"
+      },
+      {
+        name: "_value",
+        type: "uint256"
+      }
+    ],
+    name: "approve",
+    outputs: [
+      {
+        name: "",
+        type: "bool"
+      }
+    ],
+    payable: false,
+    stateMutability: "nonpayable",
+    type: "function"
+  },
+  {
+    constant: true,
+    inputs: [],
+    name: "totalSupply",
+    outputs: [
+      {
+        name: "",
+        type: "uint256"
+      }
+    ],
+    payable: false,
+    stateMutability: "view",
+    type: "function"
+  },
+  {
+    constant: false,
+    inputs: [
+      {
+        name: "_from",
+        type: "address"
+      },
+      {
+        name: "_to",
+        type: "address"
+      },
+      {
+        name: "_value",
+        type: "uint256"
+      }
+    ],
+    name: "transferFrom",
+    outputs: [
+      {
+        name: "",
+        type: "bool"
+      }
+    ],
+    payable: false,
+    stateMutability: "nonpayable",
+    type: "function"
+  },
+  {
+    constant: true,
+    inputs: [],
+    name: "decimals",
+    outputs: [
+      {
+        name: "",
+        type: "uint8"
+      }
+    ],
+    payable: false,
+    stateMutability: "view",
+    type: "function"
+  },
+  {
+    constant: true,
+    inputs: [
+      {
+        name: "_owner",
+        type: "address"
+      }
+    ],
+    name: "balanceOf",
+    outputs: [
+      {
+        name: "balance",
+        type: "uint256"
+      }
+    ],
+    payable: false,
+    stateMutability: "view",
+    type: "function"
+  },
+  {
+    constant: true,
+    inputs: [],
+    name: "symbol",
+    outputs: [
+      {
+        name: "",
+        type: "string"
+      }
+    ],
+    payable: false,
+    stateMutability: "view",
+    type: "function"
+  },
+  {
+    constant: false,
+    inputs: [
+      {
+        name: "_to",
+        type: "address"
+      },
+      {
+        name: "_value",
+        type: "uint256"
+      }
+    ],
+    name: "transfer",
+    outputs: [
+      {
+        name: "",
+        type: "bool"
+      }
+    ],
+    payable: false,
+    stateMutability: "nonpayable",
+    type: "function"
+  },
+  {
+    constant: true,
+    inputs: [
+      {
+        name: "_owner",
+        type: "address"
+      },
+      {
+        name: "_spender",
+        type: "address"
+      }
+    ],
+    name: "allowance",
+    outputs: [
+      {
+        name: "",
+        type: "uint256"
+      }
+    ],
+    payable: false,
+    stateMutability: "view",
+    type: "function"
+  },
+  {
+    payable: true,
+    stateMutability: "payable",
+    type: "fallback"
+  },
+  {
+    anonymous: false,
+    inputs: [
+      {
+        indexed: true,
+        name: "owner",
+        type: "address"
+      },
+      {
+        indexed: true,
+        name: "spender",
+        type: "address"
+      },
+      {
+        indexed: false,
+        name: "value",
+        type: "uint256"
+      }
+    ],
+    name: "Approval",
+    type: "event"
+  },
+  {
+    anonymous: false,
+    inputs: [
+      {
+        indexed: true,
+        name: "from",
+        type: "address"
+      },
+      {
+        indexed: true,
+        name: "to",
+        type: "address"
+      },
+      {
+        indexed: false,
+        name: "value",
+        type: "uint256"
+      }
+    ],
+    name: "Transfer",
+    type: "event"
+  }
+];
+
 const web3 = new Web3(bsc[environment]);
 
 const testnet_scan = "https://api-testnet.bscscan.com";
@@ -57,7 +280,7 @@ export class BNB {
       const tks: Set<any> = new Set();
 
       for (const token of tokens) {
-        const contract = new web3.eth.Contract(null, token.contract);
+        const contract = new web3.eth.Contract(bep20ABI, token.contract);
         const balance = await contract.methods.balanceOf(address).call();
         tks.add({
           ...token,
@@ -140,11 +363,13 @@ export class BNB {
     to: string,
     amount: number,
     contractAddress: string
-  ): Promise<{statusCode: number; payload: any}> {
+  ): Promise<{ statusCode: number; payload: any }> {
     try {
       const account = web3.eth.accounts.privateKeyToAccount(pk);
       const nonce = await web3.eth.getTransactionCount(account.address);
-      const contract = new web3.eth.Contract(null, contractAddress, { from });
+      const contract = new web3.eth.Contract(bep20ABI, contractAddress, {
+        from
+      });
       const data = await contract.methods
         .transfer(to, web3.utils.toWei(amount.toString(), "ether"))
         .encodeABI();
@@ -155,7 +380,7 @@ export class BNB {
         gasPrice: web3.utils.toHex(gasPrice),
         gas: web3.utils.toHex(gasLimit),
         to: contractAddress,
-        value: "0x0",
+        value: "0x",
         data,
         nonce
       });
