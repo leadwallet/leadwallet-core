@@ -74,6 +74,13 @@ router.post(
   WalletController.transferTrxAssets
 );
 
+router.post(
+  "/transferBEP20Asset",
+  WalletMiddleware.getKeyPair,
+  WalletMiddleware.getWalletFromRequest,
+  WalletController.transferBEP20Assets
+);
+
 router.get(
   "/getEthTx/:txHash",
   WalletMiddleware.getKeyPair,
@@ -91,30 +98,42 @@ router.patch(
 router.post("/import_by_key", WalletController.importByPrivateKey);
 
 router.get("/supported_erc20_tokens", WalletController.getSupportedERC20Tokens);
+
 router.post(
   "/addERC20",
   WalletMiddleware.getKeyPair,
   WalletMiddleware.getWalletFromRequest,
   WalletController.addCustomERC20Token
 );
+
 router.post(
   "/addERC721",
   WalletMiddleware.getKeyPair,
   WalletMiddleware.getWalletFromRequest,
   WalletController.addCustomERC721Token
 );
+
 router.post(
   "/addTRC",
   WalletMiddleware.getKeyPair,
   WalletMiddleware.getWalletFromRequest,
   WalletController.addCustomTRCToken
 );
+
+router.post(
+  "/addBEP20",
+  WalletMiddleware.getKeyPair,
+  WalletMiddleware.getWalletFromRequest,
+  WalletController.addCustomBEP20Token
+);
+
 router.get(
   "/getCollectibles",
   WalletMiddleware.getKeyPair,
   WalletMiddleware.getWalletFromRequest,
   WalletController.getCollectibles
 );
+
 router.get(
   "/supported_trc_10_tokens",
   WalletController.getSupportedTRC10Tokens

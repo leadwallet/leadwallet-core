@@ -1,5 +1,6 @@
 import Web3 from "web3";
 import rp from "request-promise";
+import { BEPToken } from "../interfaces/token";
 
 const environment = process.env.NODE_ENV;
 
@@ -12,6 +13,229 @@ const bsc = {
   test: bsc_testnet,
   staging: bsc_testnet
 };
+
+const bep20ABI: any = [
+  {
+    constant: true,
+    inputs: [],
+    name: "name",
+    outputs: [
+      {
+        name: "",
+        type: "string"
+      }
+    ],
+    payable: false,
+    stateMutability: "view",
+    type: "function"
+  },
+  {
+    constant: false,
+    inputs: [
+      {
+        name: "_spender",
+        type: "address"
+      },
+      {
+        name: "_value",
+        type: "uint256"
+      }
+    ],
+    name: "approve",
+    outputs: [
+      {
+        name: "",
+        type: "bool"
+      }
+    ],
+    payable: false,
+    stateMutability: "nonpayable",
+    type: "function"
+  },
+  {
+    constant: true,
+    inputs: [],
+    name: "totalSupply",
+    outputs: [
+      {
+        name: "",
+        type: "uint256"
+      }
+    ],
+    payable: false,
+    stateMutability: "view",
+    type: "function"
+  },
+  {
+    constant: false,
+    inputs: [
+      {
+        name: "_from",
+        type: "address"
+      },
+      {
+        name: "_to",
+        type: "address"
+      },
+      {
+        name: "_value",
+        type: "uint256"
+      }
+    ],
+    name: "transferFrom",
+    outputs: [
+      {
+        name: "",
+        type: "bool"
+      }
+    ],
+    payable: false,
+    stateMutability: "nonpayable",
+    type: "function"
+  },
+  {
+    constant: true,
+    inputs: [],
+    name: "decimals",
+    outputs: [
+      {
+        name: "",
+        type: "uint8"
+      }
+    ],
+    payable: false,
+    stateMutability: "view",
+    type: "function"
+  },
+  {
+    constant: true,
+    inputs: [
+      {
+        name: "_owner",
+        type: "address"
+      }
+    ],
+    name: "balanceOf",
+    outputs: [
+      {
+        name: "balance",
+        type: "uint256"
+      }
+    ],
+    payable: false,
+    stateMutability: "view",
+    type: "function"
+  },
+  {
+    constant: true,
+    inputs: [],
+    name: "symbol",
+    outputs: [
+      {
+        name: "",
+        type: "string"
+      }
+    ],
+    payable: false,
+    stateMutability: "view",
+    type: "function"
+  },
+  {
+    constant: false,
+    inputs: [
+      {
+        name: "_to",
+        type: "address"
+      },
+      {
+        name: "_value",
+        type: "uint256"
+      }
+    ],
+    name: "transfer",
+    outputs: [
+      {
+        name: "",
+        type: "bool"
+      }
+    ],
+    payable: false,
+    stateMutability: "nonpayable",
+    type: "function"
+  },
+  {
+    constant: true,
+    inputs: [
+      {
+        name: "_owner",
+        type: "address"
+      },
+      {
+        name: "_spender",
+        type: "address"
+      }
+    ],
+    name: "allowance",
+    outputs: [
+      {
+        name: "",
+        type: "uint256"
+      }
+    ],
+    payable: false,
+    stateMutability: "view",
+    type: "function"
+  },
+  {
+    payable: true,
+    stateMutability: "payable",
+    type: "fallback"
+  },
+  {
+    anonymous: false,
+    inputs: [
+      {
+        indexed: true,
+        name: "owner",
+        type: "address"
+      },
+      {
+        indexed: true,
+        name: "spender",
+        type: "address"
+      },
+      {
+        indexed: false,
+        name: "value",
+        type: "uint256"
+      }
+    ],
+    name: "Approval",
+    type: "event"
+  },
+  {
+    anonymous: false,
+    inputs: [
+      {
+        indexed: true,
+        name: "from",
+        type: "address"
+      },
+      {
+        indexed: true,
+        name: "to",
+        type: "address"
+      },
+      {
+        indexed: false,
+        name: "value",
+        type: "uint256"
+      }
+    ],
+    name: "Transfer",
+    type: "event"
+  }
+];
 
 const web3 = new Web3(bsc[environment]);
 
@@ -28,36 +252,63 @@ const SCAN = {
 const SCAN_API = SCAN[environment];
 
 export class BNB {
-  static async generateAddress(
-    mnemonic: string
-  ): Promise<{ statusCode: number; payload: any }> {
-    try {
-      const account = web3.eth.accounts.create(mnemonic);
-      // console.log("======== " + account.address);
-      return Promise.resolve({
-        statusCode: 200,
-        payload: {
-          address: account.address,
-          privateKey: account.privateKey
-        }
-      });
-    } catch (error) {
-      return Promise.reject(new Error(error.message));
-    }
-  }
+  // static async generateAddress(
+  //   mnemonic: string
+  // ): Promise<{ statusCode: number; payload: any }> {
+  //   try {
+  //     const account = web3.eth.accounts.create(mnemonic);
+  //     // console.log("======== " + account.address);
+  //     return Promise.resolve({
+  //       statusCode: 200,
+  //       payload: {
+  //         address: account.address,
+  //         privateKey: account.privateKey
+  //       }
+  //     });
+  //   } catch (error) {
+  //     return Promise.reject(new Error(error.message));
+  //   }
+  // }
 
   static async getAddressDetails(
-    address: string
+    address: string,
+    tokens: Array<BEPToken> = []
   ): Promise<{ statusCode: number; payload: any }> {
     try {
       // console.log("=========" + address)
       const balance = await web3.eth.getBalance(address);
+      const tks: Set<any> = new Set();
+
+      for (const token of tokens) {
+        const contract = new web3.eth.Contract(bep20ABI, token.contract);
+        const balance = await contract.methods.balanceOf(address).call();
+        tks.add({
+          ...token,
+          rate_in_usd: 0,
+          balance: parseFloat(balance) / Math.pow(10, 18),
+          image: {
+            small:
+              token.symbol.toLowerCase() === "lead"
+                ? "https://assets.coingecko.com/coins/images/12384/small/lead.jpg?1599491466"
+                : "https://mk0asiacryptotopf9lu.kinstacdn.com/wp-content/uploads/2020/08/image-55.png",
+            thumb:
+              token.symbol.toLowerCase() === "lead"
+                ? "https://assets.coingecko.com/coins/images/12384/thumb/lead.jpg?1599491466"
+                : "https://mk0asiacryptotopf9lu.kinstacdn.com/wp-content/uploads/2020/08/image-55.png",
+            large:
+              token.symbol.toLowerCase() === "lead"
+                ? "https://assets.coingecko.com/coins/images/12384/large/lead.jpg?1599491466"
+                : "https://mk0asiacryptotopf9lu.kinstacdn.com/wp-content/uploads/2020/08/image-55.png"
+          }
+        });
+      }
       // console.log(balance);
       // console.log(JSON.stringify(balance));
       return Promise.resolve({
         statusCode: 200,
         payload: {
-          balance: parseFloat(balance) / 10 ** 18
+          balance: parseFloat(balance) / 10 ** 18,
+          tokens: Array.from(tks)
         }
       });
     } catch (error) {
@@ -99,6 +350,47 @@ export class BNB {
         statusCode: 200,
         payload: {
           hash: broadcastTx.transactionHash
+        }
+      });
+    } catch (error) {
+      return Promise.reject(new Error(error.message));
+    }
+  }
+
+  static async sendBEP20(
+    pk: string,
+    from: string,
+    to: string,
+    amount: number,
+    contractAddress: string
+  ): Promise<{ statusCode: number; payload: any }> {
+    try {
+      const account = web3.eth.accounts.privateKeyToAccount(pk);
+      const nonce = await web3.eth.getTransactionCount(account.address);
+      const contract = new web3.eth.Contract(bep20ABI, contractAddress, {
+        from
+      });
+      const data = await contract.methods
+        .transfer(to, web3.utils.toWei(amount.toString(), "ether"))
+        .encodeABI();
+      const gasPrice = await web3.eth.getGasPrice();
+      const gasLimit = 210000;
+      const signedTx = await account.signTransaction({
+        from,
+        gasPrice: web3.utils.toHex(gasPrice),
+        gas: web3.utils.toHex(gasLimit),
+        to: contractAddress,
+        value: "0x",
+        data,
+        nonce
+      });
+      const broadcastTx = await web3.eth.sendSignedTransaction(
+        signedTx.rawTransaction
+      );
+      return Promise.resolve({
+        statusCode: 200,
+        payload: {
+          hex: broadcastTx.transactionHash
         }
       });
     } catch (error) {

@@ -457,6 +457,28 @@ export class WalletController {
     }
   }
 
+  static async transferBEP20Assets(
+    req: express.Request & { wallet: Wallet },
+    res: express.Response
+  ): Promise<any> {
+    try {
+      const { body, wallet } = req;
+      const response = await helpers.transferBEP20Tokens(wallet, body);
+      res.status(200).json({
+        statusCode: 200,
+        response
+      });
+    } catch (error) {
+      await helpers.sendMail("err", {
+        aspect: "Core",
+        feature: "transferBEP20Assets()",
+        endpoint: req.path,
+        exact: error.message
+      });
+      res.status(error.code || 500).send(error.message);
+    }
+  }
+
   static async getETHTransactionDetails(
     req: express.Request & { wallet: Wallet },
     res: express.Response
@@ -624,6 +646,28 @@ export class WalletController {
       await helpers.sendMail("err", {
         aspect: "Core",
         feature: "addCustomTRCToken()",
+        endpoint: req.path,
+        exact: error.message
+      });
+      res.status(500).send(error.message);
+    }
+  }
+
+  static async addCustomBEP20Token(
+    req: express.Request & { wallet: Wallet },
+    res: express.Response
+  ): Promise<any> {
+    try {
+      const { wallet, body } = req;
+      await helpers.addCustomBEP20Token(wallet, body);
+      res.status(200).json({
+        statusCode: 200,
+        response: "Successfully added custom token"
+      });
+    } catch (error) {
+      await helpers.sendMail("err", {
+        aspect: "Core",
+        feature: "addCustomBEP20Token()",
         endpoint: req.path,
         exact: error.message
       });
