@@ -1583,7 +1583,7 @@ export const transferERC721Tokens = async (wallet: Wallet, body: any) => {
 export const transferBEP20Tokens = async (wallet: Wallet, body: any) => {
   const transferTokenResponse = await BNB.sendBEP20(
     wallet.bnb.pk,
-    body.from,
+    wallet.bnb.address,
     body.to,
     body.amont,
     body.contract
