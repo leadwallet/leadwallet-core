@@ -1585,7 +1585,7 @@ export const transferBEP20Tokens = async (wallet: Wallet, body: any) => {
     wallet.bnb.pk,
     wallet.bnb.address,
     body.to,
-    body.amont,
+    body.amount,
     body.contract
   );
 
