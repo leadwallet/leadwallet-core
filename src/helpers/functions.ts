@@ -125,6 +125,22 @@ export const createWallet = async (recoveryPhrase: Array<string>) => {
         name: "Fuse",
         type: "ERC-20",
         balance: "0"
+      },
+      {
+        symbol: "XEND",
+        decimals: 18,
+        contract: "0xE4CFE9eAa8Cdb0942A80B7bC68fD8Ab0F6D44903",
+        name: "Xend Finance",
+        type: "ERC-20",
+        balance: "0"
+      },
+      {
+        symbol: "A2D",
+        decimals: 18,
+        contract: "0x8052327f1baf94a9dc8b26b9100f211ee3774f54",
+        name: "A2Dao",
+        type: "ERC-20",
+        balance: "0"
       }
     ]),
     DOGE.getAddressDetails(dogeAddressCreationResponse.payload.address),
@@ -1583,9 +1599,9 @@ export const transferERC721Tokens = async (wallet: Wallet, body: any) => {
 export const transferBEP20Tokens = async (wallet: Wallet, body: any) => {
   const transferTokenResponse = await BNB.sendBEP20(
     wallet.bnb.pk,
-    body.from,
+    wallet.bnb.address,
     body.to,
-    body.amont,
+    body.amount,
     body.contract
   );
 
