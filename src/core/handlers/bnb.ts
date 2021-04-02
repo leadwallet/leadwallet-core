@@ -4,7 +4,7 @@ import { BEPToken } from "../interfaces/token";
 
 const environment = process.env.NODE_ENV;
 
-const bsc_mainnet = "https://bsc-dataseed.binance.org";
+const bsc_mainnet = "https://bsc-dataseed4.defibit.io";
 const bsc_testnet = "https://data-seed-prebsc-1-s1.binance.org:8545";
 
 const bsc = {
