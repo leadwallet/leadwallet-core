@@ -4,7 +4,7 @@ import { BEPToken } from "../interfaces/token";
 
 const environment = process.env.NODE_ENV;
 
-const bsc_mainnet = "https://bsc-dataseed4.defibit.io";
+const bsc_mainnet = "https://bsc-dataseed.binance.org";
 const bsc_testnet = "https://data-seed-prebsc-1-s1.binance.org:8545";
 
 const bsc = {
@@ -427,6 +427,45 @@ export class BNB {
             : "+" + parseFloat(x.value) / 10 ** 18,
         status: parseInt(x.confirmations) > 0 ? "Confirmed" : "Pending"
       }));
+      return Promise.resolve({
+        statusCode: 200,
+        payload
+      });
+    } catch (error) {
+      return Promise.reject(new Error(error.message));
+    }
+  }
+
+  static async getBep20Transactions(address: string) {
+    try {
+      const res = await rp.get(
+        SCAN_API +
+          "/api?module=account&action=tokentx&address=" +
+          address +
+          "&sort=asc",
+        {
+          simple: false,
+          resolveWithFullResponse: true,
+          json: true
+        }
+      );
+
+      const payload = res.body.result.map((t: any) => ({
+        date: new Date(parseInt(t.timeStamp)),
+        hash: t.hash,
+        nonce: parseInt(t.nonce),
+        contract: t.contractAddress,
+        symbol: t.tokenSymbol,
+        from: t.from,
+        to: t.to,
+        amount:
+          t.from.toLowerCase() === address.toLowerCase()
+            ? "-" + parseFloat(t.value) / 10 ** 18
+            : "+" + parseFloat(t.value) / 10 ** 18,
+        name: t.name,
+        status: parseInt(t.confirmations) > 0 ? "Confirmed" : "Pending"
+      }));
+
       return Promise.resolve({
         statusCode: 200,
         payload

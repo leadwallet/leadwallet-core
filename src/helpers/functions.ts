@@ -1200,14 +1200,14 @@ export const sendToken = async (
   const updatedSenderWallet = await DBWallet.updateWallet(pk, senderWallet);
 
   // Send mail
-  const mail = await sendMail("analytics", {
-    coin: type,
-    hash: txHash,
-    sender: senderWallet[type].address,
-    recipient
-  });
+  // const mail = await sendMail("analytics", {
+  //   coin: type,
+  //   hash: txHash,
+  //   sender: senderWallet[type].address,
+  //   recipient
+  // });
 
-  console.log(JSON.stringify(mail));
+  // console.log(JSON.stringify(mail));
 
   // API response
   return Promise.resolve({
@@ -1393,6 +1393,13 @@ export const getTransactions = async (ticker: string, address: string) => {
       ...tx,
       view_in_explorer: getExplorerLink(ticker, tx.hash)
     }));
+  } else if (ticker.toLowerCase() === "bep20") {
+    const response = await BNB.getBep20Transactions(address);
+
+    payload = response.payload.map((tx: any) => ({
+      ...tx,
+      view_in_explorer: getExplorerLink("bnb", tx.hash)
+    }));
   } else {
     throw new CustomError(
       400,
@@ -1507,14 +1514,14 @@ export const transferERC20Tokens = async (wallet: Wallet, body: any) => {
         errorCodes[transferTokenResponse.statusCode]
     );
 
-  const mail = await sendMail("analytics", {
-    coin: "erc20",
-    hash: transferTokenResponse.payload.hex,
-    sender: wallet.eth.address,
-    recipient: body.to
-  });
+  // const mail = await sendMail("analytics", {
+  //   coin: "erc20",
+  //   hash: transferTokenResponse.payload.hex,
+  //   sender: wallet.eth.address,
+  //   recipient: body.to
+  // });
 
-  console.log(JSON.stringify(mail));
+  // console.log(JSON.stringify(mail));
 
   return Promise.resolve({
     message: "Successfully transferred token.",
@@ -1543,14 +1550,14 @@ export const transferTronAssets = async (wallet: Wallet, body: any) => {
     wallet.trx.pk
   );
 
-  const mail = await sendMail("analytics", {
-    coin: "trx",
-    hash: signAssetResponse.payload.transaction.txID,
-    sender: wallet.trx.address,
-    recipient: body.to
-  });
+  // const mail = await sendMail("analytics", {
+  //   coin: "trx",
+  //   hash: signAssetResponse.payload.transaction.txID,
+  //   sender: wallet.trx.address,
+  //   recipient: body.to
+  // });
 
-  console.log(JSON.stringify(mail));
+  // console.log(JSON.stringify(mail));
 
   return Promise.resolve({
     message: "Successfully transferred token.",
@@ -1580,14 +1587,14 @@ export const transferERC721Tokens = async (wallet: Wallet, body: any) => {
         errorCodes[transferTokenResponse.statusCode]
     );
 
-  const mail = await sendMail("analytics", {
-    coin: "erc721",
-    hash: transferTokenResponse.payload.hex,
-    sender: wallet.eth.address,
-    recipient: body.to
-  });
+  // const mail = await sendMail("analytics", {
+  //   coin: "erc721",
+  //   hash: transferTokenResponse.payload.hex,
+  //   sender: wallet.eth.address,
+  //   recipient: body.to
+  // });
 
-  console.log(JSON.stringify(mail));
+  // console.log(JSON.stringify(mail));
 
   return Promise.resolve({
     message: "Successfully transferred token.",
@@ -1612,14 +1619,14 @@ export const transferBEP20Tokens = async (wallet: Wallet, body: any) => {
         errorCodes[transferTokenResponse.statusCode]
     );
 
-  const mail = await sendMail("analytics", {
-    coin: "bep20",
-    hash: transferTokenResponse.payload.hex,
-    sender: wallet.bnb.address,
-    recipient: body.to
-  });
+  // const mail = await sendMail("analytics", {
+  //   coin: "bep20",
+  //   hash: transferTokenResponse.payload.hex,
+  //   sender: wallet.bnb.address,
+  //   recipient: body.to
+  // });
 
-  console.log(JSON.stringify(mail));
+  // console.log(JSON.stringify(mail));
 
   return Promise.resolve({
     message: "Successfully transferred token.",
