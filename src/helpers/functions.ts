@@ -141,6 +141,14 @@ export const createWallet = async (recoveryPhrase: Array<string>) => {
         name: "A2Dao",
         type: "ERC-20",
         balance: "0"
+      },
+      {
+        symbol: "MOMA",
+        decimals: 18,
+        contract: "0xbd1848e1491d4308ad18287a745dd4db2a4bd55b",
+        name: "Mochi Market",
+        type: "ERC-20",
+        balance: "0"
       }
     ]),
     DOGE.getAddressDetails(dogeAddressCreationResponse.payload.address),
