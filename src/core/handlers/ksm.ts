@@ -71,7 +71,7 @@ export class KSM {
       return Promise.resolve({
         statusCode: 200,
         payload: {
-          balance: balance.free.toNumber() / 10 ** 10
+          balance: parseFloat(balance.free.toString()) / 10 ** 10
         }
       });
     } catch (error) {

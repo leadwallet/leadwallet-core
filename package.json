@@ -8,7 +8,7 @@
     "@celo/contractkit": "^0.4.1",
     "@dashevo/dashcore-lib": "^0.19.19",
     "@js-joda/core": "^3.2.0",
-    "@polkadot/api": "^3.3.2",
+    "@polkadot/api": "^3.11.1",
     "@polkadot/keyring": "^5.2.3",
     "@polkadot/util": "^5.2.3",
     "@polkadot/util-crypto": "^5.2.3",
