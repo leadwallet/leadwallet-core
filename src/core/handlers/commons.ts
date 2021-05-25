@@ -627,12 +627,12 @@ export const CURRENT_COINS: Array<string> = [
   "doge",
   "trx",
   "bnb",
-  "dot",
+  // "dot",
   "xtz",
   "xlm",
   "celo",
   "zil",
-  "ksm",
+  // "ksm",
   "xem"
 ];
 export const CRYPTO_API_COINS: Array<string> = [
